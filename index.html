@@ -3,34 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        /* O CSS entra aqui dentro da tag <style> */
         body {
-            background-color: #f0f2f5;
+            /* Fundo verde gramado com padrão de bolas de futebol */
+            background-color: #228b22;
+            background-image: url('https://www.transparenttextures.com/patterns/football-no-lines.png'); /* Exemplo de textura */
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            font-family: Arial, sans-serif;
+            font-family: 'Arial Black', sans-serif;
         }
         .cartao {
-            background: white;
-            padding: 20px 40px;
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.9); /* Branco levemente transparente */
+            padding: 30px 50px;
+            border-radius: 20px;
+            border: 5px solid #000;
+            box-shadow: 10px 10px 0px rgba(0,0,0,0.2);
             text-align: center;
         }
         h1 {
-            color: #2563eb;
+            color: #000;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+        p {
+            color: #333;
+            font-weight: bold;
+        }
+        .bola {
+            font-size: 40px;
+            margin-bottom: 10px;
         }
     </style>
-    <title>Olá Mundo Estilizado</title>
+    <title>Olá Mundo Futebolístico</title>
 </head>
 <body>
 
     <div class="cartao">
+        <div class="bola">⚽</div>
         <h1>Olá, Mundo!</h1>
-        <p>Este código está bonitão com CSS.</p>
+        <p>O jogo começou no código!</p>
     </div>
 
 </body>

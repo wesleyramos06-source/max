@@ -194,5 +194,160 @@
 
 </body>
 </html>      
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Futebol Eletrônico</title>
+    <style>
+        :root {
+            --gramado: #2e7d32;
+            --linha: #ffffff;
+        }
 
+        body {
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #1a1a1a;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+
+        /* Menu Inicial */
+        #menu {
+            text-align: center;
+            color: white;
+            z-index: 10;
+        }
+
+        .btn-partida {
+            padding: 20px 40px;
+            font-size: 24px;
+            background-color: #fdd835;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s, background-color 0.2s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .btn-partida:hover {
+            transform: scale(1.1);
+            background-color: #fbc02d;
+        }
+
+        /* Campo de Jogo */
+        #campo {
+            display: none;
+            position: relative;
+            width: 600px;
+            height: 400px;
+            background-color: var(--gramado);
+            border: 5px solid var(--linha);
+            overflow: hidden;
+        }
+
+        /* Área do Gol */
+        .trave {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 250px;
+            height: 100px;
+            border: 5px solid var(--linha);
+            border-top: none;
+        }
+
+        /* A Bola */
+        #bola {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            width: 30px;
+            height: 30px;
+            background: white;
+            border-radius: 50%;
+            transform: translateX(-50%);
+            cursor: pointer;
+            transition: all 0.5s ease-out;
+            box-shadow: 0 4px 5px rgba(0,0,0,0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 10px;
+        }
+
+        .mensagem {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 40px;
+            display: none;
+            text-shadow: 2px 2px 5px black;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="menu">
+        <h1>PRO FOOTBALL 2026</h1>
+        <button class="btn-partida" onclick="iniciarJogo()">PARTIDA RÁPIDA</button>
+    </div>
+
+    <div id="campo">
+        <div class="trave"></div>
+        <div id="bola" onclick="chutar()">⚽</div>
+        <div id="placar" style="color: white; padding: 10px;">Gols: <span id="gols">0</span></div>
+        <div id="feedback" class="mensagem">GOOOOL!</div>
+    </div>
+
+    <script>
+        let gols = 0;
+
+        function iniciarJogo() {
+            document.getElementById('menu').style.display = 'none';
+            document.getElementById('campo').style.display = 'block';
+        }
+
+        function chutar() {
+            const bola = document.getElementById('bola');
+            const feedback = document.getElementById('feedback');
+            
+            // Lógica simples de chute aleatório
+            const sorte = Math.random();
+            const miraHorizontal = (Math.random() * 200) - 100; // Move para esquerda ou direita
+
+            bola.style.bottom = "320px";
+            bola.style.left = `calc(50% + ${miraHorizontal}px)`;
+
+            setTimeout(() => {
+                if (Math.abs(miraHorizontal) < 120) { // Dentro da área da trave
+                    feedback.innerText = "GOOOOL!";
+                    feedback.style.display = "block";
+                    gols++;
+                    document.getElementById('gols').innerText = gols;
+                } else {
+                    feedback.innerText = "PARA FORA!";
+                    feedback.style.display = "block";
+                }
+
+                // Resetar bola
+                setTimeout(() => {
+                    bola.style.bottom = "50px";
+                    bola.style.left = "50%";
+                    feedback.style.display = "none";
+                }, 1500);
+            }, 500);
+        }
+    </script>
+</body>
+</html>
         

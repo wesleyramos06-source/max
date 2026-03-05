@@ -53,6 +53,146 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        
+  <!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ginga Pro Evolution | Menu</title>
+    <style>
+        /* Estilo Geral Estilo Gamer */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+            background-color: #050505;
+            color: white;
+        }
+
+        /* Fundo com os Craques */
+        .background-container {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            z-index: -1;
+            filter: brightness(0.4) contrast(1.1);
+        }
+
+        .player-bg {
+            flex: 1;
+            background-size: cover;
+            background-position: center;
+            transition: flex 0.5s ease, filter 0.5s ease;
+            border-right: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Substitua os links abaixo pelas imagens reais */
+        .ney { background-image: url('https://via.placeholder.com/600x1000?text=NEYMAR'); }
+        .cr7 { background-image: url('https://via.placeholder.com/600x1000?text=CR7'); }
+        .messi { background-image: url('https://via.placeholder.com/600x1000?text=MESSI'); }
+
+        .player-bg:hover {
+            flex: 1.5;
+            filter: brightness(0.8);
+        }
+
+        /* Interface do Menu */
+        .overlay {
+            position: relative;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding-left: 10%;
+            background: linear-gradient(90deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 60%);
+        }
+
+        h1 {
+            font-size: 4rem;
+            text-transform: uppercase;
+            font-style: italic;
+            margin-bottom: 0;
+            text-shadow: 0 0 20px #00ffcc;
+            letter-spacing: 5px;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #00ffcc;
+            margin-bottom: 40px;
+            letter-spacing: 2px;
+        }
+
+        /* Botões Estilo FIFA/PES */
+        .menu-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            border-left: 5px solid transparent;
+            color: white;
+            padding: 15px 40px;
+            width: 300px;
+            text-align: left;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s;
+            backdrop-filter: blur(5px);
+        }
+
+        .btn:hover {
+            background: rgba(0, 255, 204, 0.2);
+            border-left: 5px solid #00ffcc;
+            transform: translateX(10px);
+            padding-left: 50px;
+        }
+
+        /* Rodapé com info */
+        .footer {
+            position: absolute;
+            bottom: 20px;
+            right: 40px;
+            text-align: right;
+            font-size: 0.8rem;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="background-container">
+        <div class="player-bg ney"></div>
+        <div class="player-bg cr7"></div>
+        <div class="player-bg messi"></div>
+    </div>
+
+    <div class="overlay">
+        <h1>GINGA PRO</h1>
+        <div class="subtitle">TEMPORADA 2026</div>
+
+        <div class="menu-options">
+            <button class="btn">Partida Rápida</button>
+            <button class="btn">Modo Carreira</button>
+            <button class="btn">Ultimate Team</button>
+            <button class="btn">Configurações</button>
+            <button class="btn">Sair</button>
+        </div>
+    </div>
+
+    <div class="footer">
+        PRESS START PARA CONECTAR AOS SERVIDORES
+    </div>
+
+</body>
+</html>      
 
         

@@ -350,4 +350,230 @@
     </script>
 </body>
 </html>
-        
+   <!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Penalty 2026</title>
+    <style>
+        /* Estilização Geral */
+        :root {
+            --verde-campo: #388e3c;
+            --gramado-escuro: #2e7d32;
+            --ouro: #fdd835;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #121212;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Menu Principal */
+        #menu-inicial {
+            text-align: center;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 50px;
+            border-radius: 20px;
+            border: 3px solid var(--ouro);
+            box-shadow: 0 0 30px rgba(253, 216, 53, 0.2);
+        }
+
+        h1 { font-size: 3rem; margin-bottom: 30px; text-shadow: 2px 2px #000; }
+
+        .btn {
+            background: var(--ouro);
+            color: #000;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+        }
+
+        .btn:hover {
+            transform: scale(1.1);
+            background: #fff;
+            box-shadow: 0 0 20px var(--ouro);
+        }
+
+        /* Campo de Jogo */
+        #estadio {
+            display: none;
+            width: 800px;
+            height: 500px;
+            background: var(--verde-campo);
+            position: relative;
+            border: 10px solid #fff;
+            border-radius: 10px;
+            background-image: repeating-linear-gradient(90deg, var(--verde-campo), var(--verde-campo) 50px, var(--gramado-escuro) 50px, var(--gramado-escuro) 100px);
+        }
+
+        /* Trave e Goleiro */
+        .gol {
+            width: 400px;
+            height: 180px;
+            border: 8px solid white;
+            border-top: none;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            top: 0;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        #goleiro {
+            width: 60px;
+            height: 80px;
+            background: #f44336;
+            position: absolute;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 10px 10px 0 0;
+            transition: left 0.2s ease-in-out;
+            display: flex;
+            justify-content: center;
+            font-size: 40px;
+        }
+
+        /* Bola */
+        #bola {
+            width: 40px;
+            height: 40px;
+            background: #fff;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            cursor: crosshair;
+            font-size: 30px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 5;
+        }
+
+        /* Placar */
+        .placar {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            background: rgba(0,0,0,0.5);
+            padding: 10px 20px;
+            border-radius: 10px;
+        }
+
+        .aviso {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 50px;
+            font-weight: bold;
+            display: none;
+            z-index: 10;
+            text-shadow: 3px 3px #000;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="menu-inicial">
+        <h1>FOOTBALL ELITE</h1>
+        <button class="btn" onclick="iniciarJogo()">⚽ Partida Rápida</button>
+    </div>
+
+    <div id="estadio">
+        <div class="placar">Gols: <span id="score">0</span></div>
+        <div class="gol"></div>
+        <div id="goleiro">🧤</div>
+        <div id="bola" onclick="chutar(event)">⚽</div>
+        <div id="feedback" class="aviso"></div>
+    </div>
+
+    <script>
+        let score = 0;
+        let jogoAtivo = true;
+        const goleiro = document.getElementById('goleiro');
+        const bola = document.getElementById('bola');
+        const feedback = document.getElementById('feedback');
+
+        // Faz o goleiro se mover sozinho
+        setInterval(() => {
+            if(jogoAtivo) {
+                const positions = ['35%', '50%', '65%'];
+                const randomPos = positions[Math.floor(Math.random() * positions.length)];
+                goleiro.style.left = randomPos;
+            }
+        }, 600);
+
+        function iniciarJogo() {
+            document.getElementById('menu-inicial').style.display = 'none';
+            document.getElementById('estadio').style.display = 'block';
+        }
+
+        function chutar(event) {
+            if(!jogoAtivo) return;
+            jogoAtivo = false;
+
+            // Define direção aleatória do chute (Esquerda, Centro ou Direita)
+            const direcoes = [-120, 0, 120];
+            const chuteX = direcoes[Math.floor(Math.random() * direcoes.length)];
+            
+            // Animação da bola subindo
+            bola.style.bottom = "350px";
+            bola.style.left = `calc(50% + ${chuteX}px)`;
+            bola.style.transform = "translateX(-50%) scale(0.7) rotate(360deg)";
+
+            setTimeout(() => {
+                validarLance(chuteX);
+            }, 600);
+        }
+
+        function validarLance(chuteX) {
+            const goleiroPos = goleiro.offsetLeft + (goleiro.offsetWidth / 2);
+            const estadioCentro = document.getElementById('estadio').offsetWidth / 2;
+            const bolaPosFinal = estadioCentro + chuteX;
+
+            // Verifica se o goleiro está na mesma posição da bola
+            const defesa = Math.abs(bolaPosFinal - goleiroPos) < 50;
+
+            if (defesa) {
+                feedback.innerText = "DEFENDEU! 🧤";
+                feedback.style.color = "#ffeb3b";
+            } else {
+                feedback.innerText = "GOOOOL! ⚽";
+                feedback.style.color = "#4caf50";
+                score++;
+                document.getElementById('score').innerText = score;
+            }
+
+            feedback.style.display = "block";
+
+            // Resetar para o próximo chute
+            setTimeout(() => {
+                feedback.style.display = "none";
+                bola.style.bottom = "60px";
+                bola.style.left = "50%";
+                bola.style.transform = "translateX(-50%) scale(1) rotate(0deg)";
+                jogoAtivo = true;
+            }, 1500);
+        }
+    </script>
+</body>
+</html>
+

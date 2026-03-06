@@ -3,348 +3,189 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FutQuiz - O Desafio Supremo</title>
+    <title>Infinity Play - Jogos Instantâneos</title>
     <style>
         :root {
-            --primary: #6c5ce7;
-            --secondary: #a29bfe;
-            --success: #00b894;
-            --danger: #d63031;
-            --dark: #2d3436;
-            --light: #f9f9f9;
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #38bdf8;
+            --text: #f8fafc;
         }
 
         body {
-            font-family: 'Segoe UI', sans-serif;
-            background: linear-gradient(135deg, #6c5ce7, #00cec9);
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', system-ui, sans-serif;
             margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            color: var(--dark);
+            padding: 20px;
         }
 
-        .container {
-            background: white;
-            width: 90%;
-            max-width: 600px;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        header {
             text-align: center;
-            position: relative;
-            overflow: hidden;
+            padding: 40px 0;
         }
 
-        /* Telas */
-        .screen { display: none; animation: fadeIn 0.5s ease; }
-        .active { display: block; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Botões */
-        .btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            font-size: 1.2rem;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: 0.3s;
-            margin: 10px;
-            font-weight: bold;
-            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.4);
+        header h1 {
+            font-size: 2.5rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin: 0;
         }
 
-        .btn:hover { background: var(--secondary); transform: scale(1.05); }
-
-        /* Estilo Quiz */
-        .options-container {
+        /* Grid de Jogos Otimizado */
+        .game-grid {
             display: grid;
-            gap: 12px;
-            margin-top: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
-        .option-btn {
-            background: var(--light);
-            border: 2px solid #eee;
-            padding: 15px;
+        .game-card {
+            background: var(--card-bg);
             border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
             cursor: pointer;
-            transition: 0.2s;
-            text-align: left;
+            border: 1px solid rgba(255,255,255,0.05);
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 15px;
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4), 0 0 15px var(--accent);
+            border-color: var(--accent);
+        }
+
+        .game-thumb {
+            width: 100%;
+            height: 150px;
+            background: #334155;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-align: center;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .game-title {
+            margin-top: 12px;
+            font-weight: 600;
             font-size: 1rem;
         }
 
-        .option-btn:hover { border-color: var(--primary); background: #f0f0ff; }
-
-        .difficulty-badge {
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            margin-bottom: 10px;
-            color: white;
+        /* Modal do Jogo (Onde o jogo abre) */
+        #game-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.95);
+            z-index: 1000;
+            flex-direction: column;
         }
 
-        .easy { background: #2ecc71; }
-        .medium { background: #f1c40f; }
-        .hard { background: #e67e22; }
-        .extreme { background: #e74c3c; }
-
-        .stats-bar {
+        .modal-header {
+            padding: 15px;
             display: flex;
             justify-content: space-between;
-            margin-bottom: 20px;
-            font-size: 0.9rem;
-            font-weight: bold;
-            color: #666;
-        }
-
-        #timer { color: var(--danger); }
-    </style>
-</head>
-<body>
-
-    <div class="container">
-        <div id="start-screen" class="screen active">
-            <h1 style="font-size: 2.5rem; color: var(--primary);">⚽ FutQuiz</h1>
-            <p>Prove que você é um mestre do futebol mundial!</p>
-            <div style="margin: 30px 0;">
-                <small>30 Perguntas • Nível Crescente • Recorde de Tempo</small>
-            </div>
-            <button class="btn" onclick="startGame()">JOGAR</button>
-        </div>
-
-        <div id="game-screen" class="screen">
-            <div class="stats-bar">
-                <span id="question-number">Pergunta: 1/30</span>
-                <span id="timer">Tempo: 00:00</span>
-            </div>
-            <div id="difficulty" class="difficulty-badge">Fácil</div>
-            <h2 id="question-text">Carregando pergunta...</h2>
-            <div id="options" class="options-container">
-                </div>
-        </div>
-
-        <div id="result-screen" class="screen">
-            <h2>🏆 Fim de Jogo!</h2>
-            <div style="font-size: 1.2rem; margin: 20px 0; text-align: left; display: inline-block;">
-                <p>✅ Acertos: <span id="res-correct" style="color: var(--success)">0</span></p>
-                <p>❌ Erros: <span id="res-wrong" style="color: var(--danger)">0</span></p>
-                <p>⏱️ Tempo Total: <span id="res-time">00:00</span></p>
-            </div>
-            <br>
-            <button class="btn" onclick="resetGame()">RECOMEÇAR</button>
-        </div>
-    </div>
-
-    <script>
-        // Banco de Dados de Perguntas (Exemplos representativos)
-        const allQuestions = [
-            // FÁCIL
-            { q: "Quem venceu a Copa do Mundo de 2022?", options: ["França", "Argentina", "Brasil", "Alemanha"], correct: 1, level: "easy" },
-            { q: "Qual o apelido da Seleção Brasileira?", options: ["Alviceleste", "Fúria", "Canarinho", "Laranja Mecânica"], correct: 2, level: "easy" },
-            // ... Adicione as outras 28 perguntas seguindo este padrão ...
-            // MÉDIO
-            { q: "Qual time venceu a Champions League 2023?", options: ["Real Madrid", "Inter de Milão", "Man. City", "Liverpool"], correct: 2, level: "medium" },
-            { q: "Quem é o maior artilheiro da história das Copas?", options: ["Pelé", "Ronaldo", "Klose", "Messi"], correct: 2, level: "medium" },
-            // DIFÍCIL
-            { q: "Em que ano o Chelsea ganhou sua primeira Champions?", options: ["2008", "2010", "2012", "2021"], correct: 2, level: "hard" },
-            { q: "Qual destes países nunca venceu uma Copa?", options: ["Espanha", "Inglaterra", "Holanda", "França"], correct: 2, level: "hard" },
-            // EXTREMO
-            { q: "Quem foi o artilheiro da Copa de 1986?", options: ["Maradona", "Gary Lineker", "Careca", "Butragueño"], correct: 1, level: "extreme" },
-            { q: "Qual clube revelou o craque Cristiano Ronaldo?", options: ["Sporting CP", "Benfica", "Man. United", "Porto"], correct: 0, level: "extreme" }
-        ];
-
-        // Lógica do Jogo
-        let currentQuestionIndex = 0;
-        let score = 0;
-        let mistakes = 0;
-        let timerInterval;
-        let seconds = 0;
-        let gameQuestions = [];
-
-        function startGame() {
-            seconds = 0;
-            score = 0;
-            mistakes = 0;
-            currentQuestionIndex = 0;
-            
-            // Embaralha e prepara as 30 perguntas (separadas por nível)
-            prepareQuestions();
-            
-            showScreen('game-screen');
-            startTimer();
-            loadQuestion();
-        }
-
-        function prepareQuestions() {
-            // Em um cenário real, você teria 30+ perguntas aqui. 
-            // O código abaixo organiza por dificuldade.
-            const levels = ['easy', 'medium', 'hard', 'extreme'];
-            gameQuestions = [];
-            
-            levels.forEach(lvl => {
-                let filtered = allQuestions.filter(q => q.level === lvl);
-                gameQuestions.push(...filtered.sort(() => Math.random() - 0.5));
-            });
-            
-            // Garante que pegamos apenas as primeiras 30 se houver mais
-            gameQuestions = gameQuestions.slice(0, 30);
-        }
-
-        function loadQuestion() {
-            const q = gameQuestions[currentQuestionIndex];
-            document.getElementById('question-number').innerText = `Pergunta: ${currentQuestionIndex + 1}/${gameQuestions.length}`;
-            document.getElementById('question-text').innerText = q.q;
-            
-            const diffBadge = document.getElementById('difficulty');
-            diffBadge.innerText = q.level;
-            diffBadge.className = `difficulty-badge ${q.level}`;
-
-            const optionsDiv = document.getElementById('options');
-            optionsDiv.innerHTML = '';
-
-            q.options.forEach((opt, index) => {
-                const btn = document.createElement('button');
-                btn.className = 'option-btn';
-                btn.innerText = opt;
-                btn.onclick = () => checkAnswer(index);
-                optionsDiv.appendChild(btn);
-            });
-        }
-
-        function checkAnswer(choice) {
-            if (choice === gameQuestions[currentQuestionIndex].correct) {
-                score++;
-            } else {
-                mistakes++;
-            }
-
-            currentQuestionIndex++;
-            if (currentQuestionIndex < gameQuestions.length) {
-                loadQuestion();
-            } else {
-                finishGame();
-            }
-        }
-
-        function startTimer() {
-            timerInterval = setInterval(() => {
-                seconds++;
-                let min = Math.floor(seconds / 60).toString().padStart(2, '0');
-                let sec = (seconds % 60).toString().padStart(2, '0');
-                document.getElementById('timer').innerText = `Tempo: ${min}:${sec}`;
-            }, 1000);
-        }
-
-        function finishGame() {
-            clearInterval(timerInterval);
-            showScreen('result-screen');
-            document.getElementById('res-correct').innerText = score;
-            document.getElementById('res-wrong').innerText = mistakes;
-            document.getElementById('res-time').innerText = document.getElementById('timer').innerText.replace('Tempo: ', '');
-        }
-
-        function showScreen(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-        }
-
-        function resetGame() {
-            showScreen('start-screen');
-        }
-    </script>
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cyber Dodge - Pro Performance</title>
-    <style>
-        :root {
-            --bg-color: #0a0a12;
-            --primary-color: #00f2ff;
-            --accent-color: #7000ff;
-            --text-color: #ffffff;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
             align-items: center;
-            height: 100vh;
-            background-color: var(--bg-color);
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            color: var(--text-color);
-            overflow: hidden;
+            background: #1e293b;
         }
 
-        #game-container {
-            position: relative;
-            box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-
-        /* Camada de UI sobre o Canvas */
-        .ui-layer {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            pointer-events: none; /* Não atrapalha o clique */
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-        }
-
-        #score {
-            font-size: 24px;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-
-        canvas {
-            display: block;
-            background: radial-gradient(circle, #1a1a2e 0%, #0a0a12 100%);
-            cursor: none;
-        }
-
-        /* Overlay de Game Over */
-        #overlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.8);
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            backdrop-filter: blur(5px);
-        }
-
-        button {
-            padding: 12px 24px;
-            font-size: 18px;
-            background: var(--primary-color);
+        #game-frame {
+            flex-grow: 1;
             border: none;
-            border-radius: 4px;
+            width: 100%;
+            height: 100%;
+        }
+
+        .close-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 5px;
             cursor: pointer;
             font-weight: bold;
-            transition: transform 0.2s, background 0.2s;
-        }
-
-        button:hover {
-            transform: scale(1.05);
-            background: #fff;
         }
     </style>
 </head>
 <body>
+
+<header>
+    <h1>Infinity Play</h1>
+    <p>Jogue agora, sem downloads.</p>
+</header>
+
+<div class="game-grid" id="grid">
+    </div>
+
+<div id="game-modal">
+    <div class="modal-header">
+        <span id="current-game-title">Carregando...</span>
+        <button class="close-btn" onclick="closeGame()">FECHAR JOGO</button>
+    </div>
+    <iframe id="game-frame" src=""></iframe>
+</div>
+
+<script>
+    const games = [
+        { name: "Subway Surfers", url: "https://games.poki.com/458768/subway-surfers" },
+        { name: "Minecraft (Classic)", url: "https://classic.minecraft.net" },
+        { name: "Slither.io", url: "https://slither.io" },
+        { name: "Crossy Road", url: "https://poki.com/pt/g/crossy-road" },
+        { name: "Temple Run 2", url: "https://poki.com/pt/g/temple-run-2" },
+        { name: "Stickman Hook", url: "https://poki.com/pt/g/stickman-hook" },
+        { name: "2048", url: "https://play2048.co" },
+        { name: "Shell Shockers", url: "https://shellshock.io" },
+        { name: "Moto X3M", url: "https://poki.com/pt/g/moto-x3m" },
+        { name: "Vectaria.io", url: "https://vectaria.io" },
+        { name: "EvoWorld.io", url: "https://evoworld.io" },
+        { name: "Tunnel Rush", url: "https://poki.com/pt/g/tunnel-rush" },
+        { name: "Little Alchemy", url: "https://littlealchemy.com" }
+    ];
+
+    const grid = document.getElementById('grid');
+    const modal = document.getElementById('game-modal');
+    const frame = document.getElementById('game-frame');
+    const title = document.getElementById('current-game-title');
+
+    // Gerar os cards dinamicamente
+    games.forEach(game => {
+        const card = document.createElement('div');
+        card.className = 'game-card';
+        card.innerHTML = `
+            <div class="game-thumb" style="background: linear-gradient(45deg, #1e293b, #38bdf8)">
+                ${game.name[0]}
+            </div>
+            <div class="game-title">${game.name}</div>
+        `;
+        card.onclick = () => openGame(game.name, game.url);
+        grid.appendChild(card);
+    });
+
+    function openGame(name, url) {
+        title.innerText = name;
+        frame.src = url;
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden'; // Trava o scroll da página
+    }
+
+    function closeGame() {
+        modal.style.display = 'none';
+        frame.src = ""; // Para o som do jogo ao fechar
+        document.body.style.overflow = 'auto';
+    }
+</script>
+
+</body>
+</html>

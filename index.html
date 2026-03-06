@@ -184,7 +184,113 @@
             { q: "Qual o placar da final da Copa de 1954 (Milagre de Berna)?", o: ["3x2", "4x2", "1x0", "2x0"], a: 0, d: "extremo" },
             { q: "Quem era o capitão do Tri em 1970?", o: ["Pelé", "Carlos Alberto Torres", "Gerson", "Tostão"], a: 1, d: "extremo" },
             { q: "Qual time grego venceu a Euro 2004?", o: ["Panathinaikos", "Olympiacos", "Grécia (Seleção)", "AEK"], a: 2, d: "extremo" },
-            { q: "Quem foi o artilheiro da Champions 2005/06?", o: ["Ronaldinho", "Shevchenko", "Eto'o", "Henry"], a: 1, d: "extremo" },
-            { q: "Qual destes nunca venceu a Bola de Ouro?", o: ["Nedved", "Owen", "Xavi", "Cannavaro"], a: 2, d: "extremo" },
-            { q: "Quantos gols Klose marcou em Copas do Mundo?", o: ["14", "15", "16", "17"], a: 2, d: "extremo" },
-            { q: "Qual clube europeu tem o apel
+            { q  "Qual clube europeu tem o apel
+             <!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desafio de Acesso</title>
+    <style>
+        /* Estilização Geral */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        h2 { color: #333; }
+        p { color: #666; margin-bottom: 1.5rem; }
+
+        /* Botão Principal */
+        .btn-start {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .btn-start:hover {
+            background-color: #0056b3;
+        }
+
+        /* Lista de Requisitos (Escondida inicialmente) */
+        #desafio-box {
+            display: none;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+            text-align: left;
+        }
+
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+
+        .checklist li {
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            color: #444;
+        }
+
+        .checklist input {
+            margin-right: 10px;
+            accent-color: #28a745;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>Portal de Segurança</h2>
+        <p>Para prosseguir, você precisa validar as diretrizes de acesso.</p>
+        
+        <button class="btn-start" onclick="mostrarDesafio()">Iniciar Desafio de Acesso</button>
+
+        <div id="desafio-box">
+            <h3>Cumprir Requisitos:</h3>
+            <ul class="checklist">
+                <li><input type="checkbox"> Confirmar identidade via token</li>
+                <li><input type="checkbox"> Aceitar termos de uso</li>
+                <li><input type="checkbox"> Resolver o Captcha visual</li>
+            </ul>
+            <p style="font-size: 0.8rem; color: #888;">* Marque todos para liberar o sistema.</p>
+        </div>
+    </div>
+
+    <script>
+        function mostrarDesafio() {
+            const box = document.getElementById('desafio-box');
+            const btn = document.querySelector('.btn-start');
+            
+            // Exibe a lista com uma transição simples
+            box.style.display = 'block';
+            // Desabilita o botão após clicar
+            btn.style.opacity = '0.5';
+            btn.innerText = 'Desafio em progresso...';
+            btn.disabled = true;
+        }
+    </script>
+
+</body>
+</html>

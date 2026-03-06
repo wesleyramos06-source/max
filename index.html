@@ -1,1 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Ligas Europeias e Mundiais</title>
+    <style>
+        /* Configurações de Fundo e Layout */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            /* Imagem de fundo com jogadores midiáticos (Estilo Colagem) */
+            background-image: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0.8)), 
+                              url('https://images.unsplash.com/photo-1574629810360-7efbbe195018?q=80&w=2093&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            font-family: 'Arial Black', Gadget, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            color: white;
+        }
 
+        h1 {
+            margin-bottom: 40px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            text-shadow: 0 0 15px #00ff88;
+            text-align: center;
+        }
+
+        /* Grid de Botões */
+        .grid-campeonatos {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            width: 90%;
+            max-width: 1000px;
+        }
+
+        /* Estilo dos Botões */
+        .btn-liga {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid #333;
+            border-radius: 12px;
+            color: #fff;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: all 0.4s ease;
+            text-align: center;
+            backdrop-filter: blur(5px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Efeito de Hover (Passar o mouse) */
+        .btn-liga:hover {
+            border-color: #00ff88;
+            background: rgba(0, 255, 136, 0.2);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 255, 136, 0.3);
+        }
+
+        /* Cores específicas para dar um toque "Premium" */
+        .btn-liga::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 5px;
+            background: #00ff88;
+            opacity: 0;
+            transition: 0.3s;
+        }
+
+        .btn-liga:hover::before {
+            opacity: 1;
+        }
+
+        /* Responsividade para celulares */
+        @media (max-width: 600px) {
+            .grid-campeonatos {
+                grid-template-columns: 1fr 1fr;
+            }
+            h1 { font-size: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🏆 Tabelas Oficiais 2026</h1>
+
+    <div class="grid-campeonatos">
+        <a href="https://ge.globo.com/futebol/brasileirao-serie-a/" target="_blank" class="btn-liga">BRASILEIRÃO</a>
+        
+        <a href="https://ge.globo.com/futebol/futebol-internacional/futebol-ingles/" target="_blank" class="btn-liga">INGLÊS</a>
+        
+        <a href="https://ge.globo.com/futebol/futebol-internacional/futebol-espanhol/" target="_blank" class="btn-liga">ESPANHOL</a>
+        
+        <a href="https://ge.globo.com/futebol/futebol-internacional/futebol-italiano/" target="_blank" class="btn-liga">ITALIANO</a>
+        
+        <a href="https://ge.globo.com/futebol/futebol-internacional/futebol-alemao/" target="_blank" class="btn-liga">ALEMÃO</a>
+        
+        <a href="https://ge.globo.com/futebol/futebol-internacional/futebol-frances/" target="_blank" class="btn-liga">FRANCÊS</a>
+        
+        <a href="https://ge.globo.com/futebol/futebol-internacional/futebol-argentino/" target="_blank" class="btn-liga">ARGENTINO</a>
+        
+        <a href="https://ge.globo.com/futebol/futebol-internacional/futebol-saudita/" target="_blank" class="btn-liga">ÁRABE</a>
+    </div>
+
+</body>
+</html>

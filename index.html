@@ -1,1 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FutMaster Quiz | Hardcore Edition</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: rgba(30, 41, 59, 0.7);
+            --primary: #3b82f6;
+            --accent: #10b981;
+            --danger: #ef4444;
+            --gold: #f59e0b;
+            --text: #f8fafc;
+        }
 
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top right, #1e293b, #0f172a);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 600px;
+            background: var(--card);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 2.5rem;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        .level-badge {
+            position: absolute;
+            top: -15px;
+            right: 20px;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .lvl-facil { background: var(--accent); }
+        .lvl-medio { background: var(--primary); }
+        .lvl-dificil { background: var(--gold); }
+        .lvl-extremo { background: var(--danger); animation: pulse 1.5s infinite; }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+
+        .progress-bar {
+            height: 6px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 3px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        #progress-fill {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        h1 { font-size: 2.5rem; margin-bottom: 0.5rem; background: linear-gradient(to right, #60a5fa, #34d399); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            font-size: 1rem;
+            margin-top: 10px;
+        }
+
+        .btn:hover { filter: brightness(1.2); transform: translateY(-2px); }
+
+        .option {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 15px;
+            margin: 8px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .option:hover { background: rgba(59, 130, 246, 0.2); border-color: var(--primary); }
+
+        #results-list {
+            max-height: 300px;
+            overflow-y: auto;
+            text-align: left;
+            margin-top: 20px;
+            padding-right: 10px;
+        }
+
+        .res-item {
+            padding: 10px;
+            border-bottom: 1px dashed rgba(255,255,255,0.1);
+            font-size: 0.9rem;
+        }
+
+        .correct { color: var(--accent); }
+        .wrong { color: var(--danger); }
+
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="quiz-app">
+        <div id="start-screen">
+            <h1>FutMaster</h1>
+            <p>30 Perguntas • 4 Níveis • 1 Só Campeão</p>
+            <button class="btn" onclick="startQuiz()">INICIAR DESAFIO</button>
+        </div>
+
+        <div id="game-screen" class="hidden">
+            <div id="difficulty-tag" class="level-badge lvl-facil">Fácil</div>
+            <div class="progress-bar"><div id="progress-fill"></div></div>
+            <p id="timer" style="font-family: monospace; color: var(--gold);">Tempo: 00:00</p>
+            <h3 id="question-text">Carregando pergunta...</h3>
+            <div id="options-box"></div>
+        </div>
+
+        <div id="end-screen" class="hidden">
+            <h2>Fim da Partida!</h2>
+            <div id="final-stats"></div>
+            <hr style="opacity: 0.1; margin: 20px 0;">
+            <div id="results-list"></div>
+            <button class="btn" onclick="location.reload()" style="background: var(--accent);">JOGAR NOVAMENTE</button>
+        </div>
+    </div>
+
+    <script>
+        // Banco de dados expandido (Exemplos representativos)
+        const database = [
+            // FÁCIL
+            { q: "Quem venceu a Copa de 2002?", o: ["Alemanha", "Brasil", "França", "Itália"], a: 1, d: "facil" },
+            { q: "Qual o time do Pelé na maior parte da carreira?", o: ["Santos", "Flamengo", "Palmeiras", "São Paulo"], a: 0, d: "facil" },
+            { q: "Quantas bolas de ouro tem Messi (até 2023)?", o: ["5", "7", "8", "6"], a: 2, d: "facil" },
+            { q: "Qual a cor da camisa da seleção da Itália?", o: ["Verde", "Azul", "Branco", "Vermelho"], a: 1, d: "facil" },
+            { q: "Em qual país nasceu Cristiano Ronaldo?", o: ["Espanha", "Brasil", "Portugal", "França"], a: 2, d: "facil" },
+            { q: "Onde foi a Copa de 2014?", o: ["Brasil", "África do Sul", "Alemanha", "Rússia"], a: 0, d: "facil" },
+            { q: "Qual o nome do estádio do Maracanã?", o: ["Beira Rio", "Mário Filho", "Morumbi", "Vila Belmiro"], a: 1, d: "facil" },
+            { q: "Quem é o 'Neymar Jr'?", o: ["Atacante", "Goleiro", "Zagueiro", "Treinador"], a: 0, d: "facil" },
+
+            // MÉDIO
+            { q: "Quem foi o vice-campeão da Copa de 2010?", o: ["Alemanha", "Espanha", "Holanda", "Uruguai"], a: 2, d: "medio" },
+            { q: "Qual clube venceu a Champions League 2023?", o: ["Real Madrid", "Inter", "Man. City", "Liverpool"], a: 2, d: "medio" },
+            { q: "Qual jogador é o maior artilheiro da Seleção Brasileira (FIFA)?", o: ["Pelé", "Neymar", "Ronaldo", "Zico"], a: 1, d: "medio" },
+            { q: "Quantas Champions tem o Real Madrid?", o: ["10", "14", "12", "15"], a: 1, d: "medio" },
+            { q: "Quem era o técnico do Brasil em 2014?", o: ["Tite", "Dunga", "Felipão", "Mano Menezes"], a: 2, d: "medio" },
+            { q: "Qual time venceu a 1ª Libertadores da história?", o: ["Santos", "Peñarol", "Boca Juniors", "Olímpia"], a: 1, d: "medio" },
+            { q: "O 'Iniestazo' foi um gol contra qual time?", o: ["Chelsea", "Real Madrid", "Bayern", "Arsenal"], a: 0, d: "medio" },
+
+            // DIFÍCIL
+            { q: "Qual goleiro defendeu o pênalti de Götze em 2014?", o: ["Ninguém (foi gol)", "Neuer", "Romero", "Casillas"], a: 0, d: "dificil" },
+            { q: "Quem foi o artilheiro da Copa de 1998?", o: ["Zidane", "Ronaldo", "Davor Šuker", "Batistuta"], a: 2, d: "dificil" },
+            { q: "Qual o placar de Uruguai x Brasil no Maracanazo?", o: ["1x0", "2x1", "3x2", "0x0"], a: 1, d: "dificil" },
+            { q: "Em que ano o Chelsea ganhou sua 1ª Champions?", o: ["2008", "2010", "2012", "2021"], a: 2, d: "dificil" },
+            { q: "Quem detém o recorde de mais gols em um único ano civil?", o: ["CR7", "Messi", "Pelé", "Müller"], a: 1, d: "dificil" },
+            { q: "Qual país sediou a Copa de 1934?", o: ["Uruguai", "Itália", "França", "Suíça"], a: 1, d: "dificil" },
+
+            // EXTREMO
+            { q: "Quem marcou o gol do título da Alemanha em 1990?", o: ["Klinsmann", "Völler", "Andreas Brehme", "Matthäus"], a: 2, d: "extremo" },
+            { q: "Qual o placar da final da Copa de 1954 (Milagre de Berna)?", o: ["3x2", "4x2", "1x0", "2x0"], a: 0, d: "extremo" },
+            { q: "Quem era o capitão do Tri em 1970?", o: ["Pelé", "Carlos Alberto Torres", "Gerson", "Tostão"], a: 1, d: "extremo" },
+            { q: "Qual time grego venceu a Euro 2004?", o: ["Panathinaikos", "Olympiacos", "Grécia (Seleção)", "AEK"], a: 2, d: "extremo" },
+            { q: "Quem foi o artilheiro da Champions 2005/06?", o: ["Ronaldinho", "Shevchenko", "Eto'o", "Henry"], a: 1, d: "extremo" },
+            { q: "Qual destes nunca venceu a Bola de Ouro?", o: ["Nedved", "Owen", "Xavi", "Cannavaro"], a: 2, d: "extremo" },
+            { q: "Quantos gols Klose marcou em Copas do Mundo?", o: ["14", "15", "16", "17"], a: 2, d: "extremo" },
+            { q: "Qual clube europeu tem o apel

@@ -1,1 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arcade Retrô - Ping Pong Console</title>
+    <style>
+        body {
+            font-family: 'Press Start 2P', cursive; /* Fonte retrô para a página */
+            background-color: #000;
+            color: #0F0; /* Verde típico de monitores antigos */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden; /* Evita barras de rolagem */
+            text-shadow: 0 0 5px #0F0; /* Efeito de brilho CRT */
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .console-button {
+            background-color: #008000; /* Verde escuro do console */
+            border: 2px solid #0F0;
+            color: #0F0;
+            padding: 20px 40px;
+            font-size: 1.5em;
+            cursor: pointer;
+            border-radius: 8px;
+            box-shadow: 0 0 15px #0F0, inset 0 0 10px #0F0;
+            transition: all 0.2s ease-in-out;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .console-button:hover {
+            background-color: #00A000;
+            box-shadow: 0 0 25px #0F0, inset 0 0 15px #0F0;
+            transform: scale(1.05);
+        }
+
+        .console-button:active {
+            background-color: #006000;
+            box-shadow: 0 0 10px #0F0, inset 0 0 5px #0F0;
+            transform: scale(0.98);
+        }
+
+        .instructions {
+            margin-top: 40px;
+            font-size: 0.9em;
+            text-align: center;
+            line-height: 1.6;
+            width: 80%;
+            max-width: 600px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Bem-vindo ao Pong Retrô!</h1>
+    <button class="console-button" onclick="startPongGame()">Iniciar Jogo de Ping Pong (Console)</button>
+    <div class="instructions">
+        <p>Ao clicar no botão, o jogo será iniciado no **Console de Desenvolvedor** do seu navegador.</p>
+        <p>Para abrir o console:</p>
+        <ul>
+            <li>Windows/Linux: Pressione `F12` ou `Ctrl+Shift+I`</li>
+            <li>Mac: Pressione `Cmd+Option+I`</li>
+        </ul>
+        <p>Siga as instruções dentro do console para jogar!</p>
+    </div>
+
+    <script>
 

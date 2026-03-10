@@ -1,1 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FutMaster - Painel de Controle</title>
+    <link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #000; /* Fundo Preto */
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
 
+        .painel {
+            border: 3px solid #0056b3; /* Borda Azul */
+            padding: 40px;
+            border-radius: 20px;
+            background-color: #111;
+            text-align: center;
+            box-shadow: 0 0 25px rgba(0, 86, 179, 0.5);
+            max-width: 500px;
+            width: 90%;
+        }
+
+        h1 {
+            /* Estilo da Fonte Fancy */
+            font-family: 'UnifrakturMaguntia', cursive; 
+            color: #007bff; /* Azul vibrante */
+            font-size: 4rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px #000, 0 0 15px rgba(0, 123, 255, 0.7);
+        }
+
+        .placar {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .time {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        .gols {
+            font-size: 3rem;
+            background: #222;
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 1px solid #007bff;
+        }
+
+        .btn-acao {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .btn-acao:hover {
+            background-color: #0056b3;
+            box-shadow: 0 0 15px #007bff;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="painel">
+        <h1>FutMaster</h1>
+
+        <div class="placar">
+            <div class="time">
+                CASA
+                <div class="gols">0</div>
+            </div>
+            <div style="font-size: 2rem;">VS</div>
+            <div class="time">
+                VISITANTE
+                <div class="gols">0</div>
+            </div>
+        </div>
+
+        <button class="btn-acao">Iniciar Partida</button>
+    </div>
+
+</body>
+</html>

@@ -3,139 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FutQuiz 3D - Recorde Infinito</title>
+    <title>FutQuiz Infinito</title>
     <style>
         :root {
-            --pitch-green: #1a6431;
-            --neon-gold: #ffd700;
-            --neon-red: #ff3131;
-            --white: #ffffff;
+            --primary-green: #2ecc71;
+            --dark-green: #27ae60;
+            --stadium-overlay: rgba(0, 0, 0, 0.7);
         }
 
         body {
             margin: 0;
-            padding: 0;
-            background: #050a05;
-            color: white;
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: url('https://images.unsplash.com/photo-1508098682722-e99c43a406b2?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') no-repeat center center fixed;
+            background-size: cover;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            perspective: 1200px;
+            color: white;
         }
 
-        /* --- Cenário 3D --- */
-        #stadium {
-            position: absolute;
-            width: 100vw;
-            height: 100vh;
-            transform-style: preserve-3d;
-            transform: rotateX(20deg);
-            z-index: -1;
-        }
-
-        #pitch {
-            position: absolute;
-            width: 200%;
-            height: 2000px;
-            background: 
-                linear-gradient(var(--pitch-green) 50%, #145228 50%),
-                linear-gradient(90deg, transparent 49%, var(--white) 50%, transparent 51%);
-            background-size: 100% 100px, 100% 100%;
-            left: -50%;
-            bottom: -500px;
-            transform: rotateX(70deg);
-            box-shadow: inset 0 0 100px #000;
-        }
-
-        /* --- Telas --- */
-        .screen {
-            position: absolute;
-            width: 90%;
-            max-width: 600px;
-            background: rgba(0, 0, 0, 0.85);
+        #game-container {
+            background: var(--stadium-overlay);
             padding: 30px;
-            border-radius: 20px;
-            border: 2px solid var(--neon-gold);
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
             text-align: center;
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.3);
-            backdrop-filter: blur(10px);
-            transition: 0.5s;
+            max-width: 500px;
+            width: 90%;
+            border: 3px solid var(--primary-green);
         }
 
-        .hidden { display: none !important; }
+        .hidden { display: none; }
 
-        /* --- Elementos do Jogo --- */
-        #timer-container {
-            width: 100%;
-            height: 10px;
-            background: #333;
-            border-radius: 5px;
-            margin: 20px 0;
-            overflow: hidden;
+        h1 { color: var(--primary-green); margin-bottom: 10px; }
+        
+        #stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-weight: bold;
         }
 
-        #timer-bar {
-            width: 100%;
-            height: 100%;
-            background: var(--neon-gold);
-            transition: width 0.1s linear;
-        }
+        #question { font-size: 1.2rem; margin-bottom: 20px; min-height: 60px; }
 
         .options-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 20px;
+            gap: 10px;
         }
 
         button {
-            padding: 15px;
-            font-size: 1rem;
             background: transparent;
+            border: 2px solid white;
             color: white;
-            border: 1px solid var(--white);
-            border-radius: 10px;
+            padding: 12px;
+            border-radius: 8px;
             cursor: pointer;
-            transition: 0.3s;
+            font-size: 1rem;
+            transition: all 0.3s;
         }
 
         button:hover {
-            background: var(--neon-gold);
-            color: black;
-            font-weight: bold;
-            transform: translateZ(20px);
+            background: var(--primary-green);
+            border-color: var(--primary-green);
         }
 
-        #high-score-display {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            color: var(--neon-gold);
-            font-size: 1.2rem;
-            text-shadow: 0 0 10px gold;
+        #game-over-screen {
+            animation: fadeIn 0.5s;
         }
 
-        .stat-box {
-            display: flex;
-            justify-content: space-around;
-            margin: 20px 0;
-            font-size: 1.1rem;
-        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Animação de Erro */
-        .shake { animation: shake 0.5s; }
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
-        }
+        .record-text { color: #f1c40f; font-size: 1.5rem; }
     </style>
 </head>
 <body>
 
-    <div id="high-score-display">🏆 Recorde: <span id="record-val">0</span></div>
+    <div id="game-container">
+        <div id="start-screen">
+            <h1>FUTQUIZ</h1>
+            <p>Dificuldade progressiva. Errou, volta ao zero!</p>
+            <button onclick="startGame()">Começar Partida</button>
+        </div>
 
-    <div id="stadium">
+        <div id="quiz-screen" class="hidden">
+            <div id="stats">
+                <span>Placar: <span id="current-score">0</span></span>
+                <span>Nível: <span id="difficulty-label">Fácil</span></span>
+            </div>
+            <div id="question">Carregando pergunta...</div>
+            <div class="options-grid" id="options">
+                </div>
+        </div>
+
+        <div id="game-over-screen" class="hidden">
+            <h2 style="color: #e74c3c;">FIM DE JOGO!</h2>
+            <p id="final-stats"></p>
+            <div class="record-text">Recorde: <span id="high-score">0</span></div>
+            <br>
+            <button onclick="startGame()">Tentar Novamente</button>
+        </div>
+    </div>
+
+    <script>
+        const questionsDB = {
+            easy: [
+                { q: "Qual país ganhou a Copa de 2022?", a: ["Argentina", "França", "Brasil", "Croácia"], c: 0 },
+                { q: "Quantos jogadores cada time tem em campo?", a: ["10", "11", "12", "5"], c: 1 },
+                { q: "Qual a duração de um tempo normal de jogo?", a: ["45 min", "90 min", "30 min", "60 min"], c: 0 },
+                { q: "Quem é conhecido como o 'Rei do Futebol'?", a: ["Zico", "Maradona", "Pelé", "Messi"], c: 2 }
+            ],
+            medium: [
+                { q: "Qual clube tem mais títulos da Champions League?", a: ["Milan", "Barcelona", "Liverpool", "Real Madrid"], c: 3 },
+                { q: "Em qual país foi realizada a Copa de 1994?", a: ["Itália", "EUA", "França", "México"], c: 1 },
+                { q: "Qual desses jogadores nunca venceu uma Copa do Mundo?", a: ["Cristiano Ronaldo", "Romário", "Zidane", "Klose"], c: 0 },
+                { q: "Qual time é conhecido como 'Merengues'?", a: ["Bayern", "Real Madrid", "Porto", "Chelsea"], c: 1 }
+            ],
+            hard: [
+                { q: "Quem foi o artilheiro da Copa de 2002?", a: ["Rivaldo", "Klose", "Ronaldo Fenômeno", "Raúl"], c: 2 },
+                { q: "Qual goleiro venceu a Bola de Ouro (Ballon d'Or)?", a: ["Lev Yashin", "Buffon", "Neuer", "Casillas"], c: 0 },
+                { q: "Qual seleção venceu a primeira Copa do Mundo em 1930?", a: ["Brasil", "Argentina", "Uruguai", "Itália"], c: 2 },
+                { q: "Em que ano o Brasil conquistou o Tetracampeonato?", a: ["1990", "1994", "1998", "2002"], c: 1 }
+            ]
+        };
+
+        let score = 0;
+        let startTime;
+        let highScore = localStorage.getItem('futQuizHighScore') || 0;
+
+        function startGame() {
+            score = 0;
+            startTime = Date.now();
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('game-over-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            nextQuestion();
+        }
+
+        function nextQuestion() {
+            document.getElementById('current-score').innerText = score;
+            
+            // Define dificuldade baseada no score
+            let diff = 'easy';
+            if (score > 5) diff = 'medium';
+            if (score > 12) diff = 'hard';
+            
+            document.getElementById('difficulty-label').innerText = diff.toUpperCase();
+            
+            const pool = questionsDB[diff];
+            const qData = pool[Math.floor(Math.random() * pool.length)];
+            
+            document.getElementById('question').innerText = qData.q;
+            const optionsDiv = document.getElementById('options');
+            optionsDiv.innerHTML = '';
+            
+            qData.a.forEach((opt, index) =>

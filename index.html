@@ -3,146 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultimate FutQuiz - Infinite Edition</title>
+    <title>Sinuca Pro - HTML5</title>
     <style>
-        /* CSS - DESIGN DO ESTÁDIO E INTERFACE */
-        :root {
-            --soccer-green: #2ecc71;
-            --dark-green: #27ae60;
-            --white: #ffffff;
-            --black: #1a1a1a;
-            --stadium-shadow: rgba(0, 0, 0, 0.75);
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
-
         body {
-            background: linear-gradient(var(--stadium-shadow), var(--stadium-shadow)), 
-                        url('https://images.unsplash.com/photo-1522778119026-d647f0596c20?q=80&w=2070&auto=format&fit=crop') no-repeat center center fixed;
-            background-size: cover;
-            height: 100vh;
+            margin: 0;
+            background-color: #2c3e50;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            color: var(--white);
-            overflow: hidden;
-        }
-
-        #game-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(15px);
-            border: 3px solid var(--soccer-green);
-            border-radius: 20px;
-            width: 90%;
-            max-width: 500px;
-            padding: 40px;
-            text-align: center;
-            box-shadow: 0 0 50px rgba(0,0,0,0.5);
-            position: relative;
-        }
-
-        h1 { font-size: 2.5rem; margin-bottom: 10px; color: var(--soccer-green); text-transform: uppercase; letter-spacing: 2px; }
-        
-        .hidden { display: none !important; }
-
-        /* Botões */
-        .btn-action {
-            background: var(--soccer-green);
+            justify-content: center;
+            height: 100vh;
             color: white;
-            border: none;
-            padding: 15px 30px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            width: 100%;
-            margin-top: 20px;
+            font-family: sans-serif;
         }
 
-        .btn-action:hover { background: var(--dark-green); transform: translateY(-3px); }
-
-        .option-btn {
-            background: rgba(255, 255, 255, 0.9);
-            color: var(--black);
-            border: 2px solid transparent;
-            padding: 12px;
-            margin: 8px 0;
-            width: 100%;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            transition: 0.2s;
+        #game-ui {
+            margin-bottom: 10px;
+            text-align: center;
         }
 
-        .option-btn:hover { background: var(--white); border-color: var(--soccer-green); transform: scale(1.02); }
-
-        /* Stats */
-        .stats-bar { display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: bold; font-size: 0.9rem; color: #ccc; }
-        .score-val { color: var(--soccer-green); font-size: 1.2rem; }
-
-        .difficulty-badge {
-            padding: 5px 12px;
-            border-radius: 5px;
-            font-size: 0.7rem;
-            text-transform: uppercase;
+        /* Estilização da Mesa (Bordas de madeira) */
+        #table-container {
+            padding: 20px;
+            background: #5d391b; /* Cor de madeira */
+            border-radius: 15px;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.8);
         }
-        .diff-easy { background: #2ecc71; }
-        .diff-medium { background: #f1c40f; color: #000; }
-        .diff-hard { background: #e67e22; }
-        .diff-expert { background: #e74c3c; animation: pulse 1s infinite; }
 
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        canvas {
+            background-color: #27ae60; /* Verde do pano */
+            border: 5px solid #1e8449;
+            cursor: crosshair;
+            display: block;
+        }
 
-        #question-text { font-size: 1.3rem; margin-bottom: 25px; min-height: 80px; display: flex; align-items: center; justify-content: center; }
-
-        #game-over-screen h2 { color: #e74c3c; margin-bottom: 20px; }
-        .final-info { margin: 10px 0; font-size: 1.1rem; }
-        .record-tag { color: #f1c40f; font-weight: bold; font-size: 1.4rem; margin-top: 10px; }
+        .controls {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #bdc3c7;
+        }
     </style>
 </head>
 <body>
 
-    <div id="game-card">
-        <div id="start-screen">
-            <h1>FutQuiz ⚽</h1>
-            <p>O desafio infinito de futebol.</p>
-            <p style="font-size: 0.8rem; margin-top: 10px; color: #aaa;">Se errar uma, volta ao início!</p>
-            <button class="btn-action" onclick="startGame()">Iniciar Partida</button>
-        </div>
+    <div id="game-ui">
+        <h1>SINUCA 8-BALL</h1>
+        <p>Bolas encaçapadas: <span id="score">0</span></p>
+    </div>
 
-        <div id="quiz-screen" class="hidden">
-            <div class="stats-bar">
-                <div>SCORE: <span id="current-score" class="score-val">0</span></div>
-                <div id="difficulty-label" class="difficulty-badge diff-easy">Fácil</div>
-            </div>
-            <div id="question-text">Pergunta...</div>
-            <div id="options-container"></div>
-        </div>
+    <div id="table-container">
+        <canvas id="poolTable" width="800" height="400"></canvas>
+    </div>
 
-        <div id="game-over-screen" class="hidden">
-            <h2>FIM DE JOGO! 🚩</h2>
-            <div class="final-info" id="final-score-text">Pontuação: 0</div>
-            <div class="final-info" id="final-time-text">Tempo: 0s</div>
-            <div class="record-tag">RECORDE: <span id="high-score-val">0</span></div>
-            <button class="btn-action" onclick="startGame()">Tentar Novamente</button>
-        </div>
+    <div class="controls">
+        Arraste a bola branca para trás e solte para disparar!
     </div>
 
     <script>
-        /* JAVASCRIPT - LÓGICA DO JOGO */
+        const canvas = document.getElementById('poolTable');
+        const ctx = canvas.getContext('2d');
+        const scoreEl = document.getElementById('score');
 
-        const questionsDB = {
-            easy: [
-                { q: "Qual país venceu a Copa do Mundo de 2022?", o: ["França", "Brasil", "Argentina", "Alemanha"], c: 2 },
-                { q: "Quantos jogadores um time tem em campo (titulares)?", o: ["10", "11", "12", "5"], c: 1 },
-                { q: "Quem é conhecido como o 'Rei do Futebol'?", o: ["Maradona", "Zico", "Pelé", "Messi"], c: 2 },
-                { q: "Qual a cor do cartão que expulsa o jogador?", o: ["Amarelo", "Azul", "Branco", "Vermelho"], c: 3 },
-                { q: "Onde é jogada uma partida de futebol?", o: ["Quadra", "Campo", "Pista", "Piscina"], c: 1 }
-            ],
-            medium: [
-                { q: "Qual clube tem mais títulos da Champions League?", o: ["Milan", "Real Madrid", "Barcelona", "Liverpool"], c: 1 },
-                {
+        let score = 0;
+        let isDragging = false;
+        let dragStart = { x: 0, y: 0 };
+        let mousePos = { x: 0, y: 0 };
+
+        const friction = 0.985; // Simula a resistência do pano
+        const ballRadius = 12;
+
+        class Ball {
+            constructor(x, y, color, isWhite = false) {
+                this.x = x;
+                this.y = y;
+                this.vx = 0;
+                this.vy = 0;
+                this.color = color;
+                this.isWhite = isWhite;
+                this.inPocket = false;
+            }
+
+            draw() {
+                if (this.inPocket) return;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, ballRadius, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                
+                // Brilho da bola
+                ctx.beginPath();
+                ctx.arc(this.x - 3, this.y - 3, 3, 0, Math.PI * 2);
+                ctx.fillStyle = "rgba(255,255,255,0.3)";
+                ctx.fill();
+                ctx.closePath();
+            }
+
+            update() {
+                if (this.inPocket) return;
+
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // Atrito
+                this.vx *= friction;
+                this.vy *= friction;
+
+                if (Math.abs(this.vx) < 0.1) this.vx = 0;
+                if (Math.abs(this.vy) < 0.1) this.vy = 0;
+
+                // Colisão com as bordas
+                if (this.x + ballRadius > canvas.width || this.x - ballRadius < 0) {
+                    this.vx *= -1;
+                }
+                if (this.y + ballRadius > canvas.height || this.y - ballRadius < 0) {
+                    this.vy *= -1;
+                }
+
+                // Verificar Caçapas (Pockets)
+                checkPocket(this);
+            }
+        }
+
+        let balls = [];
+        let whiteBall;
+
+        function initGame() {
+            balls = [];
+            // Criar bola branca
+            whiteBall = new Ball(200, 200, "white", true);
+            balls.push(whiteBall);
+
+            // Criar triângulo de bolas coloridas
+            const startX = 550;
+            const startY = 200;
+            const colors = ["#f1c40f", "#e67e22", "#e74c3c", "#9b59b6", "#2980b9", "#34495e", "#d35400"];
+            
+            let count = 0;
+            for (let row = 0; row < 4; row++) {
+                for (let col = 0; col <= row; col++) {
+                    let color = colors[count % colors.length];
+                    balls.push(new Ball(startX + (row * 22), (startY - (row * 12)) + (col * 25), color));
+                    count++;
+                }
+            }
+        }
+
+        function checkPocket(ball) {
+            const pockets = [
+                {x: 0, y: 0}, {x: 400, y: 0}, {x: 800, y: 0},
+                {x: 0, y: 400}, {x: 400, y: 400}, {x: 800, y: 400}
+            ];
+
+            pockets.forEach(p => {
+                const dist = Math.hypot(ball.x - p.x, ball.y - p.y);
+                if (dist < 25) {
+                    if (ball.isWhite) {
+                        // Se a branca cair, volta pro início
+                        ball.x = 200; ball.y = 200;
+                        ball.vx = 0; ball.vy = 0;
+                    } else {
+                        ball.inPocket = true;
+                        score++;
+                        scoreEl.innerText = score;
+                    }
+                }
+            });
+        }
+
+        function resolveCollision(b1, b2) {
+            const dx = b2.x - b1.x;
+            const dy = b2.y - b1.y;
+            const distance = Math.hypot(dx, dy);
+
+            if (distance < ballRadius * 2) {
+                // Física simples de colisão elástica
+                const angle = Math.atan2(dy, dx);
+                const sin = Math.sin(angle);
+                const cos = Math.cos(angle

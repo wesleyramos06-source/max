@@ -276,3 +276,190 @@
     const questions = {
         easy: [
             { q: "Qual a cor do cartão que expulsa o jogador?", a: ["Amarelo", "Azul", "Vermelho", "Verde"], c: 2 },
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FutQuiz - O Início</title>
+    <style>
+        /* Reset e Fundo de Estádio */
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Arial Black', sans-serif;
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
+                        url('https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            overflow: hidden;
+        }
+
+        .game-card {
+            background: rgba(0, 0, 0, 0.85);
+            padding: 40px;
+            border-radius: 20px;
+            border: 4px solid #2ecc71;
+            text-align: center;
+            width: 350px;
+            box-shadow: 0 0 30px rgba(46, 204, 113, 0.3);
+        }
+
+        /* Utilidade para esconder telas */
+        .hidden { display: none !important; }
+
+        .btn-principal {
+            background: #2ecc71;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn-principal:hover {
+            background: #27ae60;
+            transform: scale(1.05);
+        }
+
+        .alternativa {
+            background: transparent;
+            border: 2px solid white;
+            color: white;
+            padding: 10px;
+            margin: 10px 0;
+            width: 100%;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .alternativa:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        #stats { display: flex; justify-content: space-between; color: #2ecc71; margin-bottom: 10px; }
+        .recorde { color: #f1c40f; margin-top: 15px; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+    <div class="game-card">
+        <div id="tela-inicio">
+            <h1 style="font-size: 2.5rem; margin-bottom: 10px;">FUT QUIZ</h1>
+            <p>Dificuldade Progressiva</p>
+            <button class="btn-principal" onclick="comecarJogo()">INICIAR PARTIDA</button>
+        </div>
+
+        <div id="tela-jogo" class="hidden">
+            <div id="stats">
+                <span>Gols: <span id="score">0</span></span>
+                <span id="label-nivel">Fácil</span>
+            </div>
+            <h3 id="pergunta-texto">Carregando pergunta...</h3>
+            <div id="container-alternativas"></div>
+        </div>
+
+        <div id="tela-perdeu" class="hidden">
+            <h2 style="color: #e74c3c;">FIM DE JOGO!</h2>
+            <p id="resultado-final"></p>
+            <div class="recorde">MELHOR MARCA: <span id="high-score">0</span></div>
+            <button class="btn-principal" onclick="comecarJogo()">JOGAR NOVAMENTE</button>
+        </div>
+    </div>
+
+    <script>
+        // Banco de Dados Simples
+        const banco = {
+            facil: [
+                { p: "Quantos jogadores tem um time em campo?", r: ["11", "10", "12", "5"], c: 0 },
+                { p: "Qual a cor do cartão de expulsão?", r: ["Azul", "Amarelo", "Vermelho", "Preto"], c: 2 }
+            ],
+            medio: [
+                { p: "Quem ganhou a Copa de 2010?", r: ["Holanda", "Espanha", "Alemanha", "Brasil"], c: 1 },
+                { p: "Qual o estádio do Flamengo?", r: ["Maracanã", "Morumbi", "Vila Belmiro", "Mineirão"], c: 0 }
+            ],
+            dificil: [
+                { p: "Quem é o maior artilheiro das Copas?", r: ["Pelé", "Ronaldo", "Klose", "Messi"], c: 2 },
+                { p: "Em que ano foi a primeira Copa do Mundo?", r: ["1920", "1934", "1930", "1950"], c: 2 }
+            ]
+        };
+
+        let pontuacao = 0;
+        let tempoInicio;
+        let recorde = localStorage.getItem('futRecorde') || 0;
+
+        function comecarJogo() {
+            // Resetar Variáveis
+            pontuacao = 0;
+            tempoInicio = Date.now();
+            
+            // Trocar Telas (A mágica acontece aqui)
+            document.getElementById('tela-inicio').classList.add('hidden');
+            document.getElementById('tela-perdeu').classList.add('hidden');
+            document.getElementById('tela-jogo').classList.remove('hidden');
+            
+            gerarPergunta();
+        }
+
+        function gerarPergunta() {
+            document.getElementById('score').innerText = pontuacao;
+            
+            // Lógica de dificuldade
+            let nivel = "facil";
+            if(pontuacao > 2) nivel = "medio";
+            if(pontuacao > 5) nivel = "dificil";
+            document.getElementById('label-nivel').innerText = nivel.toUpperCase();
+
+            const lista = banco[nivel];
+            const pergunta = lista[Math.floor(Math.random() * lista.length)];
+
+            document.getElementById('pergunta-texto').innerText = pergunta.p;
+            const container = document.getElementById('container-alternativas');
+            container.innerHTML = '';
+
+            pergunta.r.forEach((txt, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'alternativa';
+                btn.innerText = txt;
+                btn.onclick = () => validarResposta(i, pergunta.c);
+                container.appendChild(btn);
+            });
+        }
+
+        function validarResposta(escolha, correta) {
+            if(escolha === correta) {
+                pontuacao++;
+                gerarPergunta();
+            } else {
+                finalizarJogo();
+            }
+        }
+
+        function finalizarJogo() {
+            const tempoTotal = Math.floor((Date.now() - tempoInicio) / 1000);
+            
+            if(pontuacao > recorde) {
+                recorde = pontuacao;
+                localStorage.setItem('futRecorde', recorde);
+            }
+
+            document.getElementById('tela-jogo').classList.add('hidden');
+            document.getElementById('tela-perdeu').classList.remove('hidden');
+            
+            document.getElementById('resultado-final').innerHTML = 
+                `Você fez <b>${pontuacao}</b> gols em <b>${tempoTotal}s</b>!`;
+            document.getElementById('high-score').innerText = recorde;
+        }
+    </script>
+</body>
+</html>

@@ -3,463 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FutQuiz Infinito</title>
+    <title>Ultimate FutQuiz - Infinite Edition</title>
     <style>
+        /* CSS - DESIGN DO ESTÁDIO E INTERFACE */
         :root {
-            --primary-green: #2ecc71;
+            --soccer-green: #2ecc71;
             --dark-green: #27ae60;
-            --stadium-overlay: rgba(0, 0, 0, 0.7);
+            --white: #ffffff;
+            --black: #1a1a1a;
+            --stadium-shadow: rgba(0, 0, 0, 0.75);
         }
 
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
+
         body {
-            margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: url('https://images.unsplash.com/photo-1508098682722-e99c43a406b2?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') no-repeat center center fixed;
+            background: linear-gradient(var(--stadium-shadow), var(--stadium-shadow)), 
+                        url('https://images.unsplash.com/photo-1522778119026-d647f0596c20?q=80&w=2070&auto=format&fit=crop') no-repeat center center fixed;
             background-size: cover;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            color: white;
-        }
-
-        #game-container {
-            background: var(--stadium-overlay);
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            text-align: center;
-            max-width: 500px;
-            width: 90%;
-            border: 3px solid var(--primary-green);
-        }
-
-        .hidden { display: none; }
-
-        h1 { color: var(--primary-green); margin-bottom: 10px; }
-        
-        #stats {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            font-weight: bold;
-        }
-
-        #question { font-size: 1.2rem; margin-bottom: 20px; min-height: 60px; }
-
-        .options-grid {
-            display: grid;
-            gap: 10px;
-        }
-
-        button {
-            background: transparent;
-            border: 2px solid white;
-            color: white;
-            padding: 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.3s;
-        }
-
-        button:hover {
-            background: var(--primary-green);
-            border-color: var(--primary-green);
-        }
-
-        #game-over-screen {
-            animation: fadeIn 0.5s;
-        }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        .record-text { color: #f1c40f; font-size: 1.5rem; }
-    </style>
-</head>
-<body>
-
-    <div id="game-container">
-        <div id="start-screen">
-            <h1>FUTQUIZ</h1>
-            <p>Dificuldade progressiva. Errou, volta ao zero!</p>
-            <button onclick="startGame()">Começar Partida</button>
-        </div>
-
-        <div id="quiz-screen" class="hidden">
-            <div id="stats">
-                <span>Placar: <span id="current-score">0</span></span>
-                <span>Nível: <span id="difficulty-label">Fácil</span></span>
-            </div>
-            <div id="question">Carregando pergunta...</div>
-            <div class="options-grid" id="options">
-                </div>
-        </div>
-
-        <div id="game-over-screen" class="hidden">
-            <h2 style="color: #e74c3c;">FIM DE JOGO!</h2>
-            <p id="final-stats"></p>
-            <div class="record-text">Recorde: <span id="high-score">0</span></div>
-            <br>
-            <button onclick="startGame()">Tentar Novamente</button>
-        </div>
-    </div>
-
-    <script>
-        const questionsDB = {
-            easy: [
-                { q: "Qual país ganhou a Copa de 2022?", a: ["Argentina", "França", "Brasil", "Croácia"], c: 0 },
-                { q: "Quantos jogadores cada time tem em campo?", a: ["10", "11", "12", "5"], c: 1 },
-                { q: "Qual a duração de um tempo normal de jogo?", a: ["45 min", "90 min", "30 min", "60 min"], c: 0 },
-                { q: "Quem é conhecido como o 'Rei do Futebol'?", a: ["Zico", "Maradona", "Pelé", "Messi"], c: 2 }
-            ],
-            medium: [
-                { q: "Qual clube tem mais títulos da Champions League?", a: ["Milan", "Barcelona", "Liverpool", "Real Madrid"], c: 3 },
-                { q: "Em qual país foi realizada a Copa de 1994?", a: ["Itália", "EUA", "França", "México"], c: 1 },
-                { q: "Qual desses jogadores nunca venceu uma Copa do Mundo?", a: ["Cristiano Ronaldo", "Romário", "Zidane", "Klose"], c: 0 },
-                { q: "Qual time é conhecido como 'Merengues'?", a: ["Bayern", "Real Madrid", "Porto", "Chelsea"], c: 1 }
-            ],
-            hard: [
-                { q: "Quem foi o artilheiro da Copa de 2002?", a: ["Rivaldo", "Klose", "Ronaldo Fenômeno", "Raúl"], c: 2 },
-                { q: "Qual goleiro venceu a Bola de Ouro (Ballon d'Or)?", a: ["Lev Yashin", "Buffon", "Neuer", "Casillas"], c: 0 },
-                { q: "Qual seleção venceu a primeira Copa do Mundo em 1930?", a: ["Brasil", "Argentina", "Uruguai", "Itália"], c: 2 },
-                { q: "Em que ano o Brasil conquistou o Tetracampeonato?", a: ["1990", "1994", "1998", "2002"], c: 1 }
-            ]
-        };
-
-        let score = 0;
-        let startTime;
-        let highScore = localStorage.getItem('futQuizHighScore') || 0;
-
-        function startGame() {
-            score = 0;
-            startTime = Date.now();
-            document.getElementById('start-screen').classList.add('hidden');
-            document.getElementById('game-over-screen').classList.add('hidden');
-            document.getElementById('quiz-screen').classList.remove('hidden');
-            nextQuestion();
-        }
-
-        function nextQuestion() {
-            document.getElementById('current-score').innerText = score;
-            
-            // Define dificuldade baseada no score
-            let diff = 'easy';
-            if (score > 5) diff = 'medium';
-            if (score > 12) diff = 'hard';
-            
-            document.getElementById('difficulty-label').innerText = diff.toUpperCase();
-            
-            const pool = questionsDB[diff];
-            const qData = pool[Math.floor(Math.random() * pool.length)];
-            
-            document.getElementById('question').innerText = qData.q;
-            const optionsDiv = document.getElementById('options');
-            optionsDiv.innerHTML = '';
-            
-            qData.a.forEach((opt, index) =>
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FutQuiz Extreme</title>
-    <style>
-        /* CSS - Estilo do Estádio */
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Arial', sans-serif;
-            background: url('https://images.unsplash.com/photo-1522778119026-d647f0596c20?q=80&w=2070&auto=format&fit=crop') no-repeat center center fixed;
-            background-size: cover;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            color: var(--white);
             overflow: hidden;
         }
 
-        #overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            z-index: 1;
-        }
-
-        .container {
-            position: relative;
-            z-index: 2;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 30px;
-            border-radius: 15px;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            width: 400px;
-            border: 4px solid #2ecc71; /* Verde gramado */
-        }
-
-        .hidden { display: none; }
-
-        h1 { color: #2c3e50; margin-top: 0; }
-
-        .btn {
-            background: #27ae60;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            margin: 8px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            width: 100%;
-            transition: transform 0.2s, background 0.2s;
-        }
-
-        .btn:hover { background: #219150; transform: scale(1.02); }
-
-        .stats {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-            font-weight: bold;
-            color: #27ae60;
-        }
-
-        #question-text {
-            font-size: 1.2rem;
-            margin-bottom: 20px;
-            color: #333;
-        }
-
-        .record-box {
-            background: #f1c40f;
-            padding: 10px;
-            border-radius: 5px;
-            margin-top: 15px;
-            font-weight: bold;
-        }
-    </style>
-</head>
-<body>
-
-<div id="overlay"></div>
-
-<div class="container">
-    <div id="start-screen">
-        <h1>FUTQUIZ ⚽</h1>
-        <p>Responda o máximo que puder. Errou, volta ao início!</p>
-        <button class="btn" onclick="startGame()">ENTRAR EM CAMPO</button>
-    </div>
-
-    <div id="game-screen" class="hidden">
-        <div class="stats">
-            <span>Pontos: <span id="score">0</span></span>
-            <span>Nível: <span id="level-name">Fácil</span></span>
-        </div>
-        <div id="question-text">Pergunta aqui?</div>
-        <div id="answers-box"></div>
-    </div>
-
-    <div id="game-over-screen" class="hidden">
-        <h2 style="color: #e74c3c;">FIM DE JOGO! 🚩</h2>
-        <p id="final-stats"></p>
-        <div class="record-box">Recorde: <span id="high-score">0</span> acertos</div>
-        <button class="btn" style="background:#3498db;" onclick="startGame()">TENTAR REPLAY</button>
-    </div>
-</div>
-
-<script>
-    // Banco de perguntas (pode adicionar centenas aqui)
-    const questions = {
-        easy: [
-            { q: "Qual a cor do cartão que expulsa o jogador?", a: ["Amarelo", "Azul", "Vermelho", "Verde"], c: 2 },
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FutQuiz - O Início</title>
-    <style>
-        /* Reset e Fundo de Estádio */
-        body {
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: 'Arial Black', sans-serif;
-            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
-                        url('https://images.unsplash.com/photo-1508098682722-e99c43a406b2?auto=format&fit=crop&w=1350&q=80');
-            background-size: cover;
-            background-position: center;
-            color: white;
-            overflow: hidden;
-        }
-
-        .game-card {
-            background: rgba(0, 0, 0, 0.85);
-            padding: 40px;
+        #game-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border: 3px solid var(--soccer-green);
             border-radius: 20px;
-            border: 4px solid #2ecc71;
+            width: 90%;
+            max-width: 500px;
+            padding: 40px;
             text-align: center;
-            width: 350px;
-            box-shadow: 0 0 30px rgba(46, 204, 113, 0.3);
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+            position: relative;
         }
 
-        /* Utilidade para esconder telas */
+        h1 { font-size: 2.5rem; margin-bottom: 10px; color: var(--soccer-green); text-transform: uppercase; letter-spacing: 2px; }
+        
         .hidden { display: none !important; }
 
-        .btn-principal {
-            background: #2ecc71;
+        /* Botões */
+        .btn-action {
+            background: var(--soccer-green);
             color: white;
             border: none;
             padding: 15px 30px;
             font-size: 1.2rem;
+            font-weight: bold;
             border-radius: 50px;
             cursor: pointer;
-            transition: 0.3s;
+            transition: all 0.3s;
             text-transform: uppercase;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             width: 100%;
             margin-top: 20px;
         }
 
-        .btn-principal:hover {
-            background: #27ae60;
-            transform: scale(1.05);
-        }
+        .btn-action:hover { background: var(--dark-green); transform: translateY(-3px); }
 
-        .alternativa {
-            background: transparent;
-            border: 2px solid white;
-            color: white;
-            padding: 10px;
-            margin: 10px 0;
+        .option-btn {
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--black);
+            border: 2px solid transparent;
+            padding: 12px;
+            margin: 8px 0;
             width: 100%;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
             transition: 0.2s;
         }
 
-        .alternativa:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
+        .option-btn:hover { background: var(--white); border-color: var(--soccer-green); transform: scale(1.02); }
 
-        #stats { display: flex; justify-content: space-between; color: #2ecc71; margin-bottom: 10px; }
-        .recorde { color: #f1c40f; margin-top: 15px; font-size: 0.9rem; }
+        /* Stats */
+        .stats-bar { display: flex; justify-content: space-between; margin-bottom: 20px; font-weight: bold; font-size: 0.9rem; color: #ccc; }
+        .score-val { color: var(--soccer-green); font-size: 1.2rem; }
+
+        .difficulty-badge {
+            padding: 5px 12px;
+            border-radius: 5px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+        }
+        .diff-easy { background: #2ecc71; }
+        .diff-medium { background: #f1c40f; color: #000; }
+        .diff-hard { background: #e67e22; }
+        .diff-expert { background: #e74c3c; animation: pulse 1s infinite; }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        #question-text { font-size: 1.3rem; margin-bottom: 25px; min-height: 80px; display: flex; align-items: center; justify-content: center; }
+
+        #game-over-screen h2 { color: #e74c3c; margin-bottom: 20px; }
+        .final-info { margin: 10px 0; font-size: 1.1rem; }
+        .record-tag { color: #f1c40f; font-weight: bold; font-size: 1.4rem; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="game-card">
-        <div id="tela-inicio">
-            <h1 style="font-size: 2.5rem; margin-bottom: 10px;">FUT QUIZ</h1>
-            <p>Dificuldade Progressiva</p>
-            <button class="btn-principal" onclick="comecarJogo()">INICIAR PARTIDA</button>
+    <div id="game-card">
+        <div id="start-screen">
+            <h1>FutQuiz ⚽</h1>
+            <p>O desafio infinito de futebol.</p>
+            <p style="font-size: 0.8rem; margin-top: 10px; color: #aaa;">Se errar uma, volta ao início!</p>
+            <button class="btn-action" onclick="startGame()">Iniciar Partida</button>
         </div>
 
-        <div id="tela-jogo" class="hidden">
-            <div id="stats">
-                <span>Gols: <span id="score">0</span></span>
-                <span id="label-nivel">Fácil</span>
+        <div id="quiz-screen" class="hidden">
+            <div class="stats-bar">
+                <div>SCORE: <span id="current-score" class="score-val">0</span></div>
+                <div id="difficulty-label" class="difficulty-badge diff-easy">Fácil</div>
             </div>
-            <h3 id="pergunta-texto">Carregando pergunta...</h3>
-            <div id="container-alternativas"></div>
+            <div id="question-text">Pergunta...</div>
+            <div id="options-container"></div>
         </div>
 
-        <div id="tela-perdeu" class="hidden">
-            <h2 style="color: #e74c3c;">FIM DE JOGO!</h2>
-            <p id="resultado-final"></p>
-            <div class="recorde">MELHOR MARCA: <span id="high-score">0</span></div>
-            <button class="btn-principal" onclick="comecarJogo()">JOGAR NOVAMENTE</button>
+        <div id="game-over-screen" class="hidden">
+            <h2>FIM DE JOGO! 🚩</h2>
+            <div class="final-info" id="final-score-text">Pontuação: 0</div>
+            <div class="final-info" id="final-time-text">Tempo: 0s</div>
+            <div class="record-tag">RECORDE: <span id="high-score-val">0</span></div>
+            <button class="btn-action" onclick="startGame()">Tentar Novamente</button>
         </div>
     </div>
 
     <script>
-        // Banco de Dados Simples
-        const banco = {
-            facil: [
-                { p: "Quantos jogadores tem um time em campo?", r: ["11", "10", "12", "5"], c: 0 },
-                { p: "Qual a cor do cartão de expulsão?", r: ["Azul", "Amarelo", "Vermelho", "Preto"], c: 2 }
+        /* JAVASCRIPT - LÓGICA DO JOGO */
+
+        const questionsDB = {
+            easy: [
+                { q: "Qual país venceu a Copa do Mundo de 2022?", o: ["França", "Brasil", "Argentina", "Alemanha"], c: 2 },
+                { q: "Quantos jogadores um time tem em campo (titulares)?", o: ["10", "11", "12", "5"], c: 1 },
+                { q: "Quem é conhecido como o 'Rei do Futebol'?", o: ["Maradona", "Zico", "Pelé", "Messi"], c: 2 },
+                { q: "Qual a cor do cartão que expulsa o jogador?", o: ["Amarelo", "Azul", "Branco", "Vermelho"], c: 3 },
+                { q: "Onde é jogada uma partida de futebol?", o: ["Quadra", "Campo", "Pista", "Piscina"], c: 1 }
             ],
-            medio: [
-                { p: "Quem ganhou a Copa de 2010?", r: ["Holanda", "Espanha", "Alemanha", "Brasil"], c: 1 },
-                { p: "Qual o estádio do Flamengo?", r: ["Maracanã", "Morumbi", "Vila Belmiro", "Mineirão"], c: 0 }
-            ],
-            dificil: [
-                { p: "Quem é o maior artilheiro das Copas?", r: ["Pelé", "Ronaldo", "Klose", "Messi"], c: 2 },
-                { p: "Em que ano foi a primeira Copa do Mundo?", r: ["1920", "1934", "1930", "1950"], c: 2 }
-            ]
-        };
-
-        let pontuacao = 0;
-        let tempoInicio;
-        let recorde = localStorage.getItem('futRecorde') || 0;
-
-        function comecarJogo() {
-            // Resetar Variáveis
-            pontuacao = 0;
-            tempoInicio = Date.now();
-            
-            // Trocar Telas (A mágica acontece aqui)
-            document.getElementById('tela-inicio').classList.add('hidden');
-            document.getElementById('tela-perdeu').classList.add('hidden');
-            document.getElementById('tela-jogo').classList.remove('hidden');
-            
-            gerarPergunta();
-        }
-
-        function gerarPergunta() {
-            document.getElementById('score').innerText = pontuacao;
-            
-            // Lógica de dificuldade
-            let nivel = "facil";
-            if(pontuacao > 2) nivel = "medio";
-            if(pontuacao > 5) nivel = "dificil";
-            document.getElementById('label-nivel').innerText = nivel.toUpperCase();
-
-            const lista = banco[nivel];
-            const pergunta = lista[Math.floor(Math.random() * lista.length)];
-
-            document.getElementById('pergunta-texto').innerText = pergunta.p;
-            const container = document.getElementById('container-alternativas');
-            container.innerHTML = '';
-
-            pergunta.r.forEach((txt, i) => {
-                const btn = document.createElement('button');
-                btn.className = 'alternativa';
-                btn.innerText = txt;
-                btn.onclick = () => validarResposta(i, pergunta.c);
-                container.appendChild(btn);
-            });
-        }
-
-        function validarResposta(escolha, correta) {
-            if(escolha === correta) {
-                pontuacao++;
-                gerarPergunta();
-            } else {
-                finalizarJogo();
-            }
-        }
-
-        function finalizarJogo() {
-            const tempoTotal = Math.floor((Date.now() - tempoInicio) / 1000);
-            
-            if(pontuacao > recorde) {
-                recorde = pontuacao;
-                localStorage.setItem('futRecorde', recorde);
-            }
-
-            document.getElementById('tela-jogo').classList.add('hidden');
-            document.getElementById('tela-perdeu').classList.remove('hidden');
-            
-            document.getElementById('resultado-final').innerHTML = 
-                `Você fez <b>${pontuacao}</b> gols em <b>${tempoTotal}s</b>!`;
-            document.getElementById('high-score').innerText = recorde;
-        }
-    </script>
-</body>
-</html>
+            medium: [
+                { q: "Qual clube tem mais títulos da Champions League?", o: ["Milan", "Real Madrid", "Barcelona", "Liverpool"], c: 1 },
+                {

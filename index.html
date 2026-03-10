@@ -1,1 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FutMaster - Enciclopédia de Craques</title>
+    <link href="https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --azul: #007bff;
+            --preto: #000000;
+            --cinza-escuro: #121212;
+        }
 
+        body {
+            background-color: var(--preto);
+            color: white;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .titulo-livro {
+            font-family: 'UnifrakturMaguntia', cursive;
+            color: var(--azul);
+            font-size: 4rem;
+            margin: 0;
+            text-shadow: 0 0 15px rgba(0, 123, 255, 0.5);
+        }
+
+        /* Container do Livro */
+        .livro-pagina {
+            background-color: var(--cinza-escuro);
+            width: 90%;
+            max-width: 800px;
+            border: 2px solid var(--azul);
+            border-radius: 15px;
+            padding: 40px;
+            margin: 20px;
+            box-shadow: 0 0 30px rgba(0, 123, 255, 0.2);
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Divide em 2 colunas: Foto e Bio */
+            gap: 30px;
+        }
+
+        /* Foto do Jogador */
+        .foto-container {
+            border: 4px solid var(--azul);
+            border-radius: 10px;
+            overflow: hidden;
+            background: #050505;
+            height: 350px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .foto-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Informações */
+        .bio-info h2 {
+            font-family: 'UnifrakturMaguntia', cursive;
+            color: var(--azul);
+            font-size: 2.5rem;
+            margin-top: 0;
+            border-bottom: 1px solid var(--azul);
+        }
+
+        .bio-info p {
+            line-height: 1.6

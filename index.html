@@ -158,3 +158,121 @@
             optionsDiv.innerHTML = '';
             
             qData.a.forEach((opt, index) =>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FutQuiz Extreme</title>
+    <style>
+        /* CSS - Estilo do Estádio */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background: url('https://images.unsplash.com/photo-1522778119026-d647f0596c20?q=80&w=2070&auto=format&fit=crop') no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1;
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            width: 400px;
+            border: 4px solid #2ecc71; /* Verde gramado */
+        }
+
+        .hidden { display: none; }
+
+        h1 { color: #2c3e50; margin-top: 0; }
+
+        .btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            margin: 8px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            transition: transform 0.2s, background 0.2s;
+        }
+
+        .btn:hover { background: #219150; transform: scale(1.02); }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: #27ae60;
+        }
+
+        #question-text {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .record-box {
+            background: #f1c40f;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div id="overlay"></div>
+
+<div class="container">
+    <div id="start-screen">
+        <h1>FUTQUIZ ⚽</h1>
+        <p>Responda o máximo que puder. Errou, volta ao início!</p>
+        <button class="btn" onclick="startGame()">ENTRAR EM CAMPO</button>
+    </div>
+
+    <div id="game-screen" class="hidden">
+        <div class="stats">
+            <span>Pontos: <span id="score">0</span></span>
+            <span>Nível: <span id="level-name">Fácil</span></span>
+        </div>
+        <div id="question-text">Pergunta aqui?</div>
+        <div id="answers-box"></div>
+    </div>
+
+    <div id="game-over-screen" class="hidden">
+        <h2 style="color: #e74c3c;">FIM DE JOGO! 🚩</h2>
+        <p id="final-stats"></p>
+        <div class="record-box">Recorde: <span id="high-score">0</span> acertos</div>
+        <button class="btn" style="background:#3498db;" onclick="startGame()">TENTAR REPLAY</button>
+    </div>
+</div>
+
+<script>
+    // Banco de perguntas (pode adicionar centenas aqui)
+    const questions = {
+        easy: [
+            { q: "Qual a cor do cartão que expulsa o jogador?", a: ["Amarelo", "Azul", "Vermelho", "Verde"], c: 2 },

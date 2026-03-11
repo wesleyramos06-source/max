@@ -104,3 +104,146 @@
 
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Linha de Fogo - Jarvis System</title>
+    <style>
+        /* Reset e Base */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body, html {
+            height: 100%;
+            background-color: #050505;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: #fff;
+            overflow: hidden;
+        }
+
+        /* Fundo com a Caveira (Melhorado com Overlay) */
+        .bg-skull {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('https://img.freepik.com/fotos-premium/caveira-em-chamas-isolada-no-fundo-preto_739548-10.jpg') no-repeat center center;
+            background-size: cover;
+            opacity: 0.25;
+            filter: grayscale(30%) contrast(120%);
+            z-index: -1;
+        }
+
+        /* Container Principal */
+        #main-panel {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        /* Título Estilizado */
+        h1 {
+            font-size: 5rem;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            margin-bottom: 40px;
+            color: #ff3c00;
+            text-shadow: 0 0 20px rgba(255, 60, 0, 0.7), 0 0 40px rgba(255, 60, 0, 0.4);
+            font-weight: 900;
+        }
+
+        /* Botão Estilo Jarvis */
+        .jarvis-btn {
+            position: relative;
+            padding: 20px 60px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #00f2ff;
+            background: rgba(0, 242, 255, 0.05);
+            border: 2px solid #00f2ff;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            overflow: hidden;
+            transition: 0.4s;
+            box-shadow: 0 0 15px rgba(0, 242, 255, 0.2);
+            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%); /* Corte futurista */
+        }
+
+        .jarvis-btn:hover {
+            background: #00f2ff;
+            color: #000;
+            box-shadow: 0 0 50px rgba(0, 242, 255, 0.6);
+            transform: scale(1.05);
+        }
+
+        /* Área do Novo Cenário (Inicialmente Escondida) */
+        #new-scenario {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #ffffff; /* Fundo branco para seu futuro cenário */
+            display: none; /* Escondido por padrão */
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hidden {
+            opacity: 0;
+            transform: scale(0.9);
+            pointer-events: none;
+        }
+
+        /* Texto de placeholder no cenário branco */
+        .placeholder-text {
+            color: #333;
+            font-size: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-skull"></div>
+
+    <section id="main-panel">
+        <h1>LINHA DE FOGO</h1>
+        
+        <button class="jarvis-btn" onclick="accessSystem()">
+            INICIAR PROTOCOLO
+        </button>
+    </section>
+
+    <section id="new-scenario">
+        <div class="placeholder-text">
+            [ ÁREA DE CONSTRUÇÃO DO CENÁRIO ]
+        </div>
+    </section>
+
+    <script>
+        function accessSystem() {
+            // Efeito visual de saída
+            const mainPanel = document.getElementById('main-panel');
+            const newScenario = document.getElementById('new-scenario');
+
+            mainPanel.classList.add('hidden');
+
+            // Aguarda a animação de fade-out e troca a tela
+            setTimeout(() => {
+                mainPanel.style.display = 'none';
+                newScenario.style.display = 'flex';
+                
+                // Log estilo Jarvis no console
+                console.log("Sistema Jarvis: Acessando nova área...");
+            }, 800);
+        }
+    </script>
+</body>
+</html>

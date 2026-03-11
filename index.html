@@ -184,3 +184,104 @@
                 linear-gradient(to top, #2f2f2f 0%, #3a3a3a 50%, #4a4a4a 100%); /* Tons de cinza para o solo */
             border-top: 5px solid #4a4a4a;
             box-shadow: inset 0 10px 20px rgba(
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Caos Total</title>
+    <style>
+        /* Reset e Fundo */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #050505;
+            font-family: 'Arial Black', sans-serif;
+            overflow: hidden;
+        }
+
+        /* Container Principal */
+        .container {
+            text-align: center;
+            border: 4px solid #ff0000;
+            padding: 60px;
+            background: linear-gradient(145deg, #1a1a1a, #000);
+            box-shadow: 0 0 50px #ff0000;
+            border-radius: 15px;
+        }
+
+        /* Título Estilizado */
+        h1 {
+            color: #fff;
+            font-size: 60px;
+            text-shadow: 3px 3px #ff0000;
+            margin-bottom: 50px;
+            letter-spacing: 2px;
+        }
+
+        /* Botão Play */
+        .btn-jarvis {
+            background-color: #ff0000;
+            color: white;
+            border: none;
+            padding: 20px 50px;
+            font-size: 30px;
+            cursor: pointer;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: 0.3s;
+            margin: 0 auto;
+            text-decoration: none;
+        }
+
+        .btn-jarvis:hover {
+            transform: scale(1.1);
+            background-color: #ba0000;
+            box-shadow: 0 0 20px #ff0000;
+        }
+
+        /* O Controle Giratório */
+        .controle-icon {
+            font-size: 40px;
+            display: inline-block;
+            animation: girar360 2s linear infinite;
+        }
+
+        @keyframes girar360 {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>CAOS TOTAL</h1>
+        
+        <button class="btn-jarvis" onclick="comandoJarvis()">
+            <span class="controle-icon">🎮</span>
+            PLAY
+        </button>
+    </div>
+
+    <script>
+        function comandoJarvis() {
+            // Log no console para confirmar que o script rodou
+            console.log("SISTEMA JARVIS: Iniciando motor de jogo...");
+            
+            alert("Jarvis: Comando aceito. Abrindo nova interface...");
+
+            // Comando para abrir nova aba
+            // Nota: Se não abrir, verifique se o seu navegador não está bloqueando 'Pop-ups'
+            window.open("https://www.google.com", "_blank"); 
+        }
+    </script>
+
+</body>
+</html>

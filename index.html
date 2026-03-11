@@ -3,283 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Caos Total - Painel</title>
+    <title>Painel - Caos Total</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <style>
-        /* Estilização Geral */
+        /* Fundo com tema de jogo de tiro */
         body {
             margin: 0;
-            padding: 0;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            background: radial-gradient(circle, #1a1a1a 0%, #000000 100%);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: white;
+            background: #0d0d0d; /* Preto profundo */
+            color: #ffffff;
+            font-family: 'Verdana', sans-serif;
             overflow: hidden;
         }
 
-        /* Container do Painel */
-        #painel-central {
+        /* Moldura do Painel */
+        .painel {
+            background: rgba(20, 20, 20, 0.95);
+            padding: 50px 80px;
+            border: 3px solid #ff3c00; /* Laranja Choque/Fogo */
+            border-radius: 15px;
             text-align: center;
-            padding: 50px;
-            border: 2px solid #ff4500;
-            border-radius: 20px;
-            background: rgba(255, 69, 0, 0.05);
-            box-shadow: 0 0 30px rgba(255, 69, 0, 0.2);
-            backdrop-filter: blur(10px);
-        }
-
-        h1 {
-            font-size: 3rem;
-            text-transform: uppercase;
-            letter-spacing: 5px;
-            margin-bottom: 40px;
-            color: #ff4500;
-            text-shadow: 0 0 15px rgba(255, 69, 0, 0.7);
-        }
-
-        /* Botão Play */
-        .btn-play {
+            box-shadow: 0 0 40px rgba(255, 60, 0, 0.4);
             position: relative;
-            padding: 20px 60px;
-            font-size: 1.5rem;
-            font-weight: bold;
+        }
+
+        /* Título Principal */
+        h1 {
+            font-size: 50px;
+            margin-bottom: 40px;
             text-transform: uppercase;
+            letter-spacing: 4px;
+            color: #ff3c00;
+            text-shadow: 2px 2px 10px rgba(255, 60, 0, 0.8);
+        }
+
+        /* Botão Play do Jarvis */
+        .btn-play {
+            background: #ff3c00;
             color: white;
-            background: #ff4500;
             border: none;
-            border-radius: 50px;
+            padding: 20px 60px;
+            font-size: 28px;
+            font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s ease;
+            border-radius: 8px;
             display: flex;
             align-items: center;
-            gap: 15px;
+            justify-content: center;
+            gap: 20px;
+            transition: 0.3s;
+            box-shadow: 0 5px 0 #992400; /* Efeito 3D */
             margin: 0 auto;
-            overflow: hidden;
         }
 
         .btn-play:hover {
-            background: #ff6347;
-            transform: scale(1.1);
-            box-shadow: 0 0 40px rgba(255, 69, 0, 0.6);
+            background: #ff5500;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(255, 60, 0, 0.5);
         }
 
-        /* Ícone do Controle Girando */
-        .icon-control {
-            font-size: 2rem;
+        .btn-play:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #992400;
+        }
+
+        /* Animação do Controle Girando 360 */
+        .controle-girando {
+            font-size: 35px;
             display: inline-block;
-            animation: girar 3s linear infinite;
+            animation: spin 3s linear infinite;
         }
 
-        @keyframes girar {
+        @keyframes spin {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
-        }
-
-        /* Efeito de brilho no botão */
-        .btn-play::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: rgba(255, 255, 255, 0.1);
-            transform: rotate(45deg);
-            transition: 0.5s;
-        }
-
-        .btn-play:hover::after {
-            left: 120%;
         }
     </style>
 </head>
 <body>
 
-    <div id="painel-central">
+    <div class="painel">
         <h1>Central de Caos Total</h1>
         
-        <button class="btn-play" onclick="jarvisPlay()">
-            <span class="icon-control">🎮</span>
+        <button class="btn-play" onclick="jarvisInit()">
+            <i class="fas fa-gamepad controle-girando"></i>
             PLAY
         </button>
     </div>
 
     <script>
-        // Script "Jarvis" para comandos do sistema
-        function jarvisPlay() {
-            console.log("Jarvis: Iniciando sequência de inicialização...");
-            console.log("Jarvis: Abrindo nova interface de combate.");
-            
-            // Abre uma nova aba (pode ser um link ou 'about:blank' por enquanto)
+        function jarvisInit() {
+            // Feedback visual e sonoro do Jarvis (via log)
+            console.log("Jarvis: Iniciando protocolos de combate...");
+            console.log("Jarvis: Abrindo novo setor de operações.");
+
+            // Comando para abrir a nova aba
+            // Nota: se o navegador bloquear, clique no ícone de aviso na barra de endereços
             window.open('about:blank', '_blank');
-        }
-    </script>
-
-</body>
-</html>
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cenário Pós-Guerra</title>
-    <style>
-        /* Reset básico */
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden; /* Garante que nada saia da tela */
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #1a1a1a; /* Cor de fundo para o cenário */
-        }
-
-        /* Container principal do cenário (simula a visão em primeira pessoa) */
-        .cenario {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            perspective: 1000px; /* Perspectiva para 3D */
-            display: flex;
-            justify-content: center;
-            align-items: flex-end; /* Elementos do chão para baixo */
-            background: linear-gradient(to bottom, #2c3e50 0%, #1a252f 70%, #0a0a0a 100%); /* Céu escuro */
-            z-index: 1;
-        }
-
-        /* Céu Escuro e Nuvens Cinzas */
-        .sky-clouds {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 60%; /* Ocupa a parte superior */
-            background: 
-                radial-gradient(ellipse at 20% 70%, rgba(60,60,60,0.6) 0%, transparent 40%),
-                radial-gradient(ellipse at 80% 80%, rgba(50,50,50,0.5) 0%, transparent 35%),
-                radial-gradient(ellipse at 50% 50%, rgba(70,70,70,0.7) 0%, transparent 50%),
-                radial-gradient(ellipse at 70% 30%, rgba(40,40,40,0.4) 0%, transparent 30%);
-            background-size: 100% 100%;
-            animation: moveClouds 60s linear infinite; /* Nuvens se movem */
-            opacity: 0.9;
-            z-index: 2;
-        }
-
-        @keyframes moveClouds {
-            0% { background-position: 0% 0%; }
-            100% { background-position: 100% 0%; }
-        }
-
-        /* Chão / Solo de Pós-Guerra */
-        .ground {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 40%; /* Ocupa a parte inferior */
-            background: 
-                linear-gradient(to top, #2f2f2f 0%, #3a3a3a 50%, #4a4a4a 100%); /* Tons de cinza para o solo */
-            border-top: 5px solid #4a4a4a;
-            box-shadow: inset 0 10px 20px rgba(
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Caos Total</title>
-    <style>
-        /* Reset e Fundo */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body {
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #050505;
-            font-family: 'Arial Black', sans-serif;
-            overflow: hidden;
-        }
-
-        /* Container Principal */
-        .container {
-            text-align: center;
-            border: 4px solid #ff0000;
-            padding: 60px;
-            background: linear-gradient(145deg, #1a1a1a, #000);
-            box-shadow: 0 0 50px #ff0000;
-            border-radius: 15px;
-        }
-
-        /* Título Estilizado */
-        h1 {
-            color: #fff;
-            font-size: 60px;
-            text-shadow: 3px 3px #ff0000;
-            margin-bottom: 50px;
-            letter-spacing: 2px;
-        }
-
-        /* Botão Play */
-        .btn-jarvis {
-            background-color: #ff0000;
-            color: white;
-            border: none;
-            padding: 20px 50px;
-            font-size: 30px;
-            cursor: pointer;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            transition: 0.3s;
-            margin: 0 auto;
-            text-decoration: none;
-        }
-
-        .btn-jarvis:hover {
-            transform: scale(1.1);
-            background-color: #ba0000;
-            box-shadow: 0 0 20px #ff0000;
-        }
-
-        /* O Controle Giratório */
-        .controle-icon {
-            font-size: 40px;
-            display: inline-block;
-            animation: girar360 2s linear infinite;
-        }
-
-        @keyframes girar360 {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-    </style>
-</head>
-<body>
-
-    <div class="container">
-        <h1>CAOS TOTAL</h1>
-        
-        <button class="btn-jarvis" onclick="comandoJarvis()">
-            <span class="controle-icon">🎮</span>
-            PLAY
-        </button>
-    </div>
-
-    <script>
-        function comandoJarvis() {
-            // Log no console para confirmar que o script rodou
-            console.log("SISTEMA JARVIS: Iniciando motor de jogo...");
-            
-            alert("Jarvis: Comando aceito. Abrindo nova interface...");
-
-            // Comando para abrir nova aba
-            // Nota: Se não abrir, verifique se o seu navegador não está bloqueando 'Pop-ups'
-            window.open("https://www.google.com", "_blank"); 
         }
     </script>
 

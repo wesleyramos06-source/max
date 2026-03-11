@@ -1,1 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caos Total - Painel</title>
+    <style>
+        /* Estilização Geral */
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: radial-gradient(circle, #1a1a1a 0%, #000000 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            overflow: hidden;
+        }
 
+        /* Container do Painel */
+        #painel-central {
+            text-align: center;
+            padding: 50px;
+            border: 2px solid #ff4500;
+            border-radius: 20px;
+            background: rgba(255, 69, 0, 0.05);
+            box-shadow: 0 0 30px rgba(255, 69, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            font-size: 3rem;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            margin-bottom: 40px;
+            color: #ff4500;
+            text-shadow: 0 0 15px rgba(255, 69, 0, 0.7);
+        }
+
+        /* Botão Play */
+        .btn-play {
+            position: relative;
+            padding: 20px 60px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: white;
+            background: #ff4500;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .btn-play:hover {
+            background: #ff6347;
+            transform: scale(1.1);
+            box-shadow: 0 0 40px rgba(255, 69, 0, 0.6);
+        }
+
+        /* Ícone do Controle Girando */
+        .icon-control {
+            font-size: 2rem;
+            display: inline-block;
+            animation: girar 3s linear infinite;
+        }
+
+        @keyframes girar {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Efeito de brilho no botão */
+        .btn-play::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.1);
+            transform: rotate(45deg);
+            transition: 0.5s;
+        }
+
+        .btn-play:hover::after {
+            left: 120%;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="painel-central">
+        <h1>Central de Caos Total</h1>
+        
+        <button class="btn-play" onclick="jarvisPlay()">
+            <span class="icon-control">🎮</span>
+            PLAY
+        </button>
+    </div>
+
+    <script>
+        // Script "Jarvis" para comandos do sistema
+        function jarvisPlay() {
+            console.log("Jarvis: Iniciando sequência de inicialização...");
+            console.log("Jarvis: Abrindo nova interface de combate.");
+            
+            // Abre uma nova aba (pode ser um link ou 'about:blank' por enquanto)
+            window.open('about:blank', '_blank');
+        }
+    </script>
+
+</body>
+</html>

@@ -119,3 +119,68 @@
 
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cenário Pós-Guerra</title>
+    <style>
+        /* Reset básico */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden; /* Garante que nada saia da tela */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1a1a1a; /* Cor de fundo para o cenário */
+        }
+
+        /* Container principal do cenário (simula a visão em primeira pessoa) */
+        .cenario {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            perspective: 1000px; /* Perspectiva para 3D */
+            display: flex;
+            justify-content: center;
+            align-items: flex-end; /* Elementos do chão para baixo */
+            background: linear-gradient(to bottom, #2c3e50 0%, #1a252f 70%, #0a0a0a 100%); /* Céu escuro */
+            z-index: 1;
+        }
+
+        /* Céu Escuro e Nuvens Cinzas */
+        .sky-clouds {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 60%; /* Ocupa a parte superior */
+            background: 
+                radial-gradient(ellipse at 20% 70%, rgba(60,60,60,0.6) 0%, transparent 40%),
+                radial-gradient(ellipse at 80% 80%, rgba(50,50,50,0.5) 0%, transparent 35%),
+                radial-gradient(ellipse at 50% 50%, rgba(70,70,70,0.7) 0%, transparent 50%),
+                radial-gradient(ellipse at 70% 30%, rgba(40,40,40,0.4) 0%, transparent 30%);
+            background-size: 100% 100%;
+            animation: moveClouds 60s linear infinite; /* Nuvens se movem */
+            opacity: 0.9;
+            z-index: 2;
+        }
+
+        @keyframes moveClouds {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 100% 0%; }
+        }
+
+        /* Chão / Solo de Pós-Guerra */
+        .ground {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 40%; /* Ocupa a parte inferior */
+            background: 
+                linear-gradient(to top, #2f2f2f 0%, #3a3a3a 50%, #4a4a4a 100%); /* Tons de cinza para o solo */
+            border-top: 5px solid #4a4a4a;
+            box-shadow: inset 0 10px 20px rgba(

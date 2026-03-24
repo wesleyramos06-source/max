@@ -81,3 +81,45 @@
         function createEnemy() {
             if (Math.random() < enemyFrequency) {
                 const width = 40 + Math.random() *
+<script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    const scoreElement = document.getElementById("score");
+
+    canvas.width = 400;
+    canvas.height = 600;
+
+    let score = 0;
+    let gameActive = true;
+
+    // Configurações do Jogador com Física
+    const player = {
+        width: 45,
+        height: 75,
+        x: canvas.width / 2 - 22.5,
+        y: canvas.height - 110,
+        velocityX: 0,       // Velocidade atual
+        acceleration: 0.8,  // O quão rápido ele ganha velocidade
+        friction: 0.85,     // O quanto ele "desliza" (resistência)
+        maxSpeed: 8,        // Velocidade máxima lateral
+        angle: 0            // Para o efeito visual de inclinação
+    };
+
+    const enemies = [];
+    let enemySpeed = 5;
+    const keys = {};
+
+    window.addEventListener("keydown", (e) => keys[e.code] = true);
+    window.addEventListener("keyup", (e) => keys[e.code] = false);
+
+    function drawPlayer() {
+        ctx.save();
+        // Move o contexto para o centro do carro para rotacionar
+        ctx.translate(player.x + player.width / 2, player.y + player.height / 2);
+        ctx.rotate(player.angle);
+
+        // Desenha o corpo do carro (sombra rápida)
+        ctx.fillStyle = "#2c3e50";
+        ctx.fillRect(-player.width / 2 + 2, -player.height / 2 + 2, player.width, player.height);
+
+        // Corpo

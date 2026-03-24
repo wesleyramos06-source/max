@@ -3,125 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sinuca Pro Max</title>
+    <title>Jogo de Desviar - Carro</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #000; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        #ui {
-            position: absolute; top: 20px; left: 20px; color: #fff;
-            background: rgba(0, 0, 0, 0.8); padding: 20px; border-radius: 12px;
-            border: 2px solid #2e7d32; pointer-events: none;
-            box-shadow: 0 0 15px rgba(0,255,0,0.2);
+        body {
+            margin: 0;
+            background-color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: white;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
         }
-        .title { font-size: 24px; font-weight: bold; color: #4caf50; margin-bottom: 10px; display: block; }
-        .power-bar-container { width: 200px; height: 12px; background: #222; margin-top: 10px; border-radius: 6px; border: 1px solid #444; }
-        #power-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #4caf50, #ffeb3b, #f44336); border-radius: 6px; transition: width 0.05s; }
-        .controls { font-size: 13px; color: #aaa; margin-top: 10px; }
+        canvas {
+            border: 4px solid #fff;
+            background-color: #555;
+        }
+        .info {
+            position: absolute;
+            top: 10px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
 
-<div id="ui">
-    <span class="title">SINUCA PRO MAX</span>
-    <div class="controls">
-        Mova o mouse para mirar<br>
-        Segure o clique para carregar<br>
-        Solte para dar a tacada
+    <div class="info">
+        <h1>Desvie dos Alvos!</h1>
+        <p>Use as setas <b>Esquerda / Direita</b> para mover</p>
+        <h2 id="score">Pontuação: 0</h2>
     </div>
-    <div class="power-bar-container"><div id="power-bar"></div></div>
-</div>
 
-<script type="module">
-    import * as THREE from 'https://unpkg.com/three@0.150.1/build/three.module.js';
-    import * as CANNON from 'https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.js';
+    <canvas id="gameCanvas"></canvas>
 
-    // --- SETUP DO MOTOR JARVIS (PHYSICS & RENDER) ---
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x050505);
-    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.shadowMap.enabled = true;
-    document.body.appendChild(renderer.domElement);
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+        const scoreElement = document.getElementById("score");
 
-    const world = new CANNON.World({ gravity: new CANNON.Vec3(0, -9.82, 0) });
-    const ballPhysMat = new CANNON.Material("ball");
-    const tablePhysMat = new CANNON.Material("table");
-    
-    world.addContactMaterial(new CANNON.ContactMaterial(ballPhysMat, ballPhysMat, { restitution: 0.85, friction: 0.1 }));
-    world.addContactMaterial(new CANNON.ContactMaterial(ballPhysMat, tablePhysMat, { restitution: 0.5, friction: 0.2 }));
+        // Configurações do jogo
+        canvas.width = 400;
+        canvas.height = 600;
 
-    // --- ILUMINAÇÃO ---
-    const ambient = new THREE.AmbientLight(0xffffff, 0.3);
-    scene.add(ambient);
-    const topLight = new THREE.SpotLight(0xffffff, 1.2);
-    topLight.position.set(0, 15, 0);
-    topLight.castShadow = true;
-    topLight.shadow.mapSize.set(2048, 2048);
-    scene.add(topLight);
+        let score = 0;
+        let gameActive = true;
 
-    // --- MESA VERDE ---
-    const tableW = 11, tableH = 22;
-    const floor = new THREE.Mesh(
-        new THREE.BoxGeometry(tableW, 0.5, tableH),
-        new THREE.MeshPhongMaterial({ color: 0x1a5e20, shininess: 5 })
-    );
-    floor.receiveShadow = true;
-    scene.add(floor);
+        // Propriedades do jogador (Carro)
+        const player = {
+            width: 50,
+            height: 80,
+            x: canvas.width / 2 - 25,
+            y: canvas.height - 100,
+            speed: 7,
+            color: "#3498db" // Azul
+        };
 
-    const floorBody = new CANNON.Body({ mass: 0, shape: new CANNON.Box(new CANNON.Vec3(5.5, 0.25, 11)), material: tablePhysMat });
-    world.addBody(floorBody);
+        // Obstáculos (Alvos)
+        const enemies = [];
+        const enemySpeed = 5;
+        const enemyFrequency = 0.02; // Probabilidade de surgir novo alvo a cada frame
 
-    // Bordas de Madeira
-    function createBorder(x, z, w, d) {
-        const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, 1.2, d), new THREE.MeshPhongMaterial({ color: 0x3e2723 }));
-        mesh.position.set(x, 0.6, z);
-        mesh.castShadow = true;
-        scene.add(mesh);
-        const body = new CANNON.Body({ mass: 0, shape: new CANNON.Box(new CANNON.Vec3(w/2, 0.6, d/2)), material: tablePhysMat });
-        body.position.set(x, 0.6, z);
-        world.addBody(body);
-    }
-    createBorder(0, 11.3, 11.6, 0.6);  // Topo
-    createBorder(0, -11.3, 11.6, 0.6); // Baixo
-    createBorder(5.8, 0, 0.6, 23.2);   // Direita
-    createBorder(-5.8, 0, 0.6, 23.2);  // Esquerda
+        // Controle de teclas
+        const keys = {};
 
-    // --- AS 16 BOLAS (15 COLORIDAS + 1 BRANCA) ---
-    const balls = [];
-    const radius = 0.28;
-    const colors = [
-        0xffff00, 0x0000ff, 0xff0000, 0x4b0082, 0xff8c00, 0x006400, 0x8b0000, 0x000000,
-        0xffff00, 0x0000ff, 0xff0000, 0x4b0082, 0xff8c00, 0x006400, 0x8b0000
-    ];
+        window.addEventListener("keydown", (e) => keys[e.code] = true);
+        window.addEventListener("keyup", (e) => keys[e.code] = false);
 
-    function addBall(x, z, color, isWhite = false) {
-        const mesh = new THREE.Mesh(
-            new THREE.SphereGeometry(radius, 32, 32),
-            new THREE.MeshPhongMaterial({ color: color, shininess: 120 })
-        );
-        mesh.castShadow = true;
-        scene.add(mesh);
+        function drawPlayer() {
+            ctx.fillStyle = player.color;
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+            // Detalhes do carro (janela)
+            ctx.fillStyle = "white";
+            ctx.fillRect(player.x + 5, player.y + 10, player.width - 10, 20);
+        }
 
-        const body = new CANNON.Body({
-            mass: 0.17,
-            shape: new CANNON.Sphere(radius),
-            material: ballPhysMat,
-            position: new CANNON.Vec3(x, radius + 0.25, z)
-        });
-        body.linearDamping = 0.45; // Fricção realista do pano
-        body.angularDamping = 0.45;
-        world.addBody(body);
-        balls.push({ mesh, body, isWhite });
-        return body;
-    }
-
-    // Bola Branca (Cue Ball)
-    const whiteBallBody = addBall(0, 6, 0xffffff, true);
-
-    // Triângulo de 15 Bolas
-    let bIdx = 0;
-    const rowOffset = 0.58;
-    for (let i = 0; i < 5; i++) {
-        for (let j = 0; j <= i; j++) {
-            const x = (j - i / 2) * 0.6;
-            const z = -4 - (i * rowOffset);
+        function createEnemy() {
+            if (Math.random() < enemyFrequency) {
+                const width = 40 + Math.random() *

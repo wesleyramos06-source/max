@@ -3,123 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jogo de Desviar - Carro</title>
-    <style>
-        body {
-            margin: 0;
-            background-color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            color: white;
-            font-family: Arial, sans-serif;
-            overflow: hidden;
-        }
-        canvas {
-            border: 4px solid #fff;
-            background-color: #555;
-        }
-        .info {
-            position: absolute;
-            top: 10px;
-            text-align: center;
-        }
-    </style>
+    <title>Conhecendo o Mundo</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <div class="info">
-        <h1>Desvie dos Alvos!</h1>
-        <p>Use as setas <b>Esquerda / Direita</b> para mover</p>
-        <h2 id="score">Pontuação: 0</h2>
+    <div class="stars-container">
+        <div class="stars"></div>
+        <div class="stars2"></div>
     </div>
 
-    <canvas id="gameCanvas"></canvas>
+    <main class="panel">
+        <h1>Conhecendo o Mundo</h1>
+        <p>Explore o nosso planeta em 3D e descubra novos horizontes.</p>
+        
+        <a href="https://earth.google.com/web/" target="_blank" class="earth-button">
+            Acessar Google Earth
+        </a>
+    </main>
 
-    <script>
-        const canvas = document.getElementById("gameCanvas");
-        const ctx = canvas.getContext("2d");
-        const scoreElement = document.getElementById("score");
-
-        // Configurações do jogo
-        canvas.width = 400;
-        canvas.height = 600;
-
-        let score = 0;
-        let gameActive = true;
-
-        // Propriedades do jogador (Carro)
-        const player = {
-            width: 50,
-            height: 80,
-            x: canvas.width / 2 - 25,
-            y: canvas.height - 100,
-            speed: 7,
-            color: "#3498db" // Azul
-        };
-
-        // Obstáculos (Alvos)
-        const enemies = [];
-        const enemySpeed = 5;
-        const enemyFrequency = 0.02; // Probabilidade de surgir novo alvo a cada frame
-
-        // Controle de teclas
-        const keys = {};
-
-        window.addEventListener("keydown", (e) => keys[e.code] = true);
-        window.addEventListener("keyup", (e) => keys[e.code] = false);
-
-        function drawPlayer() {
-            ctx.fillStyle = player.color;
-            ctx.fillRect(player.x, player.y, player.width, player.height);
-            // Detalhes do carro (janela)
-            ctx.fillStyle = "white";
-            ctx.fillRect(player.x + 5, player.y + 10, player.width - 10, 20);
-        }
-
-        function createEnemy() {
-            if (Math.random() < enemyFrequency) {
-                const width = 40 + Math.random() *
-<script>
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
-    const scoreElement = document.getElementById("score");
-
-    canvas.width = 400;
-    canvas.height = 600;
-
-    let score = 0;
-    let gameActive = true;
-
-    // Configurações do Jogador com Física
-    const player = {
-        width: 45,
-        height: 75,
-        x: canvas.width / 2 - 22.5,
-        y: canvas.height - 110,
-        velocityX: 0,       // Velocidade atual
-        acceleration: 0.8,  // O quão rápido ele ganha velocidade
-        friction: 0.85,     // O quanto ele "desliza" (resistência)
-        maxSpeed: 8,        // Velocidade máxima lateral
-        angle: 0            // Para o efeito visual de inclinação
-    };
-
-    const enemies = [];
-    let enemySpeed = 5;
-    const keys = {};
-
-    window.addEventListener("keydown", (e) => keys[e.code] = true);
-    window.addEventListener("keyup", (e) => keys[e.code] = false);
-
-    function drawPlayer() {
-        ctx.save();
-        // Move o contexto para o centro do carro para rotacionar
-        ctx.translate(player.x + player.width / 2, player.y + player.height / 2);
-        ctx.rotate(player.angle);
-
-        // Desenha o corpo do carro (sombra rápida)
-        ctx.fillStyle = "#2c3e50";
-        ctx.fillRect(-player.width / 2 + 2, -player.height / 2 + 2, player.width, player.height);
-
-        // Corpo
+</body>
+</html>

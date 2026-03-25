@@ -1,1 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo de Carro</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #333; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
 
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // Aqui você adicionaria toda a lógica do seu jogo
+        // Por exemplo, desenhar a estrada, o carro, lidar com entradas do usuário, etc.
+
+        function gameLoop() {
+            // Atualizar estado do jogo
+            // Desenhar elementos
+            // requestAnimationFrame(gameLoop);
+        }
+
+        // gameLoop(); // Iniciar o loop do jogo
+    </script>
+</body>
+</html>

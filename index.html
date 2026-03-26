@@ -1,33 +1,105 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jogo de Carro</title>
+    <title>Jogo de Tiro Simples</title>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #333; }
-        canvas { display: block; }
+        body {
+            margin: 0;
+            background: #111;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+            font-family: sans-serif;
+        }
+        canvas {
+            border: 2px solid #fff;
+            background: #000;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+        }
+        .info { margin-bottom: 10px; }
     </style>
 </head>
 <body>
+
+    <div class="info">Use as <b>Setas</b> para mover e <b>Espaço</b> para atirar!</div>
     <canvas id="gameCanvas"></canvas>
+
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        // Configurações do Canvas
+        canvas.width = 600;
+        canvas.height = 400;
 
-        // Aqui você adicionaria toda a lógica do seu jogo
-        // Por exemplo, desenhar a estrada, o carro, lidar com entradas do usuário, etc.
+        // Variáveis do Jogo
+        let score = 0;
+        let gameActive = true;
 
-        function gameLoop() {
-            // Atualizar estado do jogo
-            // Desenhar elementos
-            // requestAnimationFrame(gameLoop);
+        const player = {
+            x: canvas.width / 2 - 15,
+            y: canvas.height - 40,
+            w: 30,
+            h: 30,
+            speed: 5,
+            color: '#00ffcc'
+        };
+
+        const bullets = [];
+        const enemies = [];
+        const keys = {};
+
+        // Controles
+        window.addEventListener('keydown', e => keys[e.code] = true);
+        window.addEventListener('keyup', e => keys[e.code] = false);
+
+        // Criar Inimigos
+        function spawnEnemy() {
+            if(!gameActive) return;
+            const size = 25;
+            enemies.push({
+                x: Math.random() * (canvas.width - size),
+                y: -size,
+                w: size,
+                h: size,
+                speed: 2 + Math.random() * 2,
+                color: '#ff4d4d'
+            });
         }
+        setInterval(spawnEnemy, 1000);
 
-        // gameLoop(); // Iniciar o loop do jogo
-    </script>
-</body>
-</html>
+        function update() {
+            if (!gameActive) return;
+
+            // Movimento do Jogador
+            if (keys['ArrowLeft'] && player.x > 0) player.x -= player.speed;
+            if (keys['ArrowRight'] && player.x < canvas.width - player.w) player.x += player.speed;
+            
+            // Atirar (Limitador simples)
+            if (keys['Space']) {
+                if (bullets.length === 0 || bullets[bullets.length - 1].y < player.y - 40) {
+                    bullets.push({ x: player.x + player.w / 2 - 2, y: player.y, w: 4, h: 10 });
+                }
+            }
+
+            // Atualizar Balas
+            bullets.forEach((b, index) => {
+                b.y -= 7;
+                if (b.y < 0) bullets.splice(index, 1);
+            });
+
+            // Atualizar Inimigos
+            enemies.forEach((en, enIdx) => {
+                en.y += en.speed;
+
+                // Colisão com Jogador
+                if (en.x < player.x + player.w && en.x + en.w > player.x &&
+                    en.y < player.y + player.h && en.y + en.h > player.y) {
+                    gameActive = false;
+                    alert("GAME OVER! Pont

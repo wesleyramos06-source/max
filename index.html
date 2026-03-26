@@ -3,103 +3,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jogo de Tiro Simples</title>
+    <title>3D Hyper Drive</title>
     <style>
-        body {
-            margin: 0;
-            background: #111;
-            color: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            overflow: hidden;
-            font-family: sans-serif;
+        body { margin: 0; overflow: hidden; background: #000; font-family: 'Segoe UI', sans-serif; }
+        #ui {
+            position: absolute; top: 20px; left: 20px; color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5); pointer-events: none;
         }
-        canvas {
-            border: 2px solid #fff;
-            background: #000;
-            box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+        .speed { font-size: 2rem; font-weight: bold; }
+        #instructions {
+            position: absolute; bottom: 20px; width: 100%; text-align: center;
+            color: rgba(255,255,255,0.7); font-size: 0.9rem;
         }
-        .info { margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="info">Use as <b>Setas</b> para mover e <b>Espaço</b> para atirar!</div>
-    <canvas id="gameCanvas"></canvas>
+    <div id="ui">
+        <div class="speed">KM/H: <span id="kmh">0</span></div>
+        <div>DISTÂNCIA: <span id="dist">0</span>m</div>
+    </div>
 
-    <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
+    <div id="instructions">Use as SETAS ou WASD para dirigir</div>
 
-        // Configurações do Canvas
-        canvas.width = 600;
-        canvas.height = 400;
-
-        // Variáveis do Jogo
-        let score = 0;
-        let gameActive = true;
-
-        const player = {
-            x: canvas.width / 2 - 15,
-            y: canvas.height - 40,
-            w: 30,
-            h: 30,
-            speed: 5,
-            color: '#00ffcc'
-        };
-
-        const bullets = [];
-        const enemies = [];
-        const keys = {};
-
-        // Controles
-        window.addEventListener('keydown', e => keys[e.code] = true);
-        window.addEventListener('keyup', e => keys[e.code] = false);
-
-        // Criar Inimigos
-        function spawnEnemy() {
-            if(!gameActive) return;
-            const size = 25;
-            enemies.push({
-                x: Math.random() * (canvas.width - size),
-                y: -size,
-                w: size,
-                h: size,
-                speed: 2 + Math.random() * 2,
-                color: '#ff4d4d'
-            });
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+            }
         }
-        setInterval(spawnEnemy, 1000);
+    </script>
 
-        function update() {
-            if (!gameActive) return;
+    <script type="module">
+        import * as THREE from 'three';
 
-            // Movimento do Jogador
-            if (keys['ArrowLeft'] && player.x > 0) player.x -= player.speed;
-            if (keys['ArrowRight'] && player.x < canvas.width - player.w) player.x += player.speed;
-            
-            // Atirar (Limitador simples)
-            if (keys['Space']) {
-                if (bullets.length === 0 || bullets[bullets.length - 1].y < player.y - 40) {
-                    bullets.push({ x: player.x + player.w / 2 - 2, y: player.y, w: 4, h: 10 });
-                }
+        // --- CONFIGURAÇÃO DA CENA ---
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.Fog(0x000000, 20, 100); // Neblina para realismo de profundidade
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        document.body.appendChild(renderer.domElement);
+
+        // --- ILUMINAÇÃO ---
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+        scene.add(ambientLight);
+
+        const sun = new THREE.DirectionalLight(0xffffff, 1.5);
+        sun.position.set(5, 10, 5);
+        sun.castShadow = true;
+        scene.add(sun);
+
+        // --- O CARRO (Corpo e Rodas) ---
+        const carGroup = new THREE.Group();
+        
+        // Chassi
+        const bodyGeom = new THREE.BoxGeometry(1.2, 0.5, 2.5);
+        const bodyMat = new THREE.MeshPhongMaterial({ color: 0xff0000, shininess: 100 });
+        const carBody = new THREE.Mesh(bodyGeom, bodyMat);
+        carBody.castShadow = true;
+        carGroup.add(carBody);
+
+        // Cabine
+        const cabinGeom = new THREE.BoxGeometry(1, 0.4, 1.2);
+        const cabinMat = new THREE.MeshPhongMaterial({ color: 0x333333, transparent: true, opacity: 0.8 });
+        const cabin = new THREE.Mesh(cabinGeom, cabinMat);
+        cabin.position.set(0, 0.4, -0.2);
+        carGroup.add(cabin);
+
+        // Rodas
+        const wheelGeom = new THREE.CylinderGeometry(0.3, 0.3, 0.2, 16);
+        const wheelMat = new THREE.MeshPhongMaterial({ color: 0x111111 });
+        const wheels = [];
+        const wheelPositions = [
+            [-0.7, -0.1, 0.8], [0.7, -0.1, 0.8],
+            [-0.7, -0.1, -0.8], [0.7, -0.1, -0.8]
+        ];
+
+        wheelPositions.forEach(pos => {
+            const wheel = new THREE.Mesh(wheelGeom, wheelMat);
+            wheel.rotation.z = Math.PI / 2;
+            wheel.position.set(...pos);
+            carGroup.add(wheel);
+            wheels.push(wheel);
+        });
+
+        scene.add(carGroup);
+        carGroup.position.y = 0.5;
+
+        // --- CHÃO (ESTRADA INFINITA) ---
+        const planeGeom = new THREE.PlaneGeometry(100, 100);
+        const planeMat = new THREE.MeshPhongMaterial({ color: 0x151515 });
+        const ground = new THREE.Mesh(planeGeom, planeMat);
+        ground.rotation.x = -Math.PI / 2;
+        ground.receiveShadow = true;
+        scene.add(ground);
+
+        // Linhas da estrada
+        const grid = new THREE.GridHelper(200, 40, 0xffffff, 0x222222);
+        grid.position.y = 0.05;
+        scene.add(grid);
+
+        // --- LÓGICA DE MOVIMENTO ---
+        let speed = 0;
+        let rotation = 0;
+        const keys = {};
+        let distance = 0;
+
+        window.addEventListener('keydown', e => keys[e.key.toLowerCase()] = true);
+        window.addEventListener('keyup', e => keys[e.key.toLowerCase()] = false);
+
+        function updatePhysics() {
+            // Aceleração e Freio
+            if (keys['arrowup'] || keys['w']) speed = Math.min(speed + 0.005, 0.5);
+            else if (keys['arrowdown'] || keys['s']) speed = Math.max(speed - 0.01, -0.1);
+            else speed *= 0.98; // Atrito natural
+
+            // Direção
+            if (Math.abs(speed) > 0.01) {
+                const direction = speed > 0 ? 1 : -1;
+                if (keys['arrowleft'] || keys['a']) carGroup.rotation.y += 0.03 * direction;
+                if (keys['arrowright'] || keys['d']) carGroup.rotation.y -= 0.03 * direction;
             }
 
-            // Atualizar Balas
-            bullets.forEach((b, index) => {
-                b.y -= 7;
-                if (b.y < 0) bullets.splice(index, 1);
-            });
+            // Movimento baseado na rotação
+            carGroup.translateZ(speed);
+            
+            // Rodas girando
+            wheels.forEach(w => w.rotation.x += speed * 2);
 
-            // Atualizar Inimigos
-            enemies.forEach((en, enIdx) => {
-                en.y += en.speed;
+            // Atualizar UI
+            distance += Math.abs(speed);
+            document.getElementById('kmh').innerText = Math.floor(speed * 400);
+            document.getElementById('dist').innerText = Math.floor(distance);
 
-                // Colisão com Jogador
-                if (en.x < player.x + player.w && en.x + en.w > player.x &&
-                    en.y < player.y + player.h && en.y + en.h > player.y) {
-                    gameActive = false;
-                    alert("GAME OVER! Pont
+            // Câmera segue o carro suavemente
+            const relativeCameraOffset = new THREE.Vector3(0, 2, -6);
+            const cameraOffset = relativeCameraOffset.applyMatrix4(carGroup.matrixWorld);
+            camera.position.lerp(cameraOffset, 0.1);
+            camera.lookAt(carGroup.position);
+        }
+
+        // --- LOOP DE RENDERIZAÇÃO ---
+        function animate() {
+            requestAnimationFrame(animate);
+            updatePhysics();
+            renderer.render(scene, camera);
+        }
+
+        // Ajuste de janela
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+</html>

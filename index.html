@@ -1,139 +1,110 @@
-import * as THREE from 'three';
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Hyper Drive Pro - Gold Edition</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #0a0a12; font-family: 'Orbitron', sans-serif; }
+        #ui {
+            position: absolute; top: 20px; left: 20px; 
+            color: #00ffcc; background: rgba(0, 0, 0, 0.6);
+            padding: 15px; border-radius: 10px; border: 1px solid #00ffcc;
+            backdrop-filter: blur(5px); pointer-events: none;
+        }
+        .speed { font-size: 2.2rem; font-weight: 800; font-style: italic; color: #fff; text-shadow: 0 0 15px #00ffcc; }
+        #instructions {
+            position: absolute; bottom: 30px; width: 100%; text-align: center;
+            color: #00ffcc; font-size: 0.8rem; letter-spacing: 3px; 
+            text-transform: uppercase; text-shadow: 0 0 5px #000;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap" rel="stylesheet">
+</head>
+<body>
 
-// --- CENA E RENDER ---
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x020205);
-scene.fog = new THREE.FogExp2(0x020205, 0.015); // Slightly softer fog
+    <div id="ui">
+        <div class="speed"><span id="kmh">0</span> <span style="font-size: 1rem;">KM/H</span></div>
+        <div style="font-size: 0.7rem; opacity: 0.9; margin-top: 5px;">DISTÂNCIA: <span id="dist">0</span>m</div>
+    </div>
 
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.toneMapping = THREE.ReinhardToneMapping;
-renderer.shadowMap.enabled = true;
-document.body.appendChild(renderer.domElement);
+    <div id="instructions">WASD para Pilotar • ESPAÇO para Drift</div>
 
-// --- ILUMINAÇÃO ---
-scene.add(new THREE.AmbientLight(0x404040, 0.5));
-const moonlight = new THREE.DirectionalLight(0xffffff, 0.5);
-moonlight.position.set(10, 20, 10);
-scene.add(moonlight);
+    <script type="importmap">
+        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+    </script>
 
-// --- CONSTRUÇÃO DO CARRO ---
-const carGroup = new THREE.Group();
-const bodyMat = new THREE.MeshStandardMaterial({ color: 0x111111, metalness: 0.9, roughness: 0.1 });
-const carBody = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.4, 2.6), bodyMat);
-carGroup.add(carBody);
+    <script type="module">
+        import * as THREE from 'three';
 
-// Teto
-const glassMat = new THREE.MeshPhysicalMaterial({ color: 0x000000, metalness: 1, roughness: 0, transmission: 0.5 });
-const cabin = new THREE.Mesh(new THREE.BoxGeometry(1, 0.4, 1.2), glassMat);
-cabin.position.set(0, 0.4, -0.2);
-carGroup.add(cabin);
+        // --- AMBIENTE ---
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x050508);
+        scene.fog = new THREE.FogExp2(0x050508, 0.012);
 
-// Faróis Dianteiros
-const headlightGeom = new THREE.BoxGeometry(0.3, 0.1, 0.1);
-const headlightMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-const hLeft = new THREE.Mesh(headlightGeom, headlightMat);
-hLeft.position.set(-0.4, 0.1, 1.3);
-const hRight = hLeft.clone();
-hRight.position.x = 0.4;
-carGroup.add(hLeft, hRight);
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.toneMapping = THREE.ACESFilmicToneMapping; // Melhora o contraste das cores
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
+        document.body.appendChild(renderer.domElement);
 
-// Lanternas Traseiras (Brake Lights)
-const brakeLightGeom = new THREE.BoxGeometry(0.3, 0.1, 0.1);
-const brakeLightMat = new THREE.MeshBasicMaterial({ color: 0x330000 }); // Dim red by default
-const bLeft = new THREE.Mesh(brakeLightGeom, brakeLightMat);
-bLeft.position.set(-0.4, 0.1, -1.3);
-const bRight = bLeft.clone();
-bRight.position.x = 0.4;
-carGroup.add(bLeft, bRight);
+        // --- LUZES ---
+        const hemiLight = new THREE.HemisphereLight(0x00ffcc, 0xaa00ff, 0.6);
+        scene.add(hemiLight);
 
-// Rodas
-const wheels = [];
-const wheelGeom = new THREE.CylinderGeometry(0.35, 0.35, 0.2, 24);
-const wheelMat = new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.8 });
-[[-0.7, -0.1, 0.8], [0.7, -0.1, 0.8], [-0.7, -0.1, -0.8], [0.7, -0.1, -0.8]].forEach(pos => {
-    const w = new THREE.Mesh(wheelGeom, wheelMat);
-    w.rotation.z = Math.PI / 2;
-    w.position.set(...pos);
-    carGroup.add(w);
-    wheels.push(w);
-});
+        const sun = new THREE.DirectionalLight(0xffffff, 1);
+        sun.position.set(5, 10, 7);
+        scene.add(sun);
 
-scene.add(carGroup);
+        // --- CARRO (DESIGN MELHORADO) ---
+        const carGroup = new THREE.Group();
+        
+        // Chassi com reflexo
+        const bodyMat = new THREE.MeshStandardMaterial({ 
+            color: 0x080808, metalness: 1, roughness: 0.2,
+            emissive: 0x00ffcc, emissiveIntensity: 0.02
+        });
+        const carBody = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.4, 2.8), bodyMat);
+        carGroup.add(carBody);
 
-// --- ESTRADA INFINITA ---
-const grid = new THREE.GridHelper(2000, 100, 0x00ffcc, 0x222222);
-scene.add(grid);
+        // Vidro fumê
+        const glassMat = new THREE.MeshStandardMaterial({ color: 0x000000, metalness: 1, roughness: 0 });
+        const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.05, 0.45, 1.4), glassMat);
+        cabin.position.set(0, 0.35, -0.2);
+        carGroup.add(cabin);
 
-// --- FÍSICA E CONTROLES ---
-let speed = 0;
-let distance = 0;
-const keys = {};
+        // Faróis com "Bloom" (Emissive)
+        const lightGeom = new THREE.BoxGeometry(0.4, 0.1, 0.1);
+        const headMat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0x00ffff, emissiveIntensity: 5 });
+        const hL = new THREE.Mesh(lightGeom, headMat); hL.position.set(-0.4, 0, 1.4);
+        const hR = hL.clone(); hR.position.x = 0.4;
+        carGroup.add(hL, hR);
 
-window.addEventListener('keydown', e => keys[e.code] = true);
-window.addEventListener('keyup', e => keys[e.code] = false);
+        // Rodas (Aros Neon)
+        const wheels = [];
+        const wheelGeom = new THREE.CylinderGeometry(0.38, 0.38, 0.25, 32);
+        const wheelMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
+        const rimMat = new THREE.MeshStandardMaterial({ color: 0x00ffcc, emissive: 0x00ffcc, emissiveIntensity: 2 });
+        
+        [[-0.75, -0.1, 0.9], [0.75, -0.1, 0.9], [-0.75, -0.1, -0.9], [0.75, -0.1, -0.9]].forEach(pos => {
+            const w = new THREE.Mesh(wheelGeom, wheelMat);
+            w.rotation.z = Math.PI / 2;
+            w.position.set(...pos);
+            // Aro neon lateral
+            const rim = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.05, 8, 24), rimMat);
+            rim.rotation.y = Math.PI / 2;
+            w.add(rim);
+            carGroup.add(w);
+            wheels.push(w);
+        });
 
-function update() {
-    const isBraking = keys['Space'] || keys['KeyS'] || keys['ArrowDown'];
-    
-    // Logic: If braking and moving forward, light up bright red
-    if (isBraking && speed > 0.01) {
-        brakeLightMat.color.setHex(0xff0000);
-    } else {
-        brakeLightMat.color.setHex(0x330000);
-    }
+        scene.add(carGroup);
 
-    // Aceleração
-    if (keys['KeyW'] || keys['ArrowUp']) speed += 0.008;
-    if (keys['KeyS'] || keys['ArrowDown']) speed -= 0.012;
-    if (keys['Space']) speed *= 0.92; // Handbrake
+        // --- CHÃO E GRID ---
+        const grid = new THREE.GridHelper(2000, 80, 0x00ffcc, 0x151525);
+        scene.add(grid);
 
-    speed *= 0.985; // Air Resistance
-    
-    // Steering
-    if (Math.abs(speed) > 0.01) {
-        // Steering is more sensitive at medium speeds, harder at high speeds
-        const turnAbility = Math.min(Math.abs(speed) * 2, 0.04);
-        const direction = speed > 0 ? 1 : -1;
-        if (keys['KeyA'] || keys['ArrowLeft']) carGroup.rotation.y += turnAbility * direction;
-        if (keys['KeyD'] || keys['ArrowRight']) carGroup.rotation.y -= turnAbility * direction;
-    }
-
-    carGroup.translateZ(speed);
-
-    // INFINITE WORLD LOGIC
-    // Move the grid with the car so the player never reaches the edge
-    grid.position.x = carGroup.position.x;
-    grid.position.z = carGroup.position.z;
-    
-    // Wheel Spin
-    wheels.forEach(w => w.rotation.x += speed * 2.5);
-
-    // Camera
-    const camDist = -7 - (speed * 5);
-    const camHeight = 2.5 + (speed * 2);
-    const relativeCameraOffset = new THREE.Vector3(0, camHeight, camDist);
-    const cameraOffset = relativeCameraOffset.applyMatrix4(carGroup.matrixWorld);
-    camera.position.lerp(cameraOffset, 0.1);
-    camera.lookAt(carGroup.position.clone().add(new THREE.Vector3(0, 1, 0)));
-
-    // UI
-    distance += Math.abs(speed);
-    document.getElementById('kmh').innerText = Math.floor(Math.abs(speed) * 450);
-    document.getElementById('dist').innerText = Math.floor(distance);
-}
-
-function animate() {
-    requestAnimationFrame(animate);
-    update();
-    renderer.render(scene, camera);
-}
-
-window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-});
-
-animate();
+        // --- LOGICA ---
+        let speed = 0;
+        let dist

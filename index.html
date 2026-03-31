@@ -3,184 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D Hyper Drive Pro</title>
+    <title>3D Hyper Drive Pro - Gold Edition</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #050505; font-family: 'Segoe UI', sans-serif; }
+        body { margin: 0; overflow: hidden; background: #0a0a12; font-family: 'Orbitron', sans-serif; }
         #ui {
-            position: absolute; top: 20px; left: 20px; color: #00ffcc;
-            text-shadow: 0 0 10px rgba(0,255,204,0.5); pointer-events: none;
+            position: absolute; top: 20px; left: 20px; 
+            color: #00ffcc; background: rgba(0, 0, 0, 0.6);
+            padding: 15px; border-radius: 10px; border: 1px solid #00ffcc;
+            backdrop-filter: blur(5px); pointer-events: none;
         }
-        .speed { font-size: 2.5rem; font-weight: 800; font-style: italic; }
+        .speed { font-size: 2.2rem; font-weight: 800; font-style: italic; color: #fff; text-shadow: 0 0 15px #00ffcc; }
         #instructions {
-            position: absolute; bottom: 20px; width: 100%; text-align: center;
-            color: white; font-size: 0.9rem; letter-spacing: 2px; text-transform: uppercase;
+            position: absolute; bottom: 30px; width: 100%; text-align: center;
+            color: #00ffcc; font-size: 0.8rem; letter-spacing: 3px; 
+            text-transform: uppercase; text-shadow: 0 0 5px #000;
         }
     </style>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&display=swap" rel="stylesheet">
 </head>
 <body>
 
     <div id="ui">
-        <div class="speed"><span id="kmh">0</span> KM/H</div>
-        <div style="font-size: 0.8rem; opacity: 0.8;">ODÔMETRO: <span id="dist">0</span>m</div>
+        <div class="speed"><span id="kmh">0</span> <span style="font-size: 1rem;">KM/H</span></div>
+        <div style="font-size: 0.7rem; opacity: 0.9; margin-top: 5px;">DISTÂNCIA: <span id="dist">0</span>m</div>
     </div>
 
-    <div id="instructions">Use WASD ou SETAS • ESPAÇO para Freio de Mão</div>
+    <div id="instructions">WASD para Pilotar • ESPAÇO para Drift</div>
 
     <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
-            }
-        }
+        { "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
     </script>
 
     <script type="module">
         import * as THREE from 'three';
 
-        // --- CENA E RENDER ---
+        // --- AMBIENTE ---
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x020205);
-        scene.fog = new THREE.FogExp2(0x020205, 0.02);
+        scene.background = new THREE.Color(0x050508);
+        scene.fog = new THREE.FogExp2(0x050508, 0.012);
 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.toneMapping = THREE.ReinhardToneMapping;
-        renderer.shadowMap.enabled = true;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping; // Melhora o contraste das cores
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
         document.body.appendChild(renderer.domElement);
 
-        // --- ILUMINAÇÃO AMBIENTE ---
-        const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
-        scene.add(ambientLight);
+        // --- LUZES ---
+        const hemiLight = new THREE.HemisphereLight(0x00ffcc, 0xaa00ff, 0.6);
+        scene.add(hemiLight);
 
-        const moonlight = new THREE.DirectionalLight(0xffffff, 0.5);
-        moonlight.position.set(10, 20, 10);
-        moonlight.castShadow = true;
-        scene.add(moonlight);
+        const sun = new THREE.DirectionalLight(0xffffff, 1);
+        sun.position.set(5, 10, 7);
+        scene.add(sun);
 
-        // --- CONSTRUÇÃO DO CARRO ---
+        // --- CARRO (DESIGN MELHORADO) ---
         const carGroup = new THREE.Group();
         
-        // Chassi Principal (Pintura Metálica)
+        // Chassi com reflexo
         const bodyMat = new THREE.MeshStandardMaterial({ 
-            color: 0x111111, metalness: 0.9, roughness: 0.1 
+            color: 0x080808, metalness: 1, roughness: 0.2,
+            emissive: 0x00ffcc, emissiveIntensity: 0.02
         });
-        const carBody = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.4, 2.6), bodyMat);
-        carBody.castShadow = true;
+        const carBody = new THREE.Mesh(new THREE.BoxGeometry(1.3, 0.4, 2.8), bodyMat);
         carGroup.add(carBody);
 
-        // Teto/Vidros
-        const glassMat = new THREE.MeshPhysicalMaterial({ color: 0x000000, metalness: 1, roughness: 0, transmission: 0.5 });
-        const cabin = new THREE.Mesh(new THREE.BoxGeometry(1, 0.4, 1.2), glassMat);
-        cabin.position.set(0, 0.4, -0.2);
+        // Vidro fumê
+        const glassMat = new THREE.MeshStandardMaterial({ color: 0x000000, metalness: 1, roughness: 0 });
+        const cabin = new THREE.Mesh(new THREE.BoxGeometry(1.05, 0.45, 1.4), glassMat);
+        cabin.position.set(0, 0.35, -0.2);
         carGroup.add(cabin);
 
-        // Faróis (O objeto visual)
-        const headlightGeom = new THREE.BoxGeometry(0.3, 0.1, 0.1);
-        const headlightMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-        const hLeft = new THREE.Mesh(headlightGeom, headlightMat);
-        hLeft.position.set(-0.4, 0.1, 1.3);
-        const hRight = hLeft.clone();
-        hRight.position.x = 0.4;
-        carGroup.add(hLeft, hRight);
+        // Faróis com "Bloom" (Emissive)
+        const lightGeom = new THREE.BoxGeometry(0.4, 0.1, 0.1);
+        const headMat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0x00ffff, emissiveIntensity: 5 });
+        const hL = new THREE.Mesh(lightGeom, headMat); hL.position.set(-0.4, 0, 1.4);
+        const hR = hL.clone(); hR.position.x = 0.4;
+        carGroup.add(hL, hR);
 
-        // Spotlights (A luz real projetada)
-        const createSpotlight = (x) => {
-            const spot = new THREE.SpotLight(0xffffff, 10);
-            spot.position.set(x, 0.1, 1.3);
-            spot.target.position.set(x, 0, 10);
-            spot.angle = Math.PI / 6;
-            spot.penumbra = 0.3;
-            spot.distance = 40;
-            carGroup.add(spot);
-            carGroup.add(spot.target);
-            return spot;
-        };
-        createSpotlight(-0.4);
-        createSpotlight(0.4);
-
-        // Rodas
+        // Rodas (Aros Neon)
         const wheels = [];
-        const wheelGeom = new THREE.CylinderGeometry(0.35, 0.35, 0.2, 24);
-        const wheelMat = new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.8 });
-        [[-0.7, -0.1, 0.8], [0.7, -0.1, 0.8], [-0.7, -0.1, -0.8], [0.7, -0.1, -0.8]].forEach(pos => {
+        const wheelGeom = new THREE.CylinderGeometry(0.38, 0.38, 0.25, 32);
+        const wheelMat = new THREE.MeshStandardMaterial({ color: 0x111111 });
+        const rimMat = new THREE.MeshStandardMaterial({ color: 0x00ffcc, emissive: 0x00ffcc, emissiveIntensity: 2 });
+        
+        [[-0.75, -0.1, 0.9], [0.75, -0.1, 0.9], [-0.75, -0.1, -0.9], [0.75, -0.1, -0.9]].forEach(pos => {
             const w = new THREE.Mesh(wheelGeom, wheelMat);
             w.rotation.z = Math.PI / 2;
             w.position.set(...pos);
+            // Aro neon lateral
+            const rim = new THREE.Mesh(new THREE.TorusGeometry(0.3, 0.05, 8, 24), rimMat);
+            rim.rotation.y = Math.PI / 2;
+            w.add(rim);
             carGroup.add(w);
             wheels.push(w);
         });
 
         scene.add(carGroup);
 
-        // --- ESTRADA INFINITA ---
-        const groundGeom = new THREE.PlaneGeometry(2000, 2000);
-        const groundMat = new THREE.MeshStandardMaterial({ color: 0x0a0a0a, roughness: 0.4 });
-        const ground = new THREE.Mesh(groundGeom, groundMat);
-        ground.rotation.x = -Math.PI / 2;
-        ground.receiveShadow = true;
-        scene.add(ground);
-
-        const grid = new THREE.GridHelper(1000, 100, 0x00ffcc, 0x222222);
-        grid.position.y = 0.01;
+        // --- CHÃO E GRID ---
+        const grid = new THREE.GridHelper(2000, 80, 0x00ffcc, 0x151525);
         scene.add(grid);
 
-        // --- FÍSICA E CONTROLES ---
+        // --- LOGICA ---
         let speed = 0;
-        let accel = 0;
-        let distance = 0;
-        const keys = {};
-
-        window.addEventListener('keydown', e => keys[e.code] = true);
-        window.addEventListener('keyup', e => keys[e.code] = false);
-
-        function update() {
-            // Aceleração/Ré
-            if (keys['KeyW'] || keys['ArrowUp']) speed += 0.008;
-            if (keys['KeyS'] || keys['ArrowDown']) speed -= 0.012;
-            if (keys['Space']) speed *= 0.9; // Freio de mão
-
-            speed *= 0.985; // Resistência do ar
-            
-            // Direção suave
-            if (Math.abs(speed) > 0.01) {
-                const turnSpeed = 0.04 * (speed > 0 ? 1 : -1);
-                if (keys['KeyA'] || keys['ArrowLeft']) carGroup.rotation.y += turnSpeed;
-                if (keys['KeyD'] || keys['ArrowRight']) carGroup.rotation.y -= turnSpeed;
-            }
-
-            carGroup.translateZ(speed);
-            
-            // Animação das rodas
-            wheels.forEach(w => w.rotation.x += speed * 2.5);
-
-            // Câmera dinâmica (efeito de velocidade)
-            const camDist = -7 - (speed * 5);
-            const camHeight = 2.5 + (speed * 2);
-            const relativeCameraOffset = new THREE.Vector3(0, camHeight, camDist);
-            const cameraOffset = relativeCameraOffset.applyMatrix4(carGroup.matrixWorld);
-            camera.position.lerp(cameraOffset, 0.1);
-            camera.lookAt(carGroup.position.clone().add(new THREE.Vector3(0, 1, 0)));
-
-            // UI
-            distance += Math.abs(speed);
-            document.getElementById('kmh').innerText = Math.floor(Math.abs(speed) * 450);
-            document.getElementById('dist').innerText = Math.floor(distance);
-        }
-
-        function animate() {
-            requestAnimationFrame(animate);
-            update();
-            renderer.render(scene, camera);
-        }
-
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-
-        animate();
-    </script>
-</body>
-</html>
+        let dist

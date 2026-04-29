@@ -1,52 +1,45 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <title>Jogo de Carro</title>
-  <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-      background: #87CEEB;
-    }
-    #gameArea {
-      width: 100vw;
-      height: 100vh;
-      position: relative;
-      background: url('https://i.imgur.com/2R9zQ0K.png') repeat; /* textura de estrada */
-    }
-    #car {
-      width: 50px;
-      height: 100px;
-      background: red;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
-  </style>
-</head>
-<body>
-  <div id="gameArea">
-    <div id="car"></div>
-  </div>
+import pygame
+import sys
 
-  <script>
-    const car = document.getElementById("car");
-    let x = window.innerWidth / 2;
-    let y = window.innerHeight / 2;
-    const speed = 10;
+# Inicializa o Pygame
+pygame.init()
 
-    document.addEventListener("keydown", (e) => {
-      switch(e.key) {
-        case "ArrowUp": y -= speed; break;
-        case "ArrowDown": y += speed; break;
-        case "ArrowLeft": x -= speed; break;
-        case "ArrowRight": x += speed; break;
-      }
-      car.style.left = x + "px";
-      car.style.top = y + "px";
-    });
-  </script>
-</body>
-</html>
+# Configurações da tela
+WIDTH, HEIGHT = 800, 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Jogo de Carro Mundo Aberto")
+
+# Cores
+WHITE = (255, 255, 255)
+GREEN = (0, 200, 0)
+
+# Carro (um retângulo simples)
+car_width, car_height = 50, 30
+car_x, car_y = WIDTH // 2, HEIGHT // 2
+car_speed = 5
+
+# Loop principal
+clock = pygame.time.Clock()
+while True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+
+    # Teclas pressionadas
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_UP]:
+        car_y -= car_speed
+    if keys[pygame.K_DOWN]:
+        car_y += car_speed
+    if keys[pygame.K_LEFT]:
+        car_x -= car_speed
+    if keys[pygame.K_RIGHT]:
+        car_x += car_speed
+
+    # Desenha fundo e carro
+    screen.fill(GREEN)  # fundo verde como "grama"
+    pygame.draw.rect(screen, WHITE, (car_x, car_y, car_width, car_height))
+
+    pygame.display.flip()
+    clock.tick(60)

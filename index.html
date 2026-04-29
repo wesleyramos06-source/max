@@ -1,80 +1,85 @@
 import pygame
-import sys
-import math
+import random
 
-# Inicializa o Pygame
+# Inicialização
 pygame.init()
 
-# Configurações da tela
-WIDTH, HEIGHT = 800, 600
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Carro Mundo Aberto")
+# Configurações da Tela
+LARGURA = 400
+ALTURA = 600
+tela = pygame.display.set_mode((LARGURA, ALTURA))
+pygame.display.set_caption("Jogo de Desviar - Corrida")
 
 # Cores
-GREEN = (34, 139, 34)
-GRAY = (100, 100, 100)
-WHITE = (255, 255, 255)
+BRANCO = (255, 255, 255)
+PRETO = (0, 0, 0)
+VERMELHO = (200, 0, 0)
+AZUL = (0, 0, 255)
 
-# Carro
-car_img = pygame.Surface((50, 30), pygame.SRCALPHA)
-pygame.draw.polygon(car_img, WHITE, [(0,0), (50,15), (0,30)])  # formato triangular
-car_x, car_y = 400, 300
-car_angle = 0
-car_speed = 0
-acceleration = 0.2
-max_speed = 8
-friction = 0.05
+# Configurações do Jogador
+carro_largura = 50
+carro_altura = 80
+carro_x = (LARGURA * 0.45)
+carro_y = (ALTURA * 0.8)
+velocidade_jogador = 5
 
-# Mapa (maior que a tela)
-MAP_WIDTH, MAP_HEIGHT = 2000, 2000
-road_rect = pygame.Rect(300, 300, 1400, 1400)
+# Configurações do Obstáculo
+obs_largura = 50
+obs_altura = 50
+obs_x = random.randrange(0, LARGURA - obs_largura)
+obs_y = -600
+obs_velocidade = 7
 
-# Loop principal
-clock = pygame.time.Clock()
-while True:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
+relogio = pygame.time.Clock()
+pontos = 0
+rodando = True
 
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_UP]:
-        car_speed += acceleration
-    if keys[pygame.K_DOWN]:
-        car_speed -= acceleration
-    if keys[pygame.K_LEFT]:
-        car_angle += 3
-    if keys[pygame.K_RIGHT]:
-        car_angle -= 3
+def mostrar_pontos(contagem):
+    fonte = pygame.font.SysFont(None, 35)
+    texto = fonte.render(f"Pontos: {contagem}", True, PRETO)
+    tela.blit(texto, (10, 10))
 
-    # Limita velocidade
-    if car_speed > max_speed:
-        car_speed = max_speed
-    if car_speed < -max_speed/2:
-        car_speed = -max_speed/2
+# Loop Principal
+while rodando:
+    for evento in pygame.event.get():
+        if evento.type == pygame.QUIT:
+            rodando = False
 
-    # Aplica atrito
-    if car_speed > 0:
-        car_speed -= friction
-    elif car_speed < 0:
-        car_speed += friction
+    # Movimentação
+    teclas = pygame.key.get_pressed()
+    if teclas[pygame.K_LEFT] and carro_x > 0:
+        carro_x -= velocidade_jogador
+    if teclas[pygame.K_RIGHT] and carro_x < LARGURA - carro_largura:
+        carro_x += velocidade_jogador
 
-    # Movimento baseado no ângulo
-    car_x += car_speed * math.cos(math.radians(car_angle))
-    car_y -= car_speed * math.sin(math.radians(car_angle))
+    # Lógica do Obstáculo
+    obs_y += obs_velocidade
 
-    # Câmera centralizada no carro
-    cam_x = car_x - WIDTH // 2
-    cam_y = car_y - HEIGHT // 2
+    # Renderização
+    tela.fill(BRANCO)
+    
+    # Desenha Jogador e Obstáculo
+    pygame.draw.rect(tela, AZUL, [carro_x, carro_y, carro_largura, carro_altura])
+    pygame.draw.rect(tela, VERMELHO, [obs_x, obs_y, obs_largura, obs_altura])
+    
+    mostrar_pontos(pontos)
 
-    # Desenha mapa
-    screen.fill(GREEN)
-    pygame.draw.rect(screen, GRAY, (road_rect.x - cam_x, road_rect.y - cam_y, road_rect.width, road_rect.height))
+    # Verifica se o obstáculo saiu da tela
+    if obs_y > ALTURA:
+        obs_y = 0 - obs_altura
+        obs_x = random.randrange(0, LARGURA - obs_largura)
+        pontos += 1
+        obs_velocidade += 0.2 # Aumenta a dificuldade
 
-    # Rotaciona carro
-    rotated_car = pygame.transform.rotate(car_img, car_angle)
-    rect = rotated_car.get_rect(center=(car_x - cam_x, car_y - cam_y))
-    screen.blit(rotated_car, rect.topleft)
+    # Detecção de Colisão
+    if carro_y < obs_y + obs_altura:
+        if (carro_x > obs_x and carro_x < obs_x + obs_largura) or \
+           (carro_x + carro_largura > obs_x and carro_x + carro_largura < obs_x + obs_largura):
+            print(f"Game Over! Sua pontuação: {pontos}")
+            rodando = False
 
-    pygame.display.flip()
-    clock.tick(60)
+    pygame.display.update()
+    relogio.tick(60)
+
+pygame.quit()
+               

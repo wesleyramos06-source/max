@@ -1,85 +1,199 @@
-import pygame
-import random
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Turbo Dodge - JS Edition</title>
+    <style>
+        :root {
+            --road-color: #333;
+            --line-color: #fff;
+            --player-color: #3498db;
+            --enemy-color: #e74c3c;
+        }
 
-# Inicialização
-pygame.init()
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background: #2c3e50;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            color: white;
+        }
 
-# Configurações da Tela
-LARGURA = 400
-ALTURA = 600
-tela = pygame.display.set_mode((LARGURA, ALTURA))
-pygame.display.set_caption("Jogo de Desviar - Corrida")
+        #ui {
+            margin-bottom: 10px;
+            text-align: center;
+        }
 
-# Cores
-BRANCO = (255, 255, 255)
-PRETO = (0, 0, 0)
-VERMELHO = (200, 0, 0)
-AZUL = (0, 0, 255)
+        .score-board {
+            font-size: 2rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
 
-# Configurações do Jogador
-carro_largura = 50
-carro_altura = 80
-carro_x = (LARGURA * 0.45)
-carro_y = (ALTURA * 0.8)
-velocidade_jogador = 5
+        /* Área da Pista */
+        #game-world {
+            position: relative;
+            width: 350px;
+            height: 600px;
+            background-color: var(--road-color);
+            border: 10px solid #222;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(0,0,0,0.5);
+        }
 
-# Configurações do Obstáculo
-obs_largura = 50
-obs_altura = 50
-obs_x = random.randrange(0, LARGURA - obs_largura)
-obs_y = -600
-obs_velocidade = 7
+        /* Linhas da estrada animadas */
+        .line {
+            position: absolute;
+            width: 10px;
+            height: 80px;
+            background: var(--line-color);
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 5px;
+        }
 
-relogio = pygame.time.Clock()
-pontos = 0
-rodando = True
+        /* Design do Carro */
+        .car {
+            position: absolute;
+            width: 50px;
+            height: 80px;
+            border-radius: 8px;
+            transition: left 0.1s ease-out;
+            z-index: 2;
+            box-shadow: 0 10px 15px rgba(0,0,0,0.3);
+        }
 
-def mostrar_pontos(contagem):
-    fonte = pygame.font.SysFont(None, 35)
-    texto = fonte.render(f"Pontos: {contagem}", True, PRETO)
-    tela.blit(texto, (10, 10))
+        /* Detalhes do Carro (Rodas e Vidros) */
+        .car::before { /* Vidro frontal */
+            content: '';
+            position: absolute;
+            top: 15px; left: 5px; right: 5px; height: 15px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 3px;
+        }
 
-# Loop Principal
-while rodando:
-    for evento in pygame.event.get():
-        if evento.type == pygame.QUIT:
-            rodando = False
+        #player {
+            background: var(--player-color);
+            bottom: 30px;
+            left: 150px;
+            border: 2px solid #2980b9;
+        }
 
-    # Movimentação
-    teclas = pygame.key.get_pressed()
-    if teclas[pygame.K_LEFT] and carro_x > 0:
-        carro_x -= velocidade_jogador
-    if teclas[pygame.K_RIGHT] and carro_x < LARGURA - carro_largura:
-        carro_x += velocidade_jogador
+        .enemy {
+            background: var(--enemy-color);
+            border: 2px solid #c0392b;
+        }
 
-    # Lógica do Obstáculo
-    obs_y += obs_velocidade
+        .msg {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
 
-    # Renderização
-    tela.fill(BRANCO)
-    
-    # Desenha Jogador e Obstáculo
-    pygame.draw.rect(tela, AZUL, [carro_x, carro_y, carro_largura, carro_altura])
-    pygame.draw.rect(tela, VERMELHO, [obs_x, obs_y, obs_largura, obs_altura])
-    
-    mostrar_pontos(pontos)
+    <div id="ui">
+        <div class="score-board">KM: <span id="score">0</span></div>
+    </div>
 
-    # Verifica se o obstáculo saiu da tela
-    if obs_y > ALTURA:
-        obs_y = 0 - obs_altura
-        obs_x = random.randrange(0, LARGURA - obs_largura)
-        pontos += 1
-        obs_velocidade += 0.2 # Aumenta a dificuldade
+    <div id="game-world">
+        <div id="player" class="car"></div>
+    </div>
 
-    # Detecção de Colisão
-    if carro_y < obs_y + obs_altura:
-        if (carro_x > obs_x and carro_x < obs_x + obs_largura) or \
-           (carro_x + carro_largura > obs_x and carro_x + carro_largura < obs_x + obs_largura):
-            print(f"Game Over! Sua pontuação: {pontos}")
-            rodando = False
+    <div class="msg">Use as <b>Setas Laterais</b> para pilotar</div>
 
-    pygame.display.update()
-    relogio.tick(60)
+    <script>
+        const world = document.getElementById('game-world');
+        const scoreElement = document.getElementById('score');
+        const player = document.getElementById('player');
 
-pygame.quit()
-               
+        let score = 0;
+        let playerPos = 150;
+        let gameActive = true;
+        let speed = 5;
+        const keys = {};
+
+        // 1. Criar linhas da estrada dinamicamente
+        for(let i=0; i<5; i++) {
+            let line = document.createElement('div');
+            line.classList.add('line');
+            line.style.top = (i * 150) + "px";
+            line.y = i * 150;
+            world.appendChild(line);
+        }
+
+        // 2. Criar inimigo
+        const enemy = document.createElement('div');
+        enemy.classList.add('car', 'enemy');
+        resetEnemy(enemy);
+        world.appendChild(enemy);
+
+        // Controles
+        document.addEventListener('keydown', e => keys[e.code] = true);
+        document.addEventListener('keyup', e => keys[e.code] = false);
+
+        function resetEnemy(ent) {
+            ent.style.top = "-100px";
+            ent.style.left = Math.floor(Math.random() * 300) + "px";
+            ent.y = -100;
+        }
+
+        function update() {
+            if (!gameActive) return;
+
+            // Movimentar Linhas (Efeito de velocidade)
+            let lines = document.querySelectorAll('.line');
+            lines.forEach(line => {
+                line.y += speed;
+                if (line.y > 600) line.y = -100;
+                line.style.top = line.y + "px";
+            });
+
+            // Movimentar Jogador
+            if (keys['ArrowLeft'] && playerPos > 5) playerPos -= 7;
+            if (keys['ArrowRight'] && playerPos < 295) playerPos += 7;
+            player.style.left = playerPos + "px";
+
+            // Movimentar Inimigo
+            enemy.y += speed;
+            if (enemy.y > 600) {
+                resetEnemy(enemy);
+                score += 10;
+                scoreElement.innerText = score;
+                speed += 0.2; // Aumenta dificuldade gradualmente
+            }
+            enemy.style.top = enemy.y + "px";
+
+            // Detecção de Colisão
+            const pRect = player.getBoundingClientRect();
+            const eRect = enemy.getBoundingClientRect();
+
+            if (!(pRect.bottom < eRect.top || 
+                  pRect.top > eRect.bottom || 
+                  pRect.right < eRect.left || 
+                  pRect.left > eRect.right)) {
+                gameOver();
+            }
+
+            requestAnimationFrame(update);
+        }
+
+        function gameOver() {
+            gameActive = false;
+            alert(`Fim de jogo! Você percorreu ${score} KM.`);
+            location.reload(); // Reinicia o jogo
+        }
+
+        requestAnimationFrame(update);
+    </script>
+</body>
+</html>

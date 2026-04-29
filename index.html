@@ -1,5 +1,6 @@
 import pygame
 import sys
+import math
 
 # Inicializa o Pygame
 pygame.init()
@@ -7,16 +8,26 @@ pygame.init()
 # Configurações da tela
 WIDTH, HEIGHT = 800, 600
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Jogo de Carro Mundo Aberto")
+pygame.display.set_caption("Carro Mundo Aberto")
 
 # Cores
+GREEN = (34, 139, 34)
+GRAY = (100, 100, 100)
 WHITE = (255, 255, 255)
-GREEN = (0, 200, 0)
 
-# Carro (um retângulo simples)
-car_width, car_height = 50, 30
-car_x, car_y = WIDTH // 2, HEIGHT // 2
-car_speed = 5
+# Carro
+car_img = pygame.Surface((50, 30), pygame.SRCALPHA)
+pygame.draw.polygon(car_img, WHITE, [(0,0), (50,15), (0,30)])  # formato triangular
+car_x, car_y = 400, 300
+car_angle = 0
+car_speed = 0
+acceleration = 0.2
+max_speed = 8
+friction = 0.05
+
+# Mapa (maior que a tela)
+MAP_WIDTH, MAP_HEIGHT = 2000, 2000
+road_rect = pygame.Rect(300, 300, 1400, 1400)
 
 # Loop principal
 clock = pygame.time.Clock()
@@ -26,20 +37,44 @@ while True:
             pygame.quit()
             sys.exit()
 
-    # Teclas pressionadas
     keys = pygame.key.get_pressed()
     if keys[pygame.K_UP]:
-        car_y -= car_speed
+        car_speed += acceleration
     if keys[pygame.K_DOWN]:
-        car_y += car_speed
+        car_speed -= acceleration
     if keys[pygame.K_LEFT]:
-        car_x -= car_speed
+        car_angle += 3
     if keys[pygame.K_RIGHT]:
-        car_x += car_speed
+        car_angle -= 3
 
-    # Desenha fundo e carro
-    screen.fill(GREEN)  # fundo verde como "grama"
-    pygame.draw.rect(screen, WHITE, (car_x, car_y, car_width, car_height))
+    # Limita velocidade
+    if car_speed > max_speed:
+        car_speed = max_speed
+    if car_speed < -max_speed/2:
+        car_speed = -max_speed/2
+
+    # Aplica atrito
+    if car_speed > 0:
+        car_speed -= friction
+    elif car_speed < 0:
+        car_speed += friction
+
+    # Movimento baseado no ângulo
+    car_x += car_speed * math.cos(math.radians(car_angle))
+    car_y -= car_speed * math.sin(math.radians(car_angle))
+
+    # Câmera centralizada no carro
+    cam_x = car_x - WIDTH // 2
+    cam_y = car_y - HEIGHT // 2
+
+    # Desenha mapa
+    screen.fill(GREEN)
+    pygame.draw.rect(screen, GRAY, (road_rect.x - cam_x, road_rect.y - cam_y, road_rect.width, road_rect.height))
+
+    # Rotaciona carro
+    rotated_car = pygame.transform.rotate(car_img, car_angle)
+    rect = rotated_car.get_rect(center=(car_x - cam_x, car_y - cam_y))
+    screen.blit(rotated_car, rect.topleft)
 
     pygame.display.flip()
     clock.tick(60)

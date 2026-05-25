@@ -41,7 +41,6 @@
             display: none !important;
         }
 
-        /* Tela de Login */
         h2 {
             text-align: center;
             color: var(--accent);
@@ -70,7 +69,6 @@
             box-sizing: border-box;
         }
 
-        /* Estilo BitLife */
         .profile-bar {
             display: flex;
             justify-content: space-between;
@@ -90,6 +88,7 @@
             color: var(--green);
             text-align: center;
             margin: 20px 0;
+            transition: transform 0.1s ease;
         }
 
         .balance-box.negative {
@@ -112,6 +111,12 @@
             margin-bottom: 10px;
             border-left: 3px solid var(--accent);
             padding-left: 8px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-5px); }
+            to { opacity: 1; transform: translateX(0); }
         }
 
         .log-entry.success { border-left-color: var(--green); }
@@ -153,6 +158,7 @@
             border: 1px solid #334155;
             text-align: left;
             font-weight: normal;
+            color: var(--text-color);
         }
 
         .choice-btn:hover {
@@ -167,7 +173,7 @@
         <h2>Criar Novo Empresário</h2>
         <div class="form-group">
             <label for="char-name">Nome do Personagem:</label>
-            <input type="text" id="char-name" placeholder="Ex: Roberto Marinho" value="Carlos Almeira">
+            <input type="text" id="char-name" placeholder="Ex: Roberto Marinho" value="Carlos Almeida">
         </div>
         <div class="form-group">
             <label for="char-focus">Foco de Carreira Inicial:</label>
@@ -189,14 +195,12 @@
 
         <div class="balance-box" id="p-balance">R$ 0</div>
 
-        <div class="log-box" id="game-log">
-            </div>
+        <div class="log-box" id="game-log"></div>
 
-        <div class="choices-container" id="choices-area">
-            </div>
+        <div class="choices-container" id="choices-area"></div>
 
         <div class="choices-container">
-            <button class="btn-age" onclick="envelhecer()">＋ Envelhecer 1 Ano</button>
+            <button class="btn-age" id="btn-age-main" onclick="envelhecer()">＋ Envelhecer 1 Ano</button>
         </div>
     </div>
 
@@ -209,10 +213,8 @@
             saldo: 0
         };
 
-        // Banco de eventos e propostas estilo BitLife
+        // Banco de eventos e propostas completas
         const eventosOriginais = [
             { desc: "Um amigo te chama para abrir uma assistência técnica de celulares.", ganho: 1200, perda: 400, chance: 75, tipo: "Tecnologia" },
             { desc: "Criar um bot que automatiza postagens no Instagram para empresas locais.", ganho: 3000, perda: 200, chance: 60, tipo: "Tecnologia" },
-            { desc: "Comprar um lote de roupas de marcas famosas de um fornecedor misterioso para revender.", ganho: 4000, perda: 1500, chance: 45, tipo: "Varejo" },
-            { desc: "Abrir um carrinho de espetinhos gourmet na praça central da cidade.", ganho: 1800, perda: 600, chance: 80, tipo: "Varejo" },
-            { desc: "Investir suas economias em opções binárias guiado por um 'guru' da internet.", ganho: 10000, perda: 3000, chance: 20
+            { desc: "Comprar um lote de roupas de marcas famosas de um fornecedor misterioso para revender.", ganho: 4000, perda:

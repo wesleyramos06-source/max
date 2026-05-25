@@ -3,8 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zombie Survival - J.A.R.V.I.S. OS</title>
+    <title>Zombie Protocol - J.A.R.V.I.S. OS v2.0</title>
     <style>
+        :root {
+            --cyan: #00f0ff;
+            --pink: #ff0055;
+            --yellow: #ffff00;
+            --dark-bg: #030712;
+            --grid-color: rgba(0, 240, 255, 0.03);
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -13,129 +21,204 @@
         }
 
         body {
-            background-color: #050b14;
-            color: #00f0ff;
-            font-family: 'Courier New', Courier, monospace;
+            background-color: var(--dark-bg);
+            color: var(--cyan);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             overflow: hidden;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
+            perspective: 1000px;
         }
 
-        /* Interface Estilo JARVIS */
+        /* HUD Estilo Sci-Fi Holográfico */
         #hud {
             width: 800px;
             display: flex;
             justify-content: space-between;
-            margin-bottom: 10px;
-            padding: 10px;
-            border: 1px solid #00f0ff;
-            background: rgba(0, 240, 255, 0.05);
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+            margin-bottom: 15px;
+            padding: 15px 25px;
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            background: linear-gradient(180deg, rgba(0, 240, 255, 0.02) 0%, rgba(0, 240, 255, 0.08) 100%);
+            backdrop-filter: blur(5px);
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.15), inset 0 0 15px rgba(0, 240, 255, 0.05);
         }
 
         .hud-item {
-            font-size: 16px;
-            font-weight: bold;
-            text-transform: uppercase;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-shadow: 0 0 8px var(--cyan);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .hud-item span {
+            font-size: 20px;
+            margin-top: 5px;
+            font-family: 'Courier New', monospace;
         }
 
         #jarvis-console {
             width: 800px;
-            height: 50px;
-            border: 1px solid #ff0055;
-            background: rgba(255, 0, 85, 0.05);
-            margin-bottom: 10px;
-            padding: 5px 15px;
+            height: 55px;
+            border: 1px solid rgba(255, 0, 85, 0.3);
+            background: linear-gradient(180deg, rgba(255, 0, 85, 0.02) 0%, rgba(255, 0, 85, 0.08) 100%);
+            backdrop-filter: blur(5px);
+            margin-bottom: 15px;
+            padding: 0 20px;
             font-size: 14px;
             display: flex;
             align-items: center;
-            box-shadow: 0 0 10px rgba(255, 0, 85, 0.1);
-            color: #ff3377;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.1);
+            color: #ff4488;
+            font-family: 'Courier New', monospace;
+            border-left: 5px solid var(--pink);
         }
 
-        /* Tela do Jogo */
+        /* Arena de Jogo com Fundo de Grade Dinâmica */
         #game-container {
             position: relative;
             width: 800px;
             height: 500px;
-            background: #0a0a14;
-            border: 2px solid #00f0ff;
+            background: #060913;
+            background-image: 
+                linear-gradient(var(--grid-color) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+            background-size: 40px 40px;
+            border: 2px solid var(--cyan);
+            border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 0 30px rgba(0, 240, 255, 0.1);
+            box-shadow: 0 0 40px rgba(0, 240, 255, 0.15);
+            transition: box-shadow 0.1s ease;
         }
 
+        /* Efeito visual de dano na tela */
+        #game-container.damage-flash {
+            box-shadow: inset 0 0 50px rgba(255, 0, 85, 0.6), 0 0 40px rgba(255, 0, 85, 0.4);
+            border-color: var(--pink);
+        }
+
+        /* Jogador Estilo Nave/Drone Futurista */
         #player {
             position: absolute;
-            bottom: 20px;
+            bottom: 25px;
             left: 385px;
-            width: 30px;
-            height: 40px;
-            background: #00f0ff;
-            border-radius: 3px;
-            box-shadow: 0 0 15px #00f0ff;
-            transition: left 0.05s linear;
+            width: 32px;
+            height: 38px;
+            background: linear-gradient(135deg, #00f0ff 0%, #0077ff 100%);
+            clip-path: polygon(50% 0%, 100% 70%, 80% 100%, 20% 100%, 0% 70%);
+            box-shadow: 0 -5px 15px var(--cyan);
+            filter: drop-shadow(0 0 8px var(--cyan));
+            will-change: left;
         }
 
-        /* Elementos Dinâmicos */
+        #player::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 25%;
+            width: 50%;
+            height: 5px;
+            background: #ffaa00;
+            box-shadow: 0 0 10px #ffaa00;
+            border-radius: 50%;
+        }
+
+        /* Tiros Estilo Laser de Plasma */
         .bullet {
             position: absolute;
             width: 4px;
-            height: 15px;
-            background: #ffff00;
-            box-shadow: 0 0 8px #ffff00;
+            height: 20px;
+            background: linear-gradient(to top, var(--yellow), #ffffff);
+            border-radius: 2px;
+            filter: drop-shadow(0 0 6px var(--yellow));
+            will-change: bottom;
         }
 
+        /* Inimigos Detalhados com Brilho */
         .zombie {
             position: absolute;
-            width: 30px;
-            height: 35px;
-            background: #00ff55;
-            border-radius: 3px;
-            box-shadow: 0 0 10px #00ff55;
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #00ff66 0%, #009933 100%);
+            border-radius: 6px;
+            filter: drop-shadow(0 0 8px #00ff66);
+            transform: rotate(45deg);
+            will-change: top;
         }
 
-        /* Telas de Menu/Game Over - AJUSTADO Z-INDEX */
+        /* Partículas de Explosão */
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            pointer-events: none;
+            will-change: transform, opacity;
+        }
+
+        /* Telas de Lobby / Game Over Modernas */
         .screen {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(5, 11, 20, 0.95);
+            background: rgba(4, 7, 20, 0.92);
+            backdrop-filter: blur(8px);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            z-index: 100; /* Garante que fica acima do cenário de tiro */
+            z-index: 100;
         }
 
         h1 {
-            font-size: 36px;
-            margin-bottom: 20px;
-            letter-spacing: 3px;
-            text-shadow: 0 0 10px #00f0ff;
+            font-size: 38px;
+            margin-bottom: 10px;
+            letter-spacing: 4px;
+            background: linear-gradient(90deg, #ffffff, var(--cyan));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.5));
+            text-transform: uppercase;
+        }
+
+        .screen p {
+            color: #8fa0b5;
+            font-size: 14px;
+            margin-bottom: 30px;
+            letter-spacing: 1px;
         }
 
         button {
-            background: rgba(0, 240, 255, 0.1);
-            color: #00f0ff;
-            border: 2px solid #00f0ff;
-            padding: 12px 30px;
-            font-size: 18px;
+            background: transparent;
+            color: var(--cyan);
+            border: 2px solid var(--cyan);
+            padding: 14px 36px;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 2px;
             font-family: inherit;
             cursor: pointer;
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
-            transition: 0.3s;
-            z-index: 101; /* Botão clicável acima de tudo */
+            border-radius: 6px;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.1);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 101;
+            text-transform: uppercase;
         }
 
         button:hover {
-            background: #00f0ff;
-            color: #050b14;
-            box-shadow: 0 0 25px #00f0ff;
+            background: var(--cyan);
+            color: var(--dark-bg);
+            box-shadow: 0 0 25px var(--cyan), inset 0 0 10px rgba(255,255,255,0.5);
+            transform: scale(1.05);
         }
 
         .hide {
@@ -146,29 +229,29 @@
 <body>
 
     <div id="hud">
-        <div class="hud-item">FASE: <span id="ui-phase">1</span></div>
-        <div class="hud-item">ETAPA: <span id="ui-stage">1</span>/3</div>
-        <div class="hud-item">SCORE: <span id="ui-score">0</span></div>
-        <div class="hud-item">INTEGRIDADE: <span id="ui-hp">100</span>%</div>
+        <div class="hud-item">Fase <span id="ui-phase">1</span></div>
+        <div class="hud-item">Etapa <span id="ui-stage">1</span></div>
+        <div class="hud-item">Score <span id="ui-score">0</span></div>
+        <div class="hud-item">Integridade <span id="ui-hp">100</span></div>
     </div>
 
     <div id="jarvis-console">
-        <span id="jarvis-text">J.A.R.V.I.S: Sistema online. Aguardando ameaças...</span>
+        <span id="jarvis-text">J.A.R.V.I.S: Inicializando sistemas de combate primários...</span>
     </div>
 
     <div id="game-container">
         <div id="player"></div>
 
         <div id="start-screen" class="screen">
-            <h1>ZOMBIE PROTOCOL: JARVIS v1.0</h1>
-            <p style="margin-bottom: 20px; text-align: center;">Controles: A/D ou Setas para mover. Espaço para atirar.</p>
-            <button id="btn-start">INICIAR PROTOCOLO</button>
+            <h1>Zombie Protocol</h1>
+            <p>A/D ou Setas para mover • Espaço ou Clique para disparar plasma</p>
+            <button id="btn-start">Iniciar Protocolo</button>
         </div>
 
         <div id="gameover-screen" class="screen hide">
-            <h1 style="color: #ff0055; text-shadow: 0 0 10px #ff0055;">PROTOCOLO FALHOU</h1>
-            <p style="margin-bottom: 20px;">O perímetro foi rompido.</p>
-            <button id="btn-restart" style="color: #ff0055; border-color: #ff0055;">REINICIAR</button>
+            <h1 style="background: linear-gradient(90deg, #ff4488, var(--pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 10px rgba(255,0,85,0.5));">Protocolo Falhou</h1>
+            <p>O perímetro de defesa biológica desmoronou</p>
+            <button id="btn-restart" style="color: var(--pink); border-color: var(--pink); box-shadow: 0 0 15px rgba(255, 0, 85, 0.1);">Reiniciar OS</button>
         </div>
     </div>
 
@@ -177,64 +260,58 @@
         const player = document.getElementById('player');
         const jarvisText = document.getElementById('jarvis-text');
         
-        // Elementos UI
         const uiPhase = document.getElementById('ui-phase');
         const uiStage = document.getElementById('ui-stage');
         const uiScore = document.getElementById('ui-score');
         const uiHp = document.getElementById('ui-hp');
 
-        // Estado do Jogo
         let gameActive = false;
         let score = 0;
         let hp = 100;
         let phase = 1;
         let stage = 1;
         
-        // Configurações de Dificuldade Dinâmica
-        let zombieSpeed = 1.5;
-        let zombieSpawnRate = 2000; 
+        let zombieSpeed = 1.6;
+        let zombieSpawnRate = 1800; 
         let zombieHpMax = 1;
         let zombiesKilledInStage = 0;
         const zombiesNeededPerStage = 5;
 
-        // Posição do jogador
         let playerX = 385;
-        const playerSpeed = 8;
+        const playerSpeed = 9;
         let keys = {};
 
-        // Arrays de controle
         let bullets = [];
         let zombies = [];
+        let particles = [];
         let gameIntervals = [];
 
-        // Falas do JARVIS
         const jarvisQuotes = {
             start: "Senhor, múltiplos alvos biológicos detectados se aproximando.",
             stageUp: "Atenção: Densidade da horda aumentando. Etapa atualizada.",
-            phaseUp: "Fase concluída. Cuidado, os sinais vitais dos zumbis estão sofrendo mutação rápida.",
+            phaseUp: "Horda eliminada. Sensores indicam mutação celular nos novos alvos.",
             lowHp: "Aviso crítico! Integridade do traje em níveis perigosos!",
-            kill: ["Alvo neutralizado.", "Eliminação confirmada.", "Perímetro limpo."],
-            hit: "Alerta: Impacto detectado. Sugiro evasão imediata."
+            kill: ["Alvo neutralizado.", "Eliminação confirmada.", "Ameaça limpa.", "Disparo preciso."],
+            hit: "Alerta: Impacto detectado. Sugiro manobra de evasão."
         };
 
         function jarvisSpeak(text) {
             jarvisText.innerText = `J.A.R.V.I.S: ${text}`;
         }
 
-        // Detectar Teclado
+        // Eventos de teclas
         window.addEventListener('keydown', e => keys[e.key] = true);
         window.addEventListener('keyup', e => keys[e.key] = false);
         
-        // CORREÇÃO DO CLIQUE: O clique no container só atira se o jogo estiver ativo de verdade
+        // Clique atira apenas no cenário ativo
         container.addEventListener('click', (e) => { 
-            // Se clicou em um botão do menu, não atira
             if (e.target.tagName === 'BUTTON') return;
             if (gameActive) shoot(); 
         });
 
-        // Eventos dos botões mapeados estritamente via JavaScript (Garante funcionamento)
+        // Eventos dos botões com bloqueio de propagação (Consertado)
         document.getElementById('btn-start').addEventListener('click', function(e) {
-            e.stopPropagation(); // Impede o clique de se propagar para o container
+            e.stopPropagation();
             startGame();
         });
 
@@ -251,38 +328,37 @@
             hp = 100;
             phase = 1;
             stage = 1;
-            zombieSpeed = 1.5;
-            zombieSpawnRate = 2000;
+            zombieSpeed = 1.6;
+            zombieSpawnRate = 1800;
             zombieHpMax = 1;
             zombiesKilledInStage = 0;
             
             updateUI();
             jarvisSpeak(jarvisQuotes.start);
 
-            // Limpa loops antigos por segurança antes de iniciar
             gameIntervals.forEach(clearInterval);
             gameIntervals = [];
 
-            // Loops do jogo
-            gameIntervals.push(setInterval(updateGame, 1000 / 60)); // 60 FPS
+            // 60FPS estável para movimentações e partículas
+            gameIntervals.push(setInterval(updateGame, 1000 / 60)); 
             gameIntervals.push(setInterval(spawnZombie, zombieSpawnRate));
         }
 
         function updateUI() {
             uiPhase.innerText = phase;
-            uiStage.innerText = stage;
+            uiStage.innerText = `${stage}/3`;
             uiScore.innerText = score;
-            uiHp.innerText = hp;
-            if(hp <= 30) uiHp.style.color = '#ff0055';
-            else uiHp.style.color = '#00f0ff';
+            uiHp.innerText = `${hp}%`;
+            if(hp <= 30) uiHp.style.color = 'var(--pink)';
+            else uiHp.style.color = 'var(--cyan)';
         }
 
         function movePlayer() {
             if (keys['a'] || keys['A'] || keys['ArrowLeft']) {
-                if (playerX > 0) playerX -= playerSpeed;
+                if (playerX > 10) playerX -= playerSpeed;
             }
             if (keys['d'] || keys['D'] || keys['ArrowRight']) {
-                if (playerX < 770) playerX += playerSpeed;
+                if (playerX < 758) playerX += playerSpeed;
             }
             player.style.left = playerX + 'px';
 
@@ -295,10 +371,35 @@
         function shoot() {
             const bullet = document.createElement('div');
             bullet.classList.add('bullet');
-            bullet.style.left = (playerX + 13) + 'px';
-            bullet.style.bottom = '60px';
+            bullet.style.left = (playerX + 14) + 'px';
+            bullet.style.bottom = '65px';
             container.appendChild(bullet);
             bullets.push(bullet);
+        }
+
+        // Cria efeito visual de estilhaços neon quando zumbis morrem
+        function createExplosion(x, topColor) {
+            for (let i = 0; i < 8; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                particle.style.left = x + 'px';
+                particle.style.top = topColor + 'px';
+                particle.style.background = topColor > 200 ? '#00ff66' : (phase === 2 ? '#ffaa00' : '#ff0055');
+                particle.style.boxShadow = `0 0 6px ${particle.style.background}`;
+                
+                // Vetores de dispersão aleatórios
+                particle.dataset.vx = (Math.random() - 0.5) * 6;
+                particle.dataset.vy = (Math.random() - 0.5) * 6;
+                particle.dataset.alpha = 1.0;
+
+                container.appendChild(particle);
+                particles.push(particle);
+            }
+        }
+
+        function triggerDamageFlash() {
+            container.classList.add('damage-flash');
+            setTimeout(() => container.classList.remove('damage-flash'), 150);
         }
 
         function spawnZombie() {
@@ -306,11 +407,17 @@
             const zombie = document.createElement('div');
             zombie.classList.add('zombie');
             
-            if(phase == 2) zombie.style.backgroundColor = "#ffaa00";
-            if(phase >= 3) zombie.style.backgroundColor = "#ff0055";
+            // Mudança visual baseada na fase de mutação
+            if(phase === 2) {
+                zombie.style.background = "linear-gradient(135deg, #ffaa00 0%, #995500 100%)";
+                zombie.style.filter = "drop-shadow(0 0 8px #ffaa00)";
+            } else if (phase >= 3) {
+                zombie.style.background = "linear-gradient(135deg, #ff0055 0%, #990022 100%)";
+                zombie.style.filter = "drop-shadow(0 0 8px #ff0055)";
+            }
             
-            zombie.style.left = Math.floor(Math.random() * 770) + 'px';
-            zombie.style.top = '0px';
+            zombie.style.left = Math.floor(Math.random() * 750) + 15 + 'px';
+            zombie.style.top = '-30px';
             zombie.dataset.hp = zombieHpMax;
             
             container.appendChild(zombie);
@@ -325,14 +432,36 @@
 
             movePlayer();
 
+            // Partículas Mecânica Fluidas
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                let px = parseFloat(p.style.left);
+                let py = parseFloat(p.style.top);
+                let alpha = parseFloat(p.dataset.alpha);
+
+                px += parseFloat(p.dataset.vx);
+                py += parseFloat(p.dataset.vy);
+                alpha -= 0.04;
+
+                p.style.left = px + 'px';
+                p.style.top = py + 'px';
+                p.style.opacity = alpha;
+                p.dataset.alpha = alpha;
+
+                if (alpha <= 0) {
+                    p.remove();
+                    particles.splice(i, 1);
+                }
+            }
+
             // Atualizar Tiros
             for (let i = bullets.length - 1; i >= 0; i--) {
                 let b = bullets[i];
                 let bBottom = parseInt(b.style.bottom);
-                bBottom += 10;
+                bBottom += 12; // Velocidade de tiro aumentada para fluidez
                 b.style.bottom = bBottom + 'px';
 
-                if (bBottom > 500) {
+                if (bBottom > 520) {
                     b.remove();
                     bullets.splice(i, 1);
                 }
@@ -345,8 +474,9 @@
                 zTop += zombieSpeed;
                 z.style.top = zTop + 'px';
 
-                if (zTop > 465) {
+                if (zTop > 470) {
                     hp -= 15;
+                    triggerDamageFlash();
                     z.remove();
                     zombies.splice(i, 1);
                     jarvisSpeak(jarvisQuotes.hit);
@@ -368,12 +498,13 @@
                         bullets.splice(j, 1);
 
                         if (z.dataset.hp <= 0) {
+                            createExplosion(parseInt(z.style.left) + 14, zTop + 14);
                             z.remove();
                             zombies.splice(i, 1);
                             score += 10;
                             zombiesKilledInStage++;
                             
-                            if (Math.random() > 0.7) {
+                            if (Math.random() > 0.75) {
                                 jarvisSpeak(jarvisQuotes.kill[Math.floor(Math.random() * jarvisQuotes.kill.length)]);
                             }
                             
@@ -392,15 +523,15 @@
                 
                 if (stage < 3) {
                     stage++;
-                    zombieSpeed += 0.4; 
-                    zombieSpawnRate = Math.max(600, zombieSpawnRate - 300); 
+                    zombieSpeed += 0.5; 
+                    zombieSpawnRate = Math.max(500, zombieSpawnRate - 250); 
                     jarvisSpeak(jarvisQuotes.stageUp);
                 } else {
                     phase++;
                     stage = 1;
                     zombieHpMax += 1; 
-                    zombieSpeed = 1.5 + (phase * 0.3); 
-                    zombieSpawnRate = Math.max(500, 2000 - (phase * 250));
+                    zombieSpeed = 1.6 + (phase * 0.4); 
+                    zombieSpawnRate = Math.max(400, 1800 - (phase * 200));
                     jarvisSpeak(jarvisQuotes.phaseUp);
                 }
             }
@@ -409,7 +540,7 @@
         function checkGameOver() {
             if (hp <= 0) {
                 hp = 0;
-                uiHp.innerText = 0;
+                uiHp.innerText = "0%";
                 gameActive = false;
                 
                 gameIntervals.forEach(clearInterval);
@@ -417,11 +548,13 @@
                 
                 zombies.forEach(z => z.remove());
                 bullets.forEach(b => b.remove());
+                particles.forEach(p => p.remove());
                 zombies = [];
                 bullets = [];
+                particles = [];
 
                 document.getElementById('gameover-screen').classList.remove('hide');
-                jarvisSpeak("Protocolo de defesa quebrado. Desconectando...");
+                jarvisSpeak("Protocolo de defesa quebrado. Desconectando sistemas...");
             } else if (hp <= 30) {
                 jarvisSpeak(jarvisQuotes.lowHp);
             }

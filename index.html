@@ -3,310 +3,233 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zombie Protocol - J.A.R.V.I.S. OS v3.0</title>
+    <title>Magnata Sim - Simulador de Negócios</title>
     <style>
         :root {
-            --cyan: #00f0ff;
-            --pink: #ff0055;
-            --yellow: #ffff00;
-            --dark-bg: #030712;
-            --grid-color: rgba(0, 240, 255, 0.03);
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            user-select: none;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --green: #10b981;
+            --red: #ef4444;
+            --accent: #3b82f6;
         }
 
         body {
-            background-color: var(--dark-bg);
-            color: var(--cyan);
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
-            perspective: 1000px;
-        }
-
-        /* HUD Estilo Sci-Fi Holográfico */
-        #hud {
-            width: 800px;
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 15px;
-            padding: 15px 25px;
-            border: 1px solid rgba(0, 240, 255, 0.3);
-            background: linear-gradient(180deg, rgba(0, 240, 255, 0.02) 0%, rgba(0, 240, 255, 0.08) 100%);
-            backdrop-filter: blur(5px);
-            border-radius: 8px;
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.15), inset 0 0 15px rgba(0, 240, 255, 0.05);
-        }
-
-        .hud-item {
-            font-size: 14px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-shadow: 0 0 8px var(--cyan);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        
-        .hud-item span {
-            font-size: 20px;
-            margin-top: 5px;
-            font-family: 'Courier New', monospace;
-        }
-
-        #jarvis-console {
-            width: 800px;
-            height: 55px;
-            border: 1px solid rgba(0, 240, 255, 0.3);
-            background: linear-gradient(180deg, rgba(0, 240, 255, 0.02) 0%, rgba(0, 240, 255, 0.08) 100%);
-            backdrop-filter: blur(5px);
-            margin-bottom: 15px;
-            padding: 0 20px;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            border-radius: 8px;
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.1);
-            color: var(--cyan);
-            font-family: 'Courier New', monospace;
-            border-left: 5px solid var(--cyan);
-            transition: all 0.3s ease;
-        }
-
-        #jarvis-console.alert {
-            border-color: var(--pink);
-            color: var(--pink);
-            border-left-color: var(--pink);
-            box-shadow: 0 0 15px rgba(255, 0, 85, 0.2);
-        }
-
-        /* Arena de Jogo com Fundo de Grade Dinâmica */
-        #game-container {
-            position: relative;
-            width: 800px;
-            height: 500px;
-            background: #060913;
-            background-image: 
-                linear-gradient(var(--grid-color) 1px, transparent 1px),
-                linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
-            background-size: 40px 40px;
-            border: 2px solid var(--cyan);
-            border-radius: 12px;
+            margin: 0;
             overflow: hidden;
-            box-shadow: 0 0 40px rgba(0, 240, 255, 0.15);
-            transition: box-shadow 0.1s ease;
         }
 
-        #game-container.damage-flash {
-            box-shadow: inset 0 0 50px rgba(255, 0, 85, 0.6), 0 0 40px rgba(255, 0, 85, 0.4);
-            border-color: var(--pink);
+        .game-container {
+            text-align: center;
+            width: 90%;
+            max-width: 500px;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
         }
 
-        /* Jogador */
-        #player {
-            position: absolute;
-            bottom: 25px;
-            left: 385px;
-            width: 32px;
-            height: 38px;
-            background: linear-gradient(135deg, #00f0ff 0%, #0077ff 100%);
-            clip-path: polygon(50% 0%, 100% 70%, 80% 100%, 20% 100%, 0% 70%);
-            box-shadow: 0 -5px 15px var(--cyan);
-            filter: drop-shadow(0 0 8px var(--cyan));
-            will-change: left;
-        }
-
-        #player::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 25%;
-            width: 50%;
-            height: 5px;
-            background: #ffaa00;
-            box-shadow: 0 0 10px #ffaa00;
-            border-radius: 50%;
-        }
-
-        /* Tiros e Inimigos */
-        .bullet {
-            position: absolute;
-            width: 4px;
-            height: 20px;
-            background: linear-gradient(to top, var(--yellow), #ffffff);
-            border-radius: 2px;
-            filter: drop-shadow(0 0 6px var(--yellow));
-        }
-
-        .zombie {
-            position: absolute;
-            width: 28px;
-            height: 28px;
-            background: linear-gradient(135deg, #00ff66 0%, #009933 100%);
-            border-radius: 6px;
-            filter: drop-shadow(0 0 8px #00ff66);
-            transform: rotate(45deg);
-        }
-
-        .particle {
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            border-radius: 50%;
-            pointer-events: none;
-        }
-
-        /* Telas de Interfaces */
-        .screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(4, 7, 20, 0.95);
-            backdrop-filter: blur(8px);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
+        header {
+            margin-bottom: 30px;
         }
 
         h1 {
-            font-size: 36px;
+            font-size: 1.8rem;
+            margin-bottom: 5px;
+            color: var(--accent);
+        }
+
+        .balance-box {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: var(--green);
+            margin: 15px 0;
+            transition: transform 0.2s;
+        }
+
+        .balance-box.negative {
+            color: var(--red);
+        }
+
+        .proposal-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 12px;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .proposal-text {
+            font-size: 1.2rem;
+            line-height: 1.5;
             margin-bottom: 10px;
-            letter-spacing: 4px;
-            background: linear-gradient(90deg, #ffffff, var(--cyan));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.5));
-            text-transform: uppercase;
         }
 
-        .screen p {
-            color: #8fa0b5;
-            font-size: 14px;
-            margin-bottom: 25px;
-            letter-spacing: 1px;
+        .proposal-impact {
+            font-size: 0.9rem;
+            color: #94a3b8;
         }
 
-        /* Inputs do Formulário de Login */
-        .login-box {
+        .btn-container {
             display: flex;
-            flex-direction: column;
-            gap: 12px;
-            width: 280px;
-            margin-bottom: 20px;
-        }
-
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .input-group label {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: #6b7c96;
-        }
-
-        .login-box input {
-            background: rgba(0, 240, 255, 0.05);
-            border: 1px solid rgba(0, 240, 255, 0.2);
-            padding: 10px 12px;
-            color: #ffffff;
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            border-radius: 4px;
-            outline: none;
-            transition: all 0.3s;
-        }
-
-        .login-box input:focus {
-            border-color: var(--cyan);
-            box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
-            background: rgba(0, 240, 255, 0.1);
+            gap: 20px;
+            justify-content: center;
         }
 
         button {
-            background: transparent;
-            color: var(--cyan);
-            border: 2px solid var(--cyan);
-            padding: 12px 30px;
-            font-size: 15px;
+            padding: 15px 35px;
+            font-size: 1.1rem;
             font-weight: bold;
-            letter-spacing: 2px;
-            font-family: inherit;
+            border: none;
+            border-radius: 8px;
             cursor: pointer;
-            border-radius: 6px;
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.1);
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 101;
-            text-transform: uppercase;
+            transition: all 0.2s ease;
+            width: 100%;
         }
 
-        button:hover {
-            background: var(--cyan);
-            color: var(--dark-bg);
-            box-shadow: 0 0 25px var(--cyan);
-            transform: scale(1.03);
+        .btn-accept {
+            background-color: var(--green);
+            color: white;
         }
 
-        .hide {
-            display: none !important;
+        .btn-accept:hover {
+            background-color: #059669;
+            transform: scale(1.05);
+        }
+
+        .btn-decline {
+            background-color: var(--red);
+            color: white;
+        }
+
+        .btn-decline:hover {
+            background-color: #dc2626;
+            transform: scale(1.05);
+        }
+
+        .stats {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #64748b;
         }
     </style>
 </head>
 <body>
 
-    <div id="hud">
-        <div class="hud-item">Fase <span id="ui-phase">1</span></div>
-        <div class="hud-item">Etapa <span id="ui-stage">1</span></div>
-        <div class="hud-item">Score <span id="ui-score">0</span></div>
-        <div class="hud-item">Integridade <span id="ui-hp">100</span></div>
-    </div>
+    <div class="game-container">
+        <header>
+            <h1>Império dos Negócios</h1>
+            <p>Tome as decisões certas para buildar sua fortuna.</p>
+            <div class="balance-box" id="balance">R$ 0</div>
+        </header>
 
-    <div id="jarvis-console" class="alert">
-        <span id="jarvis-text">J.A.R.V.I.S: Protocolo de Segurança Ativo. Identifique-se por favor.</span>
-    </div>
-
-    <div id="game-container">
-        <div id="player"></div>
-
-        <div id="login-screen" class="screen">
-            <h1 style="font-size: 28px;">Autenticação Biométrica</h1>
-            <p>Insira suas credenciais Stark Industries</p>
-            
-            <div class="login-box">
-                <div class="input-group">
-                    <label>Agente / Usuário</label>
-                    <input type="text" id="login-user" placeholder="Ex: tony" autocomplete="off">
-                </div>
-                <div class="input-group">
-                    <label>Código de Acesso</label>
-                    <input type="password" id="login-pass" placeholder="Ex: stark">
-                </div>
-            </div>
-            
-            <button id="btn-login">Verificar Identidade</button>
+        <div class="proposal-card">
+            <p class="proposal-text" id="proposal-desc">Carregando primeira proposta...</p>
+            <p class="proposal-impact" id="proposal-detail"></p>
         </div>
 
-        <div id="start-screen" class="screen hide">
-            <h1>Zombie Protocol</h1>
-            <p>A/D ou Setas para mover • Espaço ou Clique para disparar plasma</p>
-            <button id="btn-start">Iniciar Protocolo</button>
+        <div class="btn-container">
+            <button class="btn-decline" onclick="decide(false)">Recusar</button>
+            <button class="btn-accept" onclick="clickAceitar()">Aceitar</button>
         </div>
 
-        <div id="gameover-screen" class="screen hide">
-            <h
+        <div class="stats">
+            Decisões tomadas: <span id="turn-count">0</span>
+        </div>
+    </div>
+
+    <script>
+        // Banco de dados de propostas (Riscos e Oportunidades)
+        const proposals = [
+            { desc: "Vender limonada na frente de casa.", ganho: 50, perda: 0, chanceSucesso: 100, detalhe: "Ganho garantido de R$ 50" },
+            { desc: "Investir em uma nova criptomoeda meme.", ganho: 5000, perda: 1000, chanceSucesso: 30, detalhe: "30% de chance de lucrar R$ 5.000, senão perde R$ 1.000" },
+            { desc: "Comprar um lote de produtos eletrônicos importados.", ganho: 1200, perda: 400, chanceSucesso: 70, detalhe: "70% de chance de revender com lucro" },
+            { desc: "Criar um aplicativo de entrega para o seu bairro.", ganho: 3000, perda: 800, chanceSucesso: 55, detalhe: "Risco moderado de mercado" },
+            { desc: "Pegar um trabalho como freelancer de última hora.", ganho: 350, perda: 0, chanceSucesso: 100, detalhe: "Dinheiro garantido pelo seu tempo" },
+            { desc: "Abrir uma franquia de cafeteria de grife.", ganho: 15000, perda: 8000, chanceSucesso: 45, detalhe: "Alto investimento, alto retorno" },
+            { desc: "Apostar no cavalo azarão no hipódromo.", ganho: 8000, perda: 2000, chanceSucesso: 15, detalhe: "Risco altíssimo!" },
+            { desc: "Comprar ações de uma empresa de tecnologia sólida.", ganho: 1500, perda: 300, chanceSucesso: 80, detalhe: "Investimento seguro" },
+            { desc: "Patrocinar um influenciador digital local.", ganho: 2500, perda: 1200, chanceSucesso: 60, detalhe: "Pode trazer muitos clientes" },
+            { desc: "Comprar uma máquina de estampar camisetas usada.", ganho: 900, perda: 200, chanceSucesso: 75, detalhe: "Bom potencial de micro-negócio" }
+        ];
+
+        let balance = 0;
+        let turn = 0;
+        let currentProposal = {};
+
+        const balanceEl = document.getElementById('balance');
+        const descEl = document.getElementById('proposal-desc');
+        const detailEl = document.getElementById('proposal-detail');
+        const turnEl = document.getElementById('turn-count');
+
+        function nextProposal() {
+            // Seleciona uma proposta aleatória do array
+            const randomIndex = Math.floor(Math.random() * proposals.length);
+            currentProposal = proposals[randomIndex];
+            
+            // Atualiza a tela
+            descEl.innerText = currentProposal.desc;
+            detailEl.innerText = currentProposal.detalhe;
+        }
+
+        function clickAceitar() {
+            decide(true);
+        }
+
+        function decide(accepted) {
+            if (accepted) {
+                // Calcula se a proposta deu certo baseado na chance de sucesso
+                const success = (Math.random() * 100) <= currentProposal.chanceSucesso;
+                
+                if (success) {
+                    balance += currentProposal.ganho;
+                    animateBalance('var(--green)');
+                } else {
+                    balance -= currentProposal.perda;
+                    animateBalance('var(--red)');
+                }
+            }
+
+            // Atualiza os dados na tela
+            turn++;
+            turnEl.innerText = turn;
+            updateBalanceDisplay();
+            
+            // Avança para a próxima
+            nextProposal();
+        }
+
+        function updateBalanceDisplay() {
+            balanceEl.innerText = `R$ ${balance.toLocaleString('pt-BR')}`;
+            if (balance < 0) {
+                balanceEl.classList.add('negative');
+            } else {
+                balanceEl.classList.remove('negative');
+            }
+        }
+
+        function animateBalance(color) {
+            balanceEl.style.transform = 'scale(1.1)';
+            setTimeout(() => {
+                balanceEl.style.transform = 'scale(1)';
+            }, 200);
+        }
+
+        // Inicializa o jogo
+        nextProposal();
+    </script>
+</body>
+</html>

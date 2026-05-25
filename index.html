@@ -97,14 +97,14 @@
             box-shadow: 0 0 10px #00ff55;
         }
 
-        /* Telas de Menu/Game Over */
+        /* Telas de Menu / Login / Game Over */
         .screen {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(5, 11, 20, 0.95);
+            background: rgba(5, 11, 20, 0.98);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -113,10 +113,38 @@
         }
 
         h1 {
-            font-size: 36px;
+            font-size: 32px;
             margin-bottom: 20px;
             letter-spacing: 3px;
             text-shadow: 0 0 10px #00f0ff;
+            text-align: center;
+        }
+
+        /* Input de Login */
+        .login-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        input[type="text"] {
+            background: rgba(0, 240, 255, 0.1);
+            border: 1px solid #00f0ff;
+            padding: 10px 15px;
+            font-family: inherit;
+            font-size: 16px;
+            color: #00f0ff;
+            text-align: center;
+            outline: none;
+            width: 250px;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.1);
+        }
+
+        input[type="text"]:focus {
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+            border-color: #ffffff;
         }
 
         button {
@@ -145,6 +173,7 @@
 <body>
 
     <div id="hud">
+        <div class="hud-item">AGENTE: <span id="ui-name">---</span></div>
         <div class="hud-item">FASE: <span id="ui-phase">1</span></div>
         <div class="hud-item">ETAPA: <span id="ui-stage">1</span>/3</div>
         <div class="hud-item">SCORE: <span id="ui-score">0</span></div>
@@ -152,22 +181,30 @@
     </div>
 
     <div id="jarvis-console">
-        <span id="jarvis-text">J.A.R.V.I.S: Sistema online. Aguardando ameaças...</span>
+        <span id="jarvis-text">J.A.R.V.I.S: Aguardando credenciais de acesso do operador...</span>
     </div>
 
     <div id="game-container">
         <div id="player"></div>
 
         <div id="start-screen" class="screen">
-            <h1>ZOMBIE PROTOCOL: JARVIS v1.0</h1>
-            <p style="margin-bottom: 20px; text-align: center;">Controles: A/D ou Setas para mover. Espaço para atirar.</p>
-            <button onclick="startGame()">INICIAR PROTOCOLO</button>
+            <h1>ZOMBIE PROTOCOL: JARVIS v1.2</h1>
+            
+            <div class="login-box">
+                <label for="player-name" style="font-size: 14px; letter-spacing: 1px;">INSIRA SEU NOME DE OPERADOR:</label>
+                <input type="text" id="player-name" placeholder="Ex: Tony Stark" maxlength="15" autocomplete="off">
+            </div>
+
+            <p style="margin-bottom: 20px; text-align: center; font-size: 12px; color: #88aaee;">
+                Controles: A/D ou Setas para mover. Espaço ou Clique para atirar.
+            </p>
+            <button onclick="validateLogin()">AUTENTICAR SISTEMA</button>
         </div>
 
         <div id="gameover-screen" class="screen hide">
             <h1 style="color: #ff0055; text-shadow: 0 0 10px #ff0055;">PROTOCOLO FALHOU</h1>
-            <p style="margin-bottom: 20px;">O perímetro foi rompido.</p>
-            <button onclick="restartGame()" style="color: #ff0055; border-color: #ff0055;">REINICIAR</button>
+            <p id="gameover-msg" style="margin-bottom: 20px;"></p>
+            <button onclick="restartGame()" style="color: #ff0055; border-color: #ff0055;">REINICIAR PROTOCOLO</button>
         </div>
     </div>
 
@@ -177,21 +214,23 @@
         const jarvisText = document.getElementById('jarvis-text');
         
         // Elementos UI
+        const uiName = document.getElementById('ui-name');
         const uiPhase = document.getElementById('ui-phase');
         const uiStage = document.getElementById('ui-stage');
         const uiScore = document.getElementById('ui-score');
         const uiHp = document.getElementById('ui-hp');
 
         // Estado do Jogo
+        let playerName = "Operador";
         let gameActive = false;
         let score = 0;
         let hp = 100;
         let phase = 1;
         let stage = 1;
         
-        // Configurações de Dificuldade Dinâmica
+        // Configurações de Dificuldade
         let zombieSpeed = 1.5;
-        let zombieSpawnRate = 2000; // milissegundos
+        let zombieSpawnRate = 2000;
         let zombieHpMax = 1;
         let zombiesKilledInStage = 0;
         const zombiesNeededPerStage = 5;
@@ -206,16 +245,6 @@
         let zombies = [];
         let gameIntervals = [];
 
-        // Falas do JARVIS
-        const jarvisQuotes = {
-            start: "Senhor, múltiplos alvos biológicos detectados se aproximando.",
-            stageUp: "Atenção: Densidade da horda aumentando. Etapa atualizada.",
-            phaseUp: "Fase concluída. Cuidado, os sinais vitais dos zumbis estão sofrendo mutação rápida.",
-            lowHp: "Aviso crítico! Integridade do traje em níveis perigosos!",
-            kill: ["Alvo neutralizado.", "Eliminação confirmada.", "Perímetro limpo."],
-            hit: "Alerta: Impacto detectado. Sugiro evasão imediata."
-        };
-
         function jarvisSpeak(text) {
             jarvisText.innerText = `J.A.R.V.I.S: ${text}`;
         }
@@ -223,201 +252,11 @@
         // Detectar Teclado
         window.addEventListener('keydown', e => keys[e.key] = true);
         window.addEventListener('keyup', e => keys[e.key] = false);
-        // Clique do mouse também atira
         container.addEventListener('click', () => { if(gameActive) shoot(); });
 
-        function startGame() {
-            document.getElementById('start-screen').classList.add('hide');
-            document.getElementById('gameover-screen').classList.add('hide');
-            gameActive = true;
-            score = 0;
-            hp = 100;
-            phase = 1;
-            stage = 1;
-            zombieSpeed = 1.5;
-            zombieSpawnRate = 2000;
-            zombieHpMax = 1;
-            zombiesKilledInStage = 0;
-            
-            updateUI();
-            jarvisSpeak(jarvisQuotes.start);
-
-            // Loops do jogo
-            gameIntervals.push(setInterval(updateGame, 1000 / 60)); // 60 FPS
-            gameIntervals.push(setInterval(spawnZombie, zombieSpawnRate));
-        }
-
-        function updateUI() {
-            uiPhase.innerText = phase;
-            uiStage.innerText = stage;
-            uiScore.innerText = score;
-            uiHp.innerText = hp;
-            if(hp <= 30) uiHp.style.color = '#ff0055';
-            else uiHp.style.color = '#00f0ff';
-        }
-
-        function movePlayer() {
-            if (keys['a'] || keys['A'] || keys['ArrowLeft']) {
-                if (playerX > 0) playerX -= playerSpeed;
-            }
-            if (keys['d'] || keys['D'] || keys['ArrowRight']) {
-                if (playerX < 770) playerX += playerSpeed;
-            }
-            player.style.left = playerX + 'px';
-
-            if (keys[' ']) {
-                shoot();
-                keys[' '] = false; // Evita metralhadora travando o espaço
-            }
-        }
-
-        function shoot() {
-            const bullet = document.createElement('div');
-            bullet.classList.add('bullet');
-            bullet.style.left = (playerX + 13) + 'px';
-            bullet.style.bottom = '60px';
-            container.appendChild(bullet);
-            bullets.push(bullet);
-        }
-
-        function spawnZombie() {
-            if (!gameActive) return;
-            const zombie = document.createElement('div');
-            zombie.classList.add('zombie');
-            // Altera a cor do zumbi baseado na fase para mostrar evolução
-            if(phase == 2) zombie.style.backgroundColor = "#ffaa00";
-            if(phase >= 3) zombie.style.backgroundColor = "#ff0055";
-            
-            zombie.style.left = Math.floor(Math.random() * 770) + 'px';
-            zombie.style.top = '0px';
-            zombie.dataset.hp = zombieHpMax;
-            
-            container.appendChild(zombie);
-            zombies.push(zombie);
-
-            // Ajusta dinamicamente o spawn rate de acordo com a dificuldade
-            clearInterval(gameIntervals[1]);
-            gameIntervals[1] = setInterval(spawnZombie, zombieSpawnRate);
-        }
-
-        function updateGame() {
-            if (!gameActive) return;
-
-            movePlayer();
-
-            // Atualizar Tiros
-            for (let i = bullets.length - 1; i >= 0; i--) {
-                let b = bullets[i];
-                let bBottom = parseInt(b.style.bottom);
-                bBottom += 10;
-                b.style.bottom = bBottom + 'px';
-
-                // Remove tiro se sair da tela
-                if (bBottom > 500) {
-                    b.remove();
-                    bullets.splice(i, 1);
-                }
-            }
-
-            // Atualizar Zumbis
-            for (let i = zombies.length - 1; i >= 0; i--) {
-                let z = zombies[i];
-                let zTop = parseInt(z.style.top);
-                zTop += zombieSpeed;
-                z.style.top = zTop + 'px';
-
-                // Colisão com o Fundo (Dano ao jogador)
-                if (zTop > 465) {
-                    hp -= 15;
-                    z.remove();
-                    zombies.splice(i, 1);
-                    jarvisSpeak(jarvisQuotes.hit);
-                    updateUI();
-                    checkGameOver();
-                    continue;
-                }
-
-                // Colisão do Tiro com o Zumbi
-                let zRect = z.getBoundingClientRect();
-                for (let j = bullets.length - 1; j >= 0; j--) {
-                    let b = bullets[j];
-                    let bRect = b.getBoundingClientRect();
-
-                    if (bRect.left < zRect.right && bRect.right > zRect.left &&
-                        bRect.top < zRect.bottom && bRect.bottom > zRect.top) {
-                        
-                        // Reduz vida do zumbi
-                        z.dataset.hp -= 1;
-                        b.remove();
-                        bullets.splice(j, 1);
-
-                        if (z.dataset.hp <= 0) {
-                            z.remove();
-                            zombies.splice(i, 1);
-                            score += 10;
-                            zombiesKilledInStage++;
+        // Validação do Login
+        function validateLogin() {
+            const inputName = document.getElementById('player-name').value.trim();
+            if (inputName === "") {
+                jarvisSpeak("Por favor, insira uma identidade válida
                             
-                            if (Math.random() > 0.7) {
-                                jarvisSpeak(jarvisQuotes.kill[Math.floor(Math.random() * jarvisQuotes.kill.length)]);
-                            }
-                            
-                            checkProgression();
-                            updateUI();
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-
-        // Sistema de Fases, Etapas e Subida de Dificuldade
-        function checkProgression() {
-            if (zombiesKilledInStage >= zombiesNeededPerStage) {
-                zombiesKilledInStage = 0;
-                
-                if (stage < 3) {
-                    // Sobe de Etapa
-                    stage++;
-                    zombieSpeed += 0.4; // Zumbis andam mais rápido
-                    zombieSpawnRate = Math.max(600, zombieSpawnRate - 300); // Nascem mais rápido
-                    jarvisSpeak(jarvisQuotes.stageUp);
-                } else {
-                    // Sobe de Fase (Reseta etapa)
-                    phase++;
-                    stage = 1;
-                    zombieHpMax += 1; // Zumbis ficam mais resistentes (mutação)
-                    zombieSpeed = 1.5 + (phase * 0.3); 
-                    zombieSpawnRate = Math.max(500, 2000 - (phase * 250));
-                    jarvisSpeak(jarvisQuotes.phaseUp);
-                }
-            }
-        }
-
-        function checkGameOver() {
-            if (hp <= 0) {
-                hp = 0;
-                uiHp.innerText = 0;
-                gameActive = false;
-                
-                // Limpar loops e entidades
-                gameIntervals.forEach(clearInterval);
-                gameIntervals = [];
-                
-                zombies.forEach(z => z.remove());
-                bullets.forEach(b => b.remove());
-                zombies = [];
-                bullets = [];
-
-                document.getElementById('gameover-screen').classList.remove('hide');
-                jarvisSpeak("Protocolo de defesa quebrado. Desconectando...");
-            } else if (hp <= 30) {
-                jarvisSpeak(jarvisQuotes.lowHp);
-            }
-        }
-
-        function restartGame() {
-            startGame();
-        }
-    </script>
-</body>
-</html>

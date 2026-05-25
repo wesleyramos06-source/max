@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Magnata Sim - Simulador de Negócios</title>
+    <title>Life Tycoon - Simulador de Vida Empresarial</title>
     <style>
         :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
+            --bg-color: #090d16;
+            --card-bg: #172033;
             --text-color: #f8fafc;
             --green: #10b981;
             --red: #ef4444;
             --accent: #3b82f6;
+            --gold: #f59e0b;
         }
 
         body {
@@ -22,214 +23,196 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
-            overflow: hidden;
         }
 
-        .game-container {
-            text-align: center;
+        .screen {
             width: 90%;
             max-width: 500px;
             background: var(--card-bg);
             padding: 30px;
             border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-sizing: border-box;
         }
 
-        header {
-            margin-bottom: 30px;
+        .hidden {
+            display: none !important;
         }
 
-        h1 {
-            font-size: 1.8rem;
-            margin-bottom: 5px;
+        /* Tela de Login */
+        h2 {
+            text-align: center;
+            color: var(--accent);
+            margin-top: 0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            background: #1e293b;
+            color: white;
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        /* Estilo BitLife */
+        .profile-bar {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 2px solid #1e293b;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+        }
+
+        .profile-bar span strong {
             color: var(--accent);
         }
 
         .balance-box {
-            font-size: 2.2rem;
+            font-size: 2.5rem;
             font-weight: bold;
             color: var(--green);
-            margin: 15px 0;
-            transition: transform 0.2s;
+            text-align: center;
+            margin: 20px 0;
         }
 
         .balance-box.negative {
             color: var(--red);
         }
 
-        .proposal-card {
-            background: rgba(255, 255, 255, 0.05);
-            padding: 20px;
-            border-radius: 12px;
-            min-height: 150px;
+        .log-box {
+            background: #0f172a;
+            padding: 15px;
+            border-radius: 8px;
+            height: 180px;
+            overflow-y: auto;
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            border: 1px solid #1e293b;
+        }
+
+        .log-entry {
+            margin-bottom: 10px;
+            border-left: 3px solid var(--accent);
+            padding-left: 8px;
+        }
+
+        .log-entry.success { border-left-color: var(--green); }
+        .log-entry.fail { border-left-color: var(--red); }
+        .log-entry.system { border-left-color: var(--gold); }
+
+        .choices-container {
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .proposal-text {
-            font-size: 1.2rem;
-            line-height: 1.5;
-            margin-bottom: 10px;
-        }
-
-        .proposal-impact {
-            font-size: 0.9rem;
-            color: #94a3b8;
-        }
-
-        .btn-container {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
+            gap: 12px;
         }
 
         button {
-            padding: 15px 35px;
-            font-size: 1.1rem;
+            padding: 14px;
+            font-size: 1rem;
             font-weight: bold;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.2s ease;
-            width: 100%;
-        }
-
-        .btn-accept {
-            background-color: var(--green);
+            background-color: var(--accent);
             color: white;
         }
 
-        .btn-accept:hover {
-            background-color: #059669;
-            transform: scale(1.05);
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
         }
 
-        .btn-decline {
-            background-color: var(--red);
-            color: white;
+        .btn-age {
+            background-color: var(--gold);
+            color: #000;
+            font-size: 1.1rem;
+            margin-top: 10px;
         }
 
-        .btn-decline:hover {
-            background-color: #dc2626;
-            transform: scale(1.05);
+        .choice-btn {
+            background-color: #1e293b;
+            border: 1px solid #334155;
+            text-align: left;
+            font-weight: normal;
         }
 
-        .stats {
-            margin-top: 20px;
-            font-size: 0.9rem;
-            color: #64748b;
+        .choice-btn:hover {
+            background-color: #273549;
+            border-color: var(--accent);
         }
     </style>
 </head>
 <body>
 
-    <div class="game-container">
-        <header>
-            <h1>Império dos Negócios</h1>
-            <p>Tome as decisões certas para buildar sua fortuna.</p>
-            <div class="balance-box" id="balance">R$ 0</div>
-        </header>
+    <div id="login-screen" class="screen">
+        <h2>Criar Novo Empresário</h2>
+        <div class="form-group">
+            <label for="char-name">Nome do Personagem:</label>
+            <input type="text" id="char-name" placeholder="Ex: Roberto Marinho" value="Carlos Almeira">
+        </div>
+        <div class="form-group">
+            <label for="char-focus">Foco de Carreira Inicial:</label>
+            <select id="char-focus">
+                <option value="Tecnologia">Tecnologia (Apps e Startups)</option>
+                <option value="Varejo">Varejo (Comércio e Franquias)</option>
+                <option value="Finanças">Finanças (Ações e Ativos)</option>
+            </select>
+        </div>
+        <button onclick="iniciarJogo()" style="width: 100%;">Começar Vida de Negócios ➔</button>
+    </div>
 
-        <div class="proposal-card">
-            <p class="proposal-text" id="proposal-desc">Carregando primeira proposta...</p>
-            <p class="proposal-impact" id="proposal-detail"></p>
+    <div id="game-screen" class="screen hidden">
+        <div class="profile-bar">
+            <span>👤 <strong id="p-name">Nome</strong></span>
+            <span>🎂 Idade: <strong id="p-age">18</strong> anos</span>
+            <span>💼 Foco: <strong id="p-focus">Tech</strong></span>
         </div>
 
-        <div class="btn-container">
-            <button class="btn-decline" onclick="decide(false)">Recusar</button>
-            <button class="btn-accept" onclick="clickAceitar()">Aceitar</button>
-        </div>
+        <div class="balance-box" id="p-balance">R$ 0</div>
 
-        <div class="stats">
-            Decisões tomadas: <span id="turn-count">0</span>
+        <div class="log-box" id="game-log">
+            </div>
+
+        <div class="choices-container" id="choices-area">
+            </div>
+
+        <div class="choices-container">
+            <button class="btn-age" onclick="envelhecer()">＋ Envelhecer 1 Ano</button>
         </div>
     </div>
 
     <script>
-        // Banco de dados de propostas (Riscos e Oportunidades)
-        const proposals = [
-            { desc: "Vender limonada na frente de casa.", ganho: 50, perda: 0, chanceSucesso: 100, detalhe: "Ganho garantido de R$ 50" },
-            { desc: "Investir em uma nova criptomoeda meme.", ganho: 5000, perda: 1000, chanceSucesso: 30, detalhe: "30% de chance de lucrar R$ 5.000, senão perde R$ 1.000" },
-            { desc: "Comprar um lote de produtos eletrônicos importados.", ganho: 1200, perda: 400, chanceSucesso: 70, detalhe: "70% de chance de revender com lucro" },
-            { desc: "Criar um aplicativo de entrega para o seu bairro.", ganho: 3000, perda: 800, chanceSucesso: 55, detalhe: "Risco moderado de mercado" },
-            { desc: "Pegar um trabalho como freelancer de última hora.", ganho: 350, perda: 0, chanceSucesso: 100, detalhe: "Dinheiro garantido pelo seu tempo" },
-            { desc: "Abrir uma franquia de cafeteria de grife.", ganho: 15000, perda: 8000, chanceSucesso: 45, detalhe: "Alto investimento, alto retorno" },
-            { desc: "Apostar no cavalo azarão no hipódromo.", ganho: 8000, perda: 2000, chanceSucesso: 15, detalhe: "Risco altíssimo!" },
-            { desc: "Comprar ações de uma empresa de tecnologia sólida.", ganho: 1500, perda: 300, chanceSucesso: 80, detalhe: "Investimento seguro" },
-            { desc: "Patrocinar um influenciador digital local.", ganho: 2500, perda: 1200, chanceSucesso: 60, detalhe: "Pode trazer muitos clientes" },
-            { desc: "Comprar uma máquina de estampar camisetas usada.", ganho: 900, perda: 200, chanceSucesso: 75, detalhe: "Bom potencial de micro-negócio" }
-        ];
+        // Estrutura de dados do jogador
+        let player = {
+            nome: "",
+            idade: 18,
+            foco: "",
+            saldo: 0
+        };
 
-        let balance = 0;
-        let turn = 0;
-        let currentProposal = {};
-
-        const balanceEl = document.getElementById('balance');
-        const descEl = document.getElementById('proposal-desc');
-        const detailEl = document.getElementById('proposal-detail');
-        const turnEl = document.getElementById('turn-count');
-
-        function nextProposal() {
-            // Seleciona uma proposta aleatória do array
-            const randomIndex = Math.floor(Math.random() * proposals.length);
-            currentProposal = proposals[randomIndex];
-            
-            // Atualiza a tela
-            descEl.innerText = currentProposal.desc;
-            detailEl.innerText = currentProposal.detalhe;
-        }
-
-        function clickAceitar() {
-            decide(true);
-        }
-
-        function decide(accepted) {
-            if (accepted) {
-                // Calcula se a proposta deu certo baseado na chance de sucesso
-                const success = (Math.random() * 100) <= currentProposal.chanceSucesso;
-                
-                if (success) {
-                    balance += currentProposal.ganho;
-                    animateBalance('var(--green)');
-                } else {
-                    balance -= currentProposal.perda;
-                    animateBalance('var(--red)');
-                }
-            }
-
-            // Atualiza os dados na tela
-            turn++;
-            turnEl.innerText = turn;
-            updateBalanceDisplay();
-            
-            // Avança para a próxima
-            nextProposal();
-        }
-
-        function updateBalanceDisplay() {
-            balanceEl.innerText = `R$ ${balance.toLocaleString('pt-BR')}`;
-            if (balance < 0) {
-                balanceEl.classList.add('negative');
-            } else {
-                balanceEl.classList.remove('negative');
-            }
-        }
-
-        function animateBalance(color) {
-            balanceEl.style.transform = 'scale(1.1)';
-            setTimeout(() => {
-                balanceEl.style.transform = 'scale(1)';
-            }, 200);
-        }
-
-        // Inicializa o jogo
-        nextProposal();
-    </script>
-</body>
-</html>
+        // Banco de eventos e propostas estilo BitLife
+        const eventosOriginais = [
+            { desc: "Um amigo te chama para abrir uma assistência técnica de celulares.", ganho: 1200, perda: 400, chance: 75, tipo: "Tecnologia" },
+            { desc: "Criar um bot que automatiza postagens no Instagram para empresas locais.", ganho: 3000, perda: 200, chance: 60, tipo: "Tecnologia" },
+            { desc: "Comprar um lote de roupas de marcas famosas de um fornecedor misterioso para revender.", ganho: 4000, perda: 1500, chance: 45, tipo: "Varejo" },
+            { desc: "Abrir um carrinho de espetinhos gourmet na praça central da cidade.", ganho: 1800, perda: 600, chance: 80, tipo: "Varejo" },
+            { desc: "Investir suas economias em opções binárias guiado por um 'guru' da internet.", ganho: 10000, perda: 3000, chance: 20

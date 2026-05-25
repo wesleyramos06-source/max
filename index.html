@@ -3,16 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Life Tycoon - Simulador de Vida Empresarial</title>
+    <title>Magnata Sim - Simulador de Negócios</title>
     <style>
         :root {
-            --bg-color: #090d16;
-            --card-bg: #172033;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
             --text-color: #f8fafc;
             --green: #10b981;
             --red: #ef4444;
             --accent: #3b82f6;
-            --gold: #f59e0b;
         }
 
         body {
@@ -23,198 +22,189 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
+            height: 100vh;
             margin: 0;
+            overflow: hidden;
         }
 
-        .screen {
+        .container {
+            text-align: center;
             width: 90%;
             max-width: 500px;
             background: var(--card-bg);
             padding: 30px;
             border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            box-sizing: border-box;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
         }
 
+        /* Classes de utilidade para alternar telas */
         .hidden {
             display: none !important;
         }
 
-        h2 {
-            text-align: center;
+        header {
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 5px;
             color: var(--accent);
-            margin-top: 0;
         }
 
-        .form-group {
-            margin-bottom: 20px;
+        /* Estilos da Tela de Login */
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
         }
 
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #94a3b8;
-            font-size: 0.9rem;
-        }
-
-        input, select {
-            width: 100%;
+        .login-form input {
             padding: 12px;
             border-radius: 8px;
-            border: 1px solid #334155;
-            background: #1e293b;
-            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.2);
+            color: var(--text-color);
             font-size: 1rem;
-            box-sizing: border-box;
+            outline: none;
         }
 
-        .profile-bar {
-            display: flex;
-            justify-content: space-between;
-            border-bottom: 2px solid #1e293b;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
-            font-size: 0.95rem;
+        .login-form input:focus {
+            border-color: var(--accent);
         }
 
-        .profile-bar span strong {
-            color: var(--accent);
-        }
-
+        /* Estilos do Jogo */
         .balance-box {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             font-weight: bold;
             color: var(--green);
-            text-align: center;
-            margin: 20px 0;
-            transition: transform 0.1s ease;
+            margin: 15px 0;
+            transition: transform 0.2s;
         }
 
         .balance-box.negative {
             color: var(--red);
         }
 
-        .log-box {
-            background: #0f172a;
-            padding: 15px;
-            border-radius: 8px;
-            height: 180px;
-            overflow-y: auto;
-            margin-bottom: 25px;
-            font-size: 0.95rem;
-            line-height: 1.5;
-            border: 1px solid #1e293b;
-        }
-
-        .log-entry {
-            margin-bottom: 10px;
-            border-left: 3px solid var(--accent);
-            padding-left: 8px;
-            animation: fadeIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateX(-5px); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
-        .log-entry.success { border-left-color: var(--green); }
-        .log-entry.fail { border-left-color: var(--red); }
-        .log-entry.system { border-left-color: var(--gold); }
-
-        .choices-container {
+        .proposal-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 12px;
+            min-height: 150px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .proposal-text {
+            font-size: 1.2rem;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .proposal-impact {
+            font-size: 0.9rem;
+            color: #94a3b8;
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
         }
 
         button {
-            padding: 14px;
-            font-size: 1rem;
+            padding: 15px 35px;
+            font-size: 1.1rem;
             font-weight: bold;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.2s ease;
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        .btn-accent {
             background-color: var(--accent);
             color: white;
         }
 
-        button:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
+        .btn-accent:hover {
+            background-color: #2563eb;
+            transform: scale(1.02);
         }
 
-        .btn-age {
-            background-color: var(--gold);
-            color: #000;
-            font-size: 1.1rem;
-            margin-top: 10px;
+        .btn-accept {
+            background-color: var(--green);
+            color: white;
+            width: 100%;
         }
 
-        .choice-btn {
-            background-color: #1e293b;
-            border: 1px solid #334155;
-            text-align: left;
-            font-weight: normal;
-            color: var(--text-color);
+        .btn-accept:hover {
+            background-color: #059669;
+            transform: scale(1.05);
         }
 
-        .choice-btn:hover {
-            background-color: #273549;
-            border-color: var(--accent);
+        .btn-decline {
+            background-color: var(--red);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-decline:hover {
+            background-color: #dc2626;
+            transform: scale(1.05);
+        }
+
+        .stats {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #64748b;
         }
     </style>
 </head>
 <body>
 
-    <div id="login-screen" class="screen">
-        <h2>Criar Novo Empresário</h2>
-        <div class="form-group">
-            <label for="char-name">Nome do Personagem:</label>
-            <input type="text" id="char-name" placeholder="Ex: Roberto Marinho" value="Carlos Almeida">
+    <div class="container" id="login-screen">
+        <header>
+            <h1>Acessar Sistema</h1>
+            <p>Insira suas credenciais corporativas para começar</p>
+        </header>
+        <div class="login-form">
+            <input type="text" id="username" placeholder="Nome do Empresário(a)" required>
+            <button class="btn-accent btn-block" onclick="efetuarLogin()">Entrar no Painel</button>
         </div>
-        <div class="form-group">
-            <label for="char-focus">Foco de Carreira Inicial:</label>
-            <select id="char-focus">
-                <option value="Tecnologia">Tecnologia (Apps e Startups)</option>
-                <option value="Varejo">Varejo (Comércio e Franquias)</option>
-                <option value="Finanças">Finanças (Ações e Ativos)</option>
-            </select>
-        </div>
-        <button onclick="iniciarJogo()" style="width: 100%;">Começar Vida de Negócios ➔</button>
     </div>
 
-    <div id="game-screen" class="screen hidden">
-        <div class="profile-bar">
-            <span>👤 <strong id="p-name">Nome</strong></span>
-            <span>🎂 Idade: <strong id="p-age">18</strong> anos</span>
-            <span>💼 Foco: <strong id="p-focus">Tech</strong></span>
+    <div class="container hidden" id="game-screen">
+        <header>
+            <h1 id="welcome-msg">Império dos Negócios</h1>
+            <p>Tome as decisões certas para buildar sua fortuna.</p>
+            <div class="balance-box" id="balance">R$ 0</div>
+        </header>
+
+        <div class="proposal-card">
+            <p class="proposal-text" id="proposal-desc">Carregando primeira proposta...</p>
+            <p class="proposal-impact" id="proposal-detail"></p>
         </div>
 
-        <div class="balance-box" id="p-balance">R$ 0</div>
+        <div class="btn-container">
+            <button class="btn-decline" onclick="decide(false)">Recusar</button>
+            <button class="btn-accept" onclick="decide(true)">Aceitar</button>
+        </div>
 
-        <div class="log-box" id="game-log"></div>
-
-        <div class="choices-container" id="choices-area"></div>
-
-        <div class="choices-container">
-            <button class="btn-age" id="btn-age-main" onclick="envelhecer()">＋ Envelhecer 1 Ano</button>
+        <div class="stats">
+            Decisões tomadas: <span id="turn-count">0</span>
         </div>
     </div>
 
     <script>
-        // Estrutura de dados do jogador
-        let player = {
-            nome: "",
-            idade: 18,
-            foco: "",
-            saldo: 0
-        };
-
-        // Banco de eventos e propostas completas
-        const eventosOriginais = [
-            { desc: "Um amigo te chama para abrir uma assistência técnica de celulares.", ganho: 1200, perda: 400, chance: 75, tipo: "Tecnologia" },
-            { desc: "Criar um bot que automatiza postagens no Instagram para empresas locais.", ganho: 3000, perda: 200, chance: 60, tipo: "Tecnologia" },
-            { desc: "Comprar um lote de roupas de marcas famosas de um fornecedor misterioso para revender.", ganho: 4000, perda:
+        // Banco

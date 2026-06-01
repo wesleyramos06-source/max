@@ -1,304 +1,136 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulador de Vida - Estilo BitLife</title>
-    <style>
-        :root {
-            --bg-color: #121212;
-            --card-bg: #1e1e1e;
-            --text-color: #ffffff;
-            --accent-color: #00e676;
-            --button-bg: #292929;
-            --button-hover: #3d3d3d;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        .game-container {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            padding: 25px;
-            width: 100%;
-            max-width: 500px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-        }
-
-        header {
-            text-align: center;
-            border-bottom: 2px solid var(--button-bg);
-            padding-bottom: 15px;
-            margin-bottom: 20px;
-        }
-
-        h1 {
-            margin: 0;
-            color: var(--accent-color);
-            font-size: 24px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 20px;
-            background: rgba(255,255,255,0.05);
-            padding: 15px;
-            border-radius: 8px;
-        }
-
-        .stat-item {
-            font-size: 14px;
-        }
-
-        .stat-item span {
-            font-weight: bold;
-            color: var(--accent-color);
-        }
-
-        .event-box {
-            min-height: 120px;
-            margin-bottom: 20px;
-            font-size: 16px;
-            line-height: 1.5;
-            border-left: 4px solid var(--accent-color);
-            padding-left: 15px;
-            display: flex;
-            align-items: center;
-        }
-
-        .options-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        button {
-            background-color: var(--button-bg);
-            color: var(--text-color);
-            border: 1px solid #444;
-            padding: 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s ease;
-            text-align: left;
-        }
-
-        button:hover {
-            background-color: var(--button-hover);
-            border-color: var(--accent-color);
-        }
-
-        .btn-age {
-            background-color: var(--accent-color);
-            color: #000;
-            font-weight: bold;
-            text-align: center;
-            margin-top: 15px;
-            width: 100%;
-        }
-
-        .btn-age:hover {
-            background-color: #00b359;
-        }
-
-        .log-box {
-            margin-top: 20px;
-            max-height: 100px;
-            overflow-y: auto;
-            font-size: 12px;
-            color: #aaa;
-            border-top: 1px solid var(--button-bg);
-            padding-top: 10px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Zombie Shooter</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #fff;
+      text-align: center;
+      margin: 0;
+      padding: 0;
+    }
+    #gameCanvas {
+      background: #333;
+      border: 2px solid #fff;
+      display: block;
+      margin: 20px auto;
+    }
+    button {
+      padding: 10px 20px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+    #hud {
+      margin-top: 10px;
+    }
+  </style>
 </head>
 <body>
+  <!-- Tela de Login -->
+  <div id="login-screen">
+    <h1>Zombie Shooter</h1>
+    <input type="text" id="username" placeholder="Digite seu nome">
+    <button onclick="login()">Entrar</button>
+  </div>
 
-    <div class="game-container">
-        <header>
-            <h1>Simulador de Vida</h1>
-        </header>
-
-        <div class="stats-grid">
-            <div class="stat-item">Idade: <span id="stat-age">0 anos</span></div>
-            <div class="stat-item">Saldo: <span id="stat-money">R$ 0</span></div>
-            <div class="stat-item">Saúde: <span id="stat-health">100%</span></div>
-            <div class="stat-item">Felicidade: <span id="stat-happiness">100%</span></div>
-        </div>
-
-        <div class="event-box" id="event-text">
-            Você acabou de nascer! Seus pais te olham com amor. Clique em "+ Envelhecer" para começar sua jornada.
-        </div>
-
-        <div class="options-container" id="options-space">
-            </div>
-
-        <button class="btn-age" id="btn-advance" onclick="advanceYear()">+ Envelhecer 1 Ano</button>
-
-        <div class="log-box" id="log-box">
-            - Vida iniciada com R$ 0.
-        </div>
+  <!-- Tela do Jogo -->
+  <div id="game-screen" style="display:none;">
+    <canvas id="gameCanvas" width="800" height="600"></canvas>
+    <div id="hud">
+      <p>Fase: <span id="fase">1</span>/12</p>
+      <p>Desafio: <span id="desafio">1</span>/10</p>
+      <p>Pontos: <span id="pontos">0</span></p>
     </div>
+    <p>Use a tecla <b>ESPAÇO</b> para atirar!</p>
+  </div>
 
-    <script>
-        // Estado inicial do jogador
-        let player = {
-            age: 0,
-            money: 0,
-            health: 100,
-            happiness: 100,
-            isAlive: true
-        };
+  <!-- Tela de Ranking -->
+  <div id="ranking-screen" style="display:none;">
+    <h2>Ranking</h2>
+    <ul id="ranking-list"></ul>
+    <button onclick="restart()">Jogar novamente</button>
+  </div>
 
-        // Banco de dados de eventos divididos por fase da vida (Loop Infinito)
-        const eventsDb = {
-            childhood: [
-                {
-                    text: "Um garoto na escola roubou seu lanche. O que você faz?",
-                    choices: [
-                        { text: "Chora e conta para a professora", money: 0, health: 0, happiness: -10, log: "Você chorou na escola." },
-                        { text: "Dá um soco nele", money: 0, health: -15, happiness: 10, log: "Você brigou e levou uma surra, mas lavou a honra." },
-                        { text: "Oferece metade no próximo dia para virarem amigos", money: 0, health: 0, happiness: 15, log: "Você fez diplomacia com o valentão." }
-                    ]
-                },
-                {
-                    text: "Seus pais te ofereceram R$ 20 para arrumar o quarto.",
-                    choices: [
-                        { text: "Arrumar imediatamente", money: 20, health: 0, happiness: 5, log: "Ganhou R$ 20 limpando o quarto." },
-                        { text: "Recusar e ir jogar videogame", money: 0, health: 0, happiness: 15, log: "Preguiça reinou, mas você se divertiu." }
-                    ]
-                },
-                {
-                    text: "Você achou uma moeda brilhante no parquinho.",
-                    choices: [
-                        { text: "Engolir a moeda", money: 0, health: -30, happiness: -20, log: "Você engoliu a moeda e foi parar no hospital." },
-                        { text: "Guardar no bolso", money: 5, health: 0, happiness: 10, log: "Achou R$ 5 no chão!" }
-                    ]
-                }
-            ],
-            adolescence: [
-                {
-                    text: "Seus amigos te chamaram para cabular aula e ir ao shopping.",
-                    choices: [
-                        { text: "Ir com eles", money: -15, health: 0, happiness: 20, log: "Fugiu da escola e gastou R$ 15 em besteira." },
-                        { text: "Ficar na aula estudando", money: 0, health: 0, happiness: -5, log: "Você estudou muito. Nerd!" }
-                    ]
-                },
-                {
-                    text: "Você quer arrumar seu primeiro emprego de jovem aprendiz.",
-                    choices: [
-                        { text: "Trabalhar em um fast food", money: 400, health: -10, happiness: -10, log: "Arrumou um emprego cansativo no fast food (+R$400)." },
-                        { text: "Focar apenas nos videogames", money: 0, health: 0, happiness: 20, log: "Você decidiu ser sustentado por mais um tempo." }
-                    ]
-                }
-            ],
-            adult: [
-                {
-                    text: "Uma oportunidade de investimento em criptomoedas duvidosas apareceu.",
-                    choices: [
-                        { text: "Investir tudo o que tem!", money: "ALL_IN", health: 0, happiness: 0, log: "Você arriscou tudo em cripto..." },
-                        { text: "Ignorar e guardar no banco", money: 50, health: 0, happiness: 5, log: "Investiu de forma segura." }
-                    ]
-                },
-                {
-                    text: "Você está trabalhando demais e se sente extremamente estressado.",
-                    choices: [
-                        { text: "Tirar férias luxuosas", money: -1500, health: 20, happiness: 30, log: "Gastou R$ 1500 em uma viagem relaxante." },
-                        { text: "Continuar trabalhando pelo dinheiro", money: 2000, health: -25, happiness: -20, log: "Trabalhou até a exaustão, mas ganhou R$ 2000." }
-                    ]
-                },
-                {
-                    text: "Você bateu o carro em um poste.",
-                    choices: [
-                        { text: "Pagar o conserto caro", money: -2000, health: 0, happiness: -15, log: "Prejuízo de R$ 2000 com o carro." },
-                        { text: "Fugir a pé e fingir que foi roubado", money: 0, health: -10, happiness: -30, log: "A polícia desconfiou de você. Que estresse." }
-                    ]
-                }
-            ],
-            elderly: [
-                {
-                    text: "Suas costas estão doendo terrivelmente hoje.",
-                    choices: [
-                        { text: "Ir ao médico particular", money: -500, health: 20, happiness: 10, log: "Gastou R$ 500 no médico, mas melhorou." },
-                        { text: "Tomar um chá caseiro e deitar", money: 0, health: -10, happiness: -5, log: "O chá não ajudou muito." }
-                    ]
-                },
-                {
-                    text: "Seus netos pediram dinheiro para comprar um doce.",
-                    choices: [
-                        { text: "Dar R$ 50 para cada", money: -100, health: 0, happiness: 40, log: "Você mimou seus netos com R$ 100." },
-                        { text: "Dizer que no seu tempo as coisas eram de graça", money: 0, health: 0, happiness: -10, log: "Eles saíram resmungando." }
-                    ]
-                }
-            ]
-        };
+  <script>
+    let player = { name: "", pontos: 0, fase: 1, desafio: 1 };
+    let ranking = [];
 
-        // Atualiza a interface gráfica do jogo
-        function updateUI() {
-            document.getElementById("stat-age").innerText = `${player.age} anos`;
-            document.getElementById("stat-money").innerText = `R$ ${player.money}`;
-            document.getElementById("stat-health").innerText = `${player.health}%`;
-            document.getElementById("stat-happiness").innerText = `${player.happiness}%`;
+    function login() {
+      const username = document.getElementById("username").value;
+      if (username.trim() === "") return alert("Digite um nome!");
+      player.name = username;
+      document.getElementById("login-screen").style.display = "none";
+      document.getElementById("game-screen").style.display = "block";
+      startGame();
+    }
 
-            if (player.health <= 0) {
-                gameOver("Você faleceu devido a problemas de saúde.");
-            } else if (player.age >= 100) {
-                gameOver("Você faleceu pacificamente de velhice aos 100 anos!");
-            }
+    function startGame() {
+      const canvas = document.getElementById("gameCanvas");
+      const ctx = canvas.getContext("2d");
+
+      document.addEventListener("keydown", shoot);
+
+      function shoot(e) {
+        if (e.code === "Space") {
+          // Pontuação básica
+          player.pontos += 10;
+
+          // Chefão na última fase
+          if (player.fase === 12 && player.desafio === 10) {
+            player.pontos += 100; // bônus do chefão derrotado
+            endGame();
+          } else {
+            nextChallenge();
+          }
+          updateHUD();
+        }
+      }
+
+      function updateHUD() {
+        document.getElementById("fase").textContent = player.fase;
+        document.getElementById("desafio").textContent = player.desafio;
+        document.getElementById("pontos").textContent = player.pontos;
+      }
+
+      function nextChallenge() {
+        if (player.desafio < 10) {
+          player.desafio++;
+        } else {
+          player.desafio = 1;
+          player.fase++;
         }
 
-        // Adiciona mensagens no painel de histórico
-        function logMessage(text) {
-            const logBox = document.getElementById("log-box");
-            logBox.innerHTML = `- ${text}<br>` + logBox.innerHTML;
+        if (player.fase > 12) {
+          endGame();
         }
+      }
 
-        // Avança um ano na vida (Gera o loop de perguntas)
-        function advanceYear() {
-            if (!player.isAlive) return;
+      function endGame() {
+        document.getElementById("game-screen").style.display = "none";
+        document.getElementById("ranking-screen").style.display = "block";
 
-            player.age++;
-            
-            // Salário/Renda passiva básica automática dependendo da idade
-            if (player.age >= 18 && player.age < 65) {
-                player.money += 150; // Salário base por ser adulto
-            } else if (player.age >= 65) {
-                player.money += 100; // Aposentadoria base
-            }
+        ranking.push({ name: player.name, pontos: player.pontos });
+        ranking.sort((a, b) => b.pontos - a.pontos);
 
-            // Seleciona a categoria de evento baseado na idade
-            let category;
-            if (player.age < 12) category = "childhood";
-            else if (player.age < 18) category = "adolescence";
-            else if (player.age < 65) category = "adult";
-            else category = "elderly";
+        const list = document.getElementById("ranking-list");
+        list.innerHTML = "";
+        ranking.forEach(r => {
+          const li = document.createElement("li");
+          li.textContent = `${r.name} - ${r.pontos} pontos`;
+          list.appendChild(li);
+        });
+      }
+    }
 
-            // Sorteia um evento aleatório da categoria (Garantindo o Loop Infinito)
-            const eventsList = eventsDb[category];
-            const randomEvent = eventsList[Math.floor(Math.random() * eventsList.length)];
-
-            // Renderiza o evento na tela
-            displayEvent(randomEvent);
-        }
-
-        // Mostra a pergunta e as opções na tela
-        function displayEvent(eventObj) {
-            document.getElementById("event-text").innerText = `[Ano ${player.age}] ${eventObj.text}`;
-            const optionsSpace = document.getElementById("options-space");
-            optionsSpace.innerHTML = ""; // Limpa escolhas anteriores
-
-            // Desativa o botão de avançar ano até que uma escolha seja feita
-            document
+    function restart() {
+      player = { name: player.name, pontos: 0, fase: 1, desafio: 1 };
+      document.getElementById("ranking-screen").style.display = "none";
+      document.getElementById("game-screen").style.display = "block";
+      startGame();
+    }
+  </script>
+</body>
+</html>

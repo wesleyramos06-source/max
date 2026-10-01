@@ -4,1098 +4,194 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FUGA INSANA</title>
-
 <link rel="stylesheet" href="style.css">
-
 </head>
 <body>
 
 <canvas id="bg-canvas"></canvas>
-
-<button id="btnBackToLobby">
-    ◄ MENU
-</button>
-
+<button id="btnBackToLobby">◄ MENU</button>
 
 <div id="lobby">
-
     <div class="title-wrap">
-
-        <div class="game-title">
-            FUGA INSANA
-        </div>
-
-        <div class="subtitle">
-            ✦ FUJA • COMA • SOBREVIVA ✦
-        </div>
-
+        <div class="game-title">FUGA INSANA</div>
+        <div class="subtitle">✦ FUJA • COMA • SOBREVIVA ✦</div>
     </div>
-
 
     <div class="menu">
-
-        <button
-            class="menu-btn primary"
-            id="btnPlay"
-        >
-            <span class="btn-icon">▶</span>
-            JOGAR
-        </button>
-
-
-        <button
-            class="menu-btn"
-            id="btnSettings"
-        >
-            <span class="btn-icon">⚙️</span>
-            CONFIGURAÇÕES
-        </button>
-
-
-        <button
-            class="menu-btn"
-            id="btnStats"
-        >
-            <span class="btn-icon">📊</span>
-            ESTATÍSTICAS
-        </button>
-
-
-        <button
-            class="menu-btn"
-            id="btnStyle"
-        >
-            <span class="btn-icon">🎨</span>
-            ESTILO
-        </button>
-
-
-        <button
-            class="menu-btn"
-            id="btnCredits"
-        >
-            <span class="btn-icon">👑</span>
-            CRÉDITOS
-        </button>
-
+        <button class="menu-btn primary" id="btnPlay"><span class="btn-icon">▶</span> JOGAR</button>
+        <button class="menu-btn" id="btnSettings"><span class="btn-icon">⚙️</span> CONFIGURAÇÕES</button>
+        <button class="menu-btn" id="btnStats"><span class="btn-icon">📊</span> ESTATÍSTICAS</button>
+        <button class="menu-btn" id="btnStyle"><span class="btn-icon">🎨</span> ESTILO</button>
+        <button class="menu-btn" id="btnCredits"><span class="btn-icon">👑</span> CRÉDITOS</button>
     </div>
 
-
-    <div class="lobby-footer">
-
-        v1.0 •
-
-        <span class="highlight">
-            FUGA INSANA
-        </span>
-
-        • © 2025
-
-    </div>
-
+    <div class="lobby-footer">v1.0 • <span class="highlight">FUGA INSANA</span> • © 2025</div>
 </div>
-
 
 <div id="game-container"></div>
 
-
 <div id="gameLoading">
-
     <div class="spinner"></div>
-
-    <div class="loading-text">
-        Carregando...
-    </div>
-
+    <div class="loading-text">Carregando...</div>
 </div>
 
-
-
-<!-- =========================================================
-     CONFIGURAÇÕES
-========================================================= -->
-
-<div
-    class="modal-bg"
-    id="modalSettings"
->
-
+<!-- MODAIS -->
+<div class="modal-bg" id="modalSettings">
     <div class="modal">
-
         <div class="modal-header">
-
-            <div class="modal-title">
-                ⚙️ Configurações
-            </div>
-
-            <button
-                class="modal-close"
-                data-close="modalSettings"
-            >
-                ✕
-            </button>
-
+            <div class="modal-title">⚙️ Configurações</div>
+            <button class="modal-close" data-close="modalSettings">✕</button>
         </div>
-
-
         <div class="form-group">
-
-            <label class="form-label">
-                Qualidade Gráfica
-            </label>
-
-
-            <div
-                class="form-options"
-                id="optQuality"
-            >
-
-                <button
-                    class="option-btn"
-                    data-value="low"
-                >
-                    <span class="opt-icon">
-                        🔻
-                    </span>
-
-                    BAIXA
-                </button>
-
-
-                <button
-                    class="option-btn"
-                    data-value="medium"
-                >
-                    <span class="opt-icon">
-                        ⚡
-                    </span>
-
-                    MÉDIA
-                </button>
-
-
-                <button
-                    class="option-btn"
-                    data-value="high"
-                >
-                    <span class="opt-icon">
-                        💎
-                    </span>
-
-                    ALTA
-                </button>
-
+            <label class="form-label">Qualidade Gráfica</label>
+            <div class="form-options" id="optQuality">
+                <button class="option-btn" data-value="low"><span class="opt-icon">🔻</span> BAIXA</button>
+                <button class="option-btn" data-value="medium"><span class="opt-icon">⚡</span> MÉDIA</button>
+                <button class="option-btn" data-value="high"><span class="opt-icon">💎</span> ALTA</button>
             </div>
-
         </div>
-
-
-
         <div class="form-group">
-
-            <label class="form-label">
-                Tamanho do Mapa
-            </label>
-
-
-            <div
-                class="form-options"
-                id="optMapSize"
-            >
-
-                <button
-                    class="option-btn"
-                    data-value="small"
-                >
-                    <span class="opt-icon">
-                        📦
-                    </span>
-
-                    15×15
-                </button>
-
-
-                <button
-                    class="option-btn"
-                    data-value="medium"
-                >
-                    <span class="opt-icon">
-                        📦
-                    </span>
-
-                    19×19
-                </button>
-
-
-                <button
-                    class="option-btn"
-                    data-value="large"
-                >
-                    <span class="opt-icon">
-                        📦
-                    </span>
-
-                    23×23
-                </button>
-
+            <label class="form-label">Tamanho do Mapa</label>
+            <div class="form-options" id="optMapSize">
+                <button class="option-btn" data-value="small"><span class="opt-icon">📦</span> 15×15</button>
+                <button class="option-btn" data-value="medium"><span class="opt-icon">📦</span> 19×19</button>
+                <button class="option-btn" data-value="large"><span class="opt-icon">📦</span> 23×23</button>
             </div>
-
         </div>
-
-
-
         <div class="form-group">
-
-            <label class="form-label">
-                Densidade de Paredes
-            </label>
-
-
-            <div
-                class="form-options"
-                id="optWallDensity"
-            >
-
-                <button
-                    class="option-btn"
-                    data-value="low"
-                >
-                    <span class="opt-icon">
-                        🌿
-                    </span>
-
-                    FÁCIL
-                </button>
-
-
-                <button
-                    class="option-btn"
-                    data-value="normal"
-                >
-                    <span class="opt-icon">
-                        ⚖️
-                    </span>
-
-                    NORMAL
-                </button>
-
-
-                <button
-                    class="option-btn"
-                    data-value="high"
-                >
-                    <span class="opt-icon">
-                        🔥
-                    </span>
-
-                    CAÓTICO
-                </button>
-
+            <label class="form-label">Densidade de Paredes</label>
+            <div class="form-options" id="optWallDensity">
+                <button class="option-btn" data-value="low"><span class="opt-icon">🌿</span> FÁCIL</button>
+                <button class="option-btn" data-value="normal"><span class="opt-icon">⚖️</span> NORMAL</button>
+                <button class="option-btn" data-value="high"><span class="opt-icon">🔥</span> CAÓTICO</button>
             </div>
-
         </div>
-
-
-
         <div class="form-group">
-
-            <label class="form-label">
-                Velocidade dos Fantasmas
-            </label>
-
-
+            <label class="form-label">Velocidade dos Fantasmas</label>
             <div class="slider-wrap">
-
-                <input
-                    type="range"
-                    class="slider"
-                    id="sliderGhostSpeed"
-                    min="1"
-                    max="10"
-                    step="1"
-                    value="5"
-                >
-
-                <span
-                    class="slider-value"
-                    id="sliderGhostSpeedVal"
-                >
-                    5
-                </span>
-
+                <input type="range" class="slider" id="sliderGhostSpeed" min="1" max="10" step="1" value="5">
+                <span class="slider-value" id="sliderGhostSpeedVal">5</span>
             </div>
-
         </div>
-
-
-
         <div class="form-group">
-
-            <label class="form-label">
-                Volume do Jogo
-            </label>
-
-
+            <label class="form-label">Volume do Jogo</label>
             <div class="slider-wrap">
-
-                <input
-                    type="range"
-                    class="slider"
-                    id="sliderVolume"
-                    min="0"
-                    max="10"
-                    step="1"
-                    value="7"
-                >
-
-                <span
-                    class="slider-value"
-                    id="sliderVolumeVal"
-                >
-                    70%
-                </span>
-
+                <input type="range" class="slider" id="sliderVolume" min="0" max="10" step="1" value="7">
+                <span class="slider-value" id="sliderVolumeVal">70%</span>
             </div>
-
         </div>
-
-
-
         <div class="form-group">
-
             <div class="toggle-row">
-
-                <div class="toggle-label">
-
-                    Efeitos de Partículas
-
-                    <small>
-                        Explosões ao comer pastilhas
-                    </small>
-
-                </div>
-
-                <div
-                    class="toggle-switch on"
-                    id="toggleParticles"
-                ></div>
-
+                <div class="toggle-label">Efeitos de Partículas<small>Explosões ao comer pastilhas</small></div>
+                <div class="toggle-switch on" id="toggleParticles"></div>
             </div>
-
-
-
             <div class="toggle-row">
-
-                <div class="toggle-label">
-
-                    Sombras Dinâmicas
-
-                    <small>
-                        Melhor aparência, mais lento
-                    </small>
-
-                </div>
-
-                <div
-                    class="toggle-switch on"
-                    id="toggleShadows"
-                ></div>
-
+                <div class="toggle-label">Sombras Dinâmicas<small>Melhor aparência, mais lento</small></div>
+                <div class="toggle-switch on" id="toggleShadows"></div>
             </div>
-
-
-
             <div class="toggle-row">
-
-                <div class="toggle-label">
-
-                    Modo Tela Cheia ao Jogar
-
-                    <small>
-                        Expande o jogo automaticamente
-                    </small>
-
-                </div>
-
-                <div
-                    class="toggle-switch"
-                    id="toggleFullscreen"
-                ></div>
-
+                <div class="toggle-label">Modo Tela Cheia ao Jogar<small>Expande o jogo automaticamente</small></div>
+                <div class="toggle-switch" id="toggleFullscreen"></div>
             </div>
-
         </div>
-
-
-
         <div class="stats-actions">
-
-            <button
-                class="menu-btn"
-                id="btnResetSettings"
-            >
-                <span class="btn-icon">
-                    ↺
-                </span>
-
-                RESETAR
-            </button>
-
-
-            <button
-                class="menu-btn primary"
-                data-close="modalSettings"
-            >
-                <span class="btn-icon">
-                    ✓
-                </span>
-
-                SALVAR
-            </button>
-
+            <button class="menu-btn" id="btnResetSettings"><span class="btn-icon">↺</span> RESETAR</button>
+            <button class="menu-btn primary" data-close="modalSettings"><span class="btn-icon">✓</span> SALVAR</button>
         </div>
-
     </div>
-
 </div>
 
-
-
-<!-- =========================================================
-     ESTATÍSTICAS
-========================================================= -->
-
-<div
-    class="modal-bg"
-    id="modalStats"
->
-
+<div class="modal-bg" id="modalStats">
     <div class="modal">
-
         <div class="modal-header">
-
-            <div class="modal-title">
-                📊 Estatísticas
-            </div>
-
-
-            <button
-                class="modal-close"
-                data-close="modalStats"
-            >
-                ✕
-            </button>
-
+            <div class="modal-title">📊 Estatísticas</div>
+            <button class="modal-close" data-close="modalStats">✕</button>
         </div>
-
-
         <div class="stats-grid">
-
-            <div class="stat-card">
-
-                <div
-                    class="stat-value"
-                    id="statHighScore"
-                >
-                    0
-                </div>
-
-                <div class="stat-label">
-                    Recorde
-                </div>
-
-            </div>
-
-
-
-            <div class="stat-card">
-
-                <div
-                    class="stat-value"
-                    id="statTotalScore"
-                >
-                    0
-                </div>
-
-                <div class="stat-label">
-                    Pontos Totais
-                </div>
-
-            </div>
-
-
-
-            <div class="stat-card">
-
-                <div
-                    class="stat-value"
-                    id="statGames"
-                >
-                    0
-                </div>
-
-                <div class="stat-label">
-                    Partidas
-                </div>
-
-            </div>
-
-
-
-            <div class="stat-card">
-
-                <div
-                    class="stat-value"
-                    id="statLevel"
-                >
-                    1
-                </div>
-
-                <div class="stat-label">
-                    Fase Máxima
-                </div>
-
-            </div>
-
-
-
-            <div class="stat-card">
-
-                <div
-                    class="stat-value"
-                    id="statGhosts"
-                >
-                    0
-                </div>
-
-                <div class="stat-label">
-                    Fantasmas Comidos
-                </div>
-
-            </div>
-
-
-
-            <div class="stat-card">
-
-                <div
-                    class="stat-value"
-                    id="statNpcs"
-                >
-                    0
-                </div>
-
-                <div class="stat-label">
-                    NPCs Visitados
-                </div>
-
-            </div>
-
-
-
-            <div class="stat-card">
-
-                <div
-                    class="stat-value"
-                    id="statTime"
-                >
-                    0h
-                </div>
-
-                <div class="stat-label">
-                    Tempo Jogado
-                </div>
-
-            </div>
-
-
-
-            <div class="stat-card">
-
-                <div
-                    class="stat-value"
-                    id="statCombo"
-                >
-                    0x
-                </div>
-
-                <div class="stat-label">
-                    Maior Combo
-                </div>
-
-            </div>
-
+            <div class="stat-card"><div class="stat-value" id="statHighScore">0</div><div class="stat-label">Recorde</div></div>
+            <div class="stat-card"><div class="stat-value" id="statTotalScore">0</div><div class="stat-label">Pontos Totais</div></div>
+            <div class="stat-card"><div class="stat-value" id="statGames">0</div><div class="stat-label">Partidas</div></div>
+            <div class="stat-card"><div class="stat-value" id="statLevel">1</div><div class="stat-label">Fase Máxima</div></div>
+            <div class="stat-card"><div class="stat-value" id="statGhosts">0</div><div class="stat-label">Fantasmas Comidos</div></div>
+            <div class="stat-card"><div class="stat-value" id="statNpcs">0</div><div class="stat-label">NPCs Visitados</div></div>
+            <div class="stat-card"><div class="stat-value" id="statTime">0h</div><div class="stat-label">Tempo Jogado</div></div>
+            <div class="stat-card"><div class="stat-value" id="statCombo">0x</div><div class="stat-label">Maior Combo</div></div>
         </div>
-
-
-
         <div class="stats-actions">
-
-            <button
-                class="menu-btn"
-                id="btnResetStats"
-            >
-
-                <span class="btn-icon">
-                    🗑️
-                </span>
-
-                LIMPAR
-
-            </button>
-
-
-            <button
-                class="menu-btn primary"
-                data-close="modalStats"
-            >
-
-                <span class="btn-icon">
-                    ✓
-                </span>
-
-                FECHAR
-
-            </button>
-
+            <button class="menu-btn" id="btnResetStats"><span class="btn-icon">🗑️</span> LIMPAR</button>
+            <button class="menu-btn primary" data-close="modalStats"><span class="btn-icon">✓</span> FECHAR</button>
         </div>
-
     </div>
-
 </div>
 
-
-
-<!-- =========================================================
-     ESTILO
-========================================================= -->
-
-<div
-    class="modal-bg"
-    id="modalStyle"
->
-
+<div class="modal-bg" id="modalStyle">
     <div class="modal">
-
         <div class="modal-header">
-
-            <div class="modal-title">
-                🎨 Estilo
-            </div>
-
-
-            <button
-                class="modal-close"
-                data-close="modalStyle"
-            >
-                ✕
-            </button>
-
+            <div class="modal-title">🎨 Estilo</div>
+            <button class="modal-close" data-close="modalStyle">✕</button>
         </div>
-
-
-
         <div class="form-group">
-
-            <label class="form-label">
-                Tema Visual
-            </label>
-
-
-            <div
-                class="form-options"
-                id="optTheme"
-            >
-
-                <button
-                    class="option-btn"
-                    data-value="classic"
-                >
-
-                    <span class="opt-icon">
-                        🔵
-                    </span>
-
-                    CLÁSSICO
-
-                </button>
-
-
-
-                <button
-                    class="option-btn"
-                    data-value="neon"
-                >
-
-                    <span class="opt-icon">
-                        💜
-                    </span>
-
-                    NEON
-
-                </button>
-
-
-
-                <button
-                    class="option-btn"
-                    data-value="retro"
-                >
-
-                    <span class="opt-icon">
-                        📺
-                    </span>
-
-                    RETRÔ
-
-                </button>
-
-
-
-                <button
-                    class="option-btn"
-                    data-value="matrix"
-                >
-
-                    <span class="opt-icon">
-                        💚
-                    </span>
-
-                    MATRIX
-
-                </button>
-
+            <label class="form-label">Tema Visual</label>
+            <div class="form-options" id="optTheme">
+                <button class="option-btn" data-value="classic"><span class="opt-icon">🔵</span> CLÁSSICO</button>
+                <button class="option-btn" data-value="neon"><span class="opt-icon">💜</span> NEON</button>
+                <button class="option-btn" data-value="retro"><span class="opt-icon">📺</span> RETRÔ</button>
+                <button class="option-btn" data-value="matrix"><span class="opt-icon">💚</span> MATRIX</button>
             </div>
-
         </div>
-
-
-
         <div class="form-group">
-
-            <label class="form-label">
-                Cor do Pac-Man
-            </label>
-
-
-            <div
-                class="form-options"
-                id="optPacmanColor"
-            >
-
-                <button
-                    class="option-btn"
-                    data-value="yellow"
-                >
-
-                    <span class="opt-icon">
-                        🟡
-                    </span>
-
-                    AMARELO
-
-                </button>
-
-
-
-                <button
-                    class="option-btn"
-                    data-value="cyan"
-                >
-
-                    <span class="opt-icon">
-                        🔵
-                    </span>
-
-                    CIANO
-
-                </button>
-
-
-
-                <button
-                    class="option-btn"
-                    data-value="pink"
-                >
-
-                    <span class="opt-icon">
-                        🩷
-                    </span>
-
-                    ROSA
-
-                </button>
-
-
-
-                <button
-                    class="option-btn"
-                    data-value="lime"
-                >
-
-                    <span class="opt-icon">
-                        🟢
-                    </span>
-
-                    VERDE
-
-                </button>
-
+            <label class="form-label">Cor do Pac-Man</label>
+            <div class="form-options" id="optPacmanColor">
+                <button class="option-btn" data-value="yellow"><span class="opt-icon">🟡</span> AMARELO</button>
+                <button class="option-btn" data-value="cyan"><span class="opt-icon">🔵</span> CIANO</button>
+                <button class="option-btn" data-value="pink"><span class="opt-icon">🩷</span> ROSA</button>
+                <button class="option-btn" data-value="lime"><span class="opt-icon">🟢</span> VERDE</button>
             </div>
-
         </div>
-
-
-
         <div class="form-group">
-
-            <label class="form-label">
-                Estilo dos Fantasmas
-            </label>
-
-
-            <div
-                class="form-options"
-                id="optGhostStyle"
-            >
-
-                <button
-                    class="option-btn"
-                    data-value="ghost"
-                >
-
-                    <span class="opt-icon">
-                        👻
-                    </span>
-
-                    CLÁSSICO
-
-                </button>
-
-
-
-                <button
-                    class="option-btn"
-                    data-value="robot"
-                >
-
-                    <span class="opt-icon">
-                        🤖
-                    </span>
-
-                    ROBÔ
-
-                </button>
-
-
-
-                <button
-                    class="option-btn"
-                    data-value="alien"
-                >
-
-                    <span class="opt-icon">
-                        👽
-                    </span>
-
-                    ALIEN
-
-                </button>
-
+            <label class="form-label">Estilo dos Fantasmas</label>
+            <div class="form-options" id="optGhostStyle">
+                <button class="option-btn" data-value="ghost"><span class="opt-icon">👻</span> CLÁSSICO</button>
+                <button class="option-btn" data-value="robot"><span class="opt-icon">🤖</span> ROBÔ</button>
+                <button class="option-btn" data-value="alien"><span class="opt-icon">👽</span> ALIEN</button>
             </div>
-
         </div>
-
-
-
         <div class="stats-actions">
-
-            <button
-                class="menu-btn primary"
-                data-close="modalStyle"
-            >
-
-                <span class="btn-icon">
-                    ✓
-                </span>
-
-                APLICAR
-
-            </button>
-
+            <button class="menu-btn primary" data-close="modalStyle"><span class="btn-icon">✓</span> APLICAR</button>
         </div>
-
     </div>
-
 </div>
 
-
-
-<!-- =========================================================
-     CRÉDITOS
-========================================================= -->
-
-<div
-    class="modal-bg"
-    id="modalCredits"
->
-
+<div class="modal-bg" id="modalCredits">
     <div class="modal">
-
         <div class="modal-header">
-
-            <div class="modal-title">
-                👑 Créditos
-            </div>
-
-
-            <button
-                class="modal-close"
-                data-close="modalCredits"
-            >
-                ✕
-            </button>
-
+            <div class="modal-title">👑 Créditos</div>
+            <button class="modal-close" data-close="modalCredits">✕</button>
         </div>
-
-
         <div class="credits-content">
-
-            <h3>
-                🎮 FUGA INSANA
-            </h3>
-
-            <p>
-                Um jogo estilo Pac-Man em 3D
-            </p>
-
-
-            <h3>
-                💻 Desenvolvimento
-            </h3>
-
-            <p>
-                Criado com JavaScript puro
-                <br>
-
-                Three.js para renderização 3D
-                <br>
-
-                WebGL para aceleração
-            </p>
-
-
-            <h3>
-                🎨 Arte & Design
-            </h3>
-
-            <p>
-                Visual Neon-Arcade
-                <br>
-
-                NPCs estilizados únicos
-                <br>
-
-                Efeitos de partículas dinâmicos
-            </p>
-
-
-            <h3>
-                🎵 Inspiração
-            </h3>
-
-            <p>
-                Pac-Man (1980) da Namco
-                <br>
-
-                Jogos Arcade Clássicos
-                <br>
-
-                Estética Retrowave
-            </p>
-
-
-            <h3>
-                🙏 Agradecimentos Especiais
-            </h3>
-
-            <p>
-                A todos os jogadores
-                <br>
-
-                que ajudaram a testar!
-            </p>
-
-
-            <h3>
-                ❤️ Feito com Amor
-            </h3>
-
-            <p>
-
-                Obrigado por jogar!
-
-                <br>
-
-                <span class="heart">
-                    ♥
-                </span>
-
-            </p>
-
-
-            <h3>
-                © 2025
-            </h3>
-
-            <p>
-                Todos os direitos reservados
-            </p>
-
+            <h3>🎮 FUGA INSANA</h3>
+            <p>Um jogo estilo Pac-Man em 3D</p>
+            <h3>💻 Desenvolvimento</h3>
+            <p>Criado com JavaScript puro<br>Three.js para renderização 3D<br>WebGL para aceleração</p>
+            <h3>🎨 Arte & Design</h3>
+            <p>Visual Neon-Arcade<br>NPCs estilizados únicos<br>Efeitos de partículas dinâmicos</p>
+            <h3>🎵 Inspiração</h3>
+            <p>Pac-Man (1980) da Namco<br>Jogos Arcade Clássicos<br>Estética Retrowave</p>
+            <h3>🙏 Agradecimentos Especiais</h3>
+            <p>A todos os jogadores<br>que ajudaram a testar!</p>
+            <h3>❤️ Feito com Amor</h3>
+            <p>Obrigado por jogar!<br><span class="heart">♥</span></p>
+            <h3>© 2025</h3>
+            <p>Todos os direitos reservados</p>
         </div>
-
-
-
         <div class="stats-actions">
-
-            <button
-                class="menu-btn primary"
-                data-close="modalCredits"
-            >
-
-                <span class="btn-icon">
-                    ✓
-                </span>
-
-                FECHAR
-
-            </button>
-
+            <button class="menu-btn primary" data-close="modalCredits"><span class="btn-icon">✓</span> FECHAR</button>
         </div>
-
     </div>
-
 </div>
 
-
-
-<!-- =========================================================
-     THREE.JS
-========================================================= -->
-
-<script
-    src="https://unpkg.com/three@0.160.0/build/three.min.js"
-></script>
-
-
-
-<!-- =========================================================
-     JAVASCRIPT DO JOGO
-========================================================= -->
-
+<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
 <script src="game.js"></script>
-
 
 </body>
 </html>
-<script src="./game.js"></script>

@@ -333,36 +333,15 @@ html, body {
     .stats-grid { grid-template-columns: 1fr; }
 }
 
-#touch-controls {
-    display: none;
-    position: absolute;
-    left: 50%;
-    bottom: 12px;
-    transform: translateX(-50%);
-    z-index: 25;
-    grid-template-columns: repeat(3, 48px);
-    grid-template-rows: repeat(2, 48px);
-    gap: 6px;
-}
-
-#touch-controls button {
-    border: 1px solid rgba(255,204,0,.65);
-    border-radius: 10px;
-    color: #ffcc00;
-    background: rgba(10,10,25,.85);
-    font-size: 22px;
-}
-
-#touch-controls button:active { background: #ffcc00; color: #15152b; }
-
+#touch-controls { display:none; position:absolute; left:50%; bottom:12px; transform:translateX(-50%);
+    z-index:25; grid-template-columns:repeat(3,48px); grid-template-rows:repeat(2,48px); gap:6px; }
+#touch-controls button { border:1px solid rgba(255,204,0,.65); border-radius:10px; color:#ffcc00;
+    background:rgba(10,10,25,.85); font-size:22px; }
+#touch-controls button:active { background:#ffcc00; color:#15152b; }
 @media (max-width: 700px), (pointer: coarse) {
-    #touch-controls { display: grid; }
+    #touch-controls { display:grid; }
     #game-canvas-container { touch-action: none; }
 }
-
 @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-        animation-duration: .001ms !important;
-        transition-duration: .001ms !important;
-    }
+    *, *::before, *::after { animation-duration: .001ms !important; transition-duration: .001ms !important; }
 }

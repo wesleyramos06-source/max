@@ -168,3 +168,163 @@ html,body{width:100%;min-height:100%;overflow:hidden;background:#05050f;font-fam
 </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+<script>
+(function initBackground(){
+const bgCanvas=document.getElementById('bg-canvas');
+const bgCtx=bgCanvas.getContext('2d');
+let W,H;let particles=[];const PARTICLE_COUNT=80;
+function resize(){W=bgCanvas.width=window.innerWidth;H=bgCanvas.height=window.innerHeight}
+resize();window.addEventListener('resize',resize);
+for(let i=0;i<PARTICLE_COUNT;i++){particles.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,size:Math.random()*2+.5,color:['#ffcc00','#ff6600','#ff0066','#00ccff','#aa66ff'][Math.floor(Math.random()*5)],alpha:Math.random()*.5+.2,pulse:Math.random()*Math.PI*2})}
+function draw(){
+bgCtx.fillStyle='rgba(5,5,15,0.15)';bgCtx.fillRect(0,0,W,H);
+bgCtx.strokeStyle='rgba(50,50,100,0.08)';bgCtx.lineWidth=1;
+for(let x=0;x<W;x+=50){bgCtx.beginPath();bgCtx.moveTo(x,0);bgCtx.lineTo(x,H);bgCtx.stroke()}
+for(let y=0;y<H;y+=50){bgCtx.beginPath();bgCtx.moveTo(0,y);bgCtx.lineTo(W,y);bgCtx.stroke()}
+for(const p of particles){p.x+=p.vx;p.y+=p.vy;p.pulse+=.05;
+if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;
+const alpha=p.alpha*(.6+Math.sin(p.pulse)*.4);
+bgCtx.globalAlpha=alpha;bgCtx.fillStyle=p.color;bgCtx.shadowColor=p.color;bgCtx.shadowBlur=15;
+bgCtx.beginPath();bgCtx.arc(p.x,p.y,p.size,0,Math.PI*2);bgCtx.fill()}
+bgCtx.globalAlpha=1;bgCtx.shadowBlur=0;requestAnimationFrame(draw)}
+draw()})();
+
+const STORAGE_KEY='fuga_insana_save_v1';
+const DEFAULT_SETTINGS={quality:'high',mapSize:'medium',wallDensity:'normal',ghostSpeed:5,volume:7,particles:true,shadows:true,fullscreen:false,theme:'neon',pacmanColor:'yellow',ghostStyle:'ghost'};
+const DEFAULT_STATS={highScore:0,totalScore:0,games:0,maxLevel:1,ghostsEaten:0,npcsVisited:0,timePlayed:0,maxCombo:0};
+function loadSave(){try{const raw=localStorage.getItem(STORAGE_KEY);if(!raw)return{settings:{...DEFAULT_SETTINGS},stats:{...DEFAULT_STATS}};const data=JSON.parse(raw);return{settings:{...DEFAULT_SETTINGS,...(data.settings||{})},stats:{...DEFAULT_STATS,...(data.stats||{})}}}catch(e){return{settings:{...DEFAULT_SETTINGS},stats:{...DEFAULT_STATS}}}}
+function saveGame(saveData){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(saveData))}catch(e){console.warn('Save falhou:',e)}}
+let saveData=loadSave();let settings=saveData.settings;let stats=saveData.stats;
+function persist(){saveData.settings=settings;saveData.stats=stats;saveGame(saveData)}
+
+const lobby=document.getElementById('lobby');
+const gameContainer=document.getElementById('game-container');
+const btnBackToLobby=document.getElementById('btnBackToLobby');
+const gameLoading=document.getElementById('gameLoading');
+function closeAllModals(){document.querySelectorAll('.modal-bg').forEach(m=>m.classList.remove('show'))}
+function openModal(id){closeAllModals();const m=document.getElementById(id);if(m)m.classList.add('show')}
+document.querySelectorAll('[data-close]').forEach(btn=>{btn.addEventListener('click',()=>{const id=btn.getAttribute('data-close');document.getElementById(id).classList.remove('show');if(id==='modalSettings'||id==='modalStyle')persist()})});
+document.querySelectorAll('.modal-bg').forEach(bg=>{bg.addEventListener('click',(e)=>{if(e.target===bg){bg.classList.remove('show');persist()}})});
+
+function syncSettingsUI(){
+document.querySelectorAll('#optQuality .option-btn').forEach(b=>b.classList.toggle('selected',b.dataset.value===settings.quality));
+document.querySelectorAll('#optMapSize .option-btn').forEach(b=>b.classList.toggle('selected',b.dataset.value===settings.mapSize));
+document.querySelectorAll('#optWallDensity .option-btn').forEach(b=>b.classList.toggle('selected',b.dataset.value===settings.wallDensity));
+document.getElementById('sliderGhostSpeed').value=settings.ghostSpeed;
+document.getElementById('sliderGhostSpeedVal').textContent=settings.ghostSpeed;
+document.getElementById('sliderVolume').value=settings.volume;
+document.getElementById('sliderVolumeVal').textContent=settings.volume*10+'%';
+document.getElementById('toggleParticles').classList.toggle('on',settings.particles);
+document.getElementById('toggleShadows').classList.toggle('on',settings.shadows);
+document.getElementById('toggleFullscreen').classList.toggle('on',settings.fullscreen)}
+function bindOptionGroup(groupId,settingKey){document.querySelectorAll(`#${groupId} .option-btn`).forEach(btn=>{btn.addEventListener('click',()=>{document.querySelectorAll(`#${groupId} .option-btn`).forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');settings[settingKey]=btn.dataset.value;persist()})})}
+bindOptionGroup('optQuality','quality');bindOptionGroup('optMapSize','mapSize');bindOptionGroup('optWallDensity','wallDensity');bindOptionGroup('optTheme','theme');bindOptionGroup('optPacmanColor','pacmanColor');bindOptionGroup('optGhostStyle','ghostStyle');
+document.getElementById('sliderGhostSpeed').addEventListener('input',(e)=>{settings.ghostSpeed=parseInt(e.target.value);document.getElementById('sliderGhostSpeedVal').textContent=settings.ghostSpeed;persist()});
+document.getElementById('sliderVolume').addEventListener('input',(e)=>{settings.volume=parseInt(e.target.value);document.getElementById('sliderVolumeVal').textContent=settings.volume*10+'%';persist()});
+function bindToggle(id,settingKey){const el=document.getElementById(id);el.addEventListener('click',()=>{el.classList.toggle('on');settings[settingKey]=el.classList.contains('on');persist()})}
+bindToggle('toggleParticles','particles');bindToggle('toggleShadows','shadows');bindToggle('toggleFullscreen','fullscreen');
+document.getElementById('btnResetSettings').addEventListener('click',()=>{settings={...DEFAULT_SETTINGS};persist();syncSettingsUI()});
+function syncStyleUI(){
+document.querySelectorAll('#optTheme .option-btn').forEach(b=>b.classList.toggle('selected',b.dataset.value===settings.theme));
+document.querySelectorAll('#optPacmanColor .option-btn').forEach(b=>b.classList.toggle('selected',b.dataset.value===settings.pacmanColor));
+document.querySelectorAll('#optGhostStyle .option-btn').forEach(b=>b.classList.toggle('selected',b.dataset.value===settings.ghostStyle))}
+function updateStatsUI(){
+document.getElementById('statHighScore').textContent=stats.highScore;
+document.getElementById('statTotalScore').textContent=stats.totalScore;
+document.getElementById('statGames').textContent=stats.games;
+document.getElementById('statLevel').textContent=stats.maxLevel;
+document.getElementById('statGhosts').textContent=stats.ghostsEaten;
+document.getElementById('statNpcs').textContent=stats.npcsVisited;
+const hours=Math.floor(stats.timePlayed/3600);
+const mins=Math.floor((stats.timePlayed%3600)/60);
+document.getElementById('statTime').textContent=hours>0?`${hours}h ${mins}m`:`${mins}m`;
+document.getElementById('statCombo').textContent=stats.maxCombo+'x'}
+document.getElementById('btnResetStats').addEventListener('click',()=>{if(confirm('Tem certeza que quer limpar TODAS as estatísticas?')){stats={...DEFAULT_STATS};persist();updateStatsUI()}});
+document.getElementById('btnPlay').addEventListener('click',()=>startGame());
+document.getElementById('btnSettings').addEventListener('click',()=>{syncSettingsUI();openModal('modalSettings')});
+document.getElementById('btnStats').addEventListener('click',()=>{updateStatsUI();openModal('modalStats')});
+document.getElementById('btnStyle').addEventListener('click',()=>{syncStyleUI();openModal('modalStyle')});
+document.getElementById('btnCredits').addEventListener('click',()=>openModal('modalCredits'));
+syncSettingsUI();syncStyleUI();
+
+let gameRunning=false;let gameCleanup=null;
+function startGame(){
+if(gameRunning)return;
+gameLoading.classList.add('show');
+lobby.classList.add('hidden');
+if(settings.fullscreen)document.documentElement.requestFullscreen?.().catch(()=>{});
+setTimeout(()=>{
+gameContainer.classList.add('show');
+btnBackToLobby.classList.add('show');
+requestAnimationFrame(()=>requestAnimationFrame(()=>{
+try{gameRunning=true;gameCleanup=runGame();gameLoading.classList.remove('show')}
+catch(err){console.error('Erro ao iniciar jogo:',err);gameLoading.innerHTML='<div style="color:#ff3333;font-size:16px;text-align:center;padding:20px;">❌ Erro ao iniciar<br><br>'+String(err.message||err)+'<br><br><button id="retryGame" class="menu-btn primary" style="margin-top:12px;">TENTAR NOVAMENTE</button></div>';gameRunning=false;lobby.classList.remove('hidden');gameContainer.classList.remove('show');btnBackToLobby.classList.remove('show');document.getElementById('retryGame')?.addEventListener('click',startGame)}
+}))},100)}
+function stopGame(){
+if(!gameRunning&&!gameContainer.classList.contains('show'))return;
+gameRunning=false;
+if(gameCleanup){try{gameCleanup()}catch(e){console.warn(e)}gameCleanup=null}
+gameContainer.classList.remove('show');
+gameContainer.innerHTML='';
+lobby.classList.remove('hidden');
+btnBackToLobby.classList.remove('show');
+gameLoading.classList.remove('show')}
+btnBackToLobby.addEventListener('click',()=>stopGame());
+
+function runGame(){
+let COLS,ROWS;
+if(settings.mapSize==='small'){COLS=15;ROWS=15}
+else if(settings.mapSize==='large'){COLS=23;ROWS=23}
+else{COLS=19;ROWS=19}
+const CELL_SIZE=1;const WALL_HEIGHT=.7;const TOTAL_LEVELS=100;const mapCanvasSize=800;
+const THEMES={classic:{bg:0x05050f,wall:0x1a4a7a,wallTop:0x00aaff,floor:0x0a0a18},neon:{bg:0x0a0514,wall:0x2a1a5a,wallTop:0xff66ff,floor:0x12081e},retro:{bg:0x0a0800,wall:0x4a3a1a,wallTop:0xffaa00,floor:0x1a1200},matrix:{bg:0x000500,wall:0x003300,wallTop:0x00ff00,floor:0x001100}};
+const theme=THEMES[settings.theme]||THEMES.neon;
+const PACMAN_COLORS={yellow:{color:0xffdd00,emissive:0xcc8800},cyan:{color:0x00ddff,emissive:0x0088cc},pink:{color:0xff66aa,emissive:0xcc2266},lime:{color:0x66ff66,emissive:0x22aa22}};
+const pacColor=PACMAN_COLORS[settings.pacmanColor]||PACMAN_COLORS.yellow;
+const densityMap={low:.28,normal:.38,high:.48};
+const baseDensity=densityMap[settings.wallDensity]||.38;
+const ghostSpeedMul=.6+(settings.ghostSpeed-1)*(.8/9);
+const qualitySettings={low:{pixelRatio:1,shadowMap:512,antialias:false},medium:{pixelRatio:1,shadowMap:1024,antialias:true},high:{pixelRatio:1.5,shadowMap:2048,antialias:true}};
+const qs=qualitySettings[settings.quality]||qualitySettings.high;
+const container=document.createElement('div');
+container.id='game-canvas-container';
+container.style.cssText='position:relative;width:min(800px,calc(100vw - 20px),calc(100vh - 20px));height:min(800px,calc(100vw - 20px),calc(100vh - 20px));border-radius:16px;overflow:hidden;box-shadow:0 0 60px rgba(255,200,0,0.3);border:2px solid rgba(255,200,0,0.4);';
+gameContainer.appendChild(container);
+const canvas=document.createElement('canvas');
+canvas.width=mapCanvasSize;canvas.height=mapCanvasSize;
+container.appendChild(canvas);
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(theme.bg);
+scene.fog=new THREE.Fog(theme.bg,COLS*1.6,COLS*2.8);
+const camera=new THREE.PerspectiveCamera(45,1,.1,200);
+const mapDiagonal=Math.sqrt(COLS*COLS+ROWS*ROWS);
+const vFov=(45*Math.PI)/180;
+const camDist=(mapDiagonal/2)/Math.tan(vFov/2)*1.15;
+camera.position.set(0,camDist*.95,camDist*.42);
+camera.lookAt(0,0,0);
+const renderer=new THREE.WebGLRenderer({canvas,antialias:qs.antialias});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,qs.pixelRatio));
+renderer.setSize(mapCanvasSize,mapCanvasSize,false);
+renderer.shadowMap.enabled=settings.shadows;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+scene.add(new THREE.AmbientLight(0xffffff,.6));
+const dirLight=new THREE.DirectionalLight(0xffffff,1);
+dirLight.position.set(COLS*.4,COLS*1.2,ROWS*.3);
+dirLight.castShadow=settings.shadows;
+dirLight.shadow.mapSize.set(qs.shadowMap,qs.shadowMap);
+dirLight.shadow.camera.left=-COLS*.8;dirLight.shadow.camera.right=COLS*.8;
+dirLight.shadow.camera.top=ROWS*.8;dirLight.shadow.camera.bottom=-ROWS*.8;
+dirLight.shadow.camera.near=.5;dirLight.shadow.camera.far=COLS*3;
+scene.add(dirLight);
+const pointLight=new THREE.PointLight(0xffaa00,.5,COLS*2);
+pointLight.position.set(0,COLS*.6,0);
+scene.add(pointLight);
+const floorMat=new THREE.MeshStandardMaterial({color:theme.floor,roughness:.9,metalness:.1});
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(COLS,ROWS),floorMat);
+floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;scene.add(floor);
+const mazeGroup=new THREE.Group();scene.add(mazeGroup);
+const portalGroup=new THREE.Group();scene.add(portalGroup);
+const powerUpGroup=new THREE.Group();scene.add(powerUpGroup);
+const npcGroup=new THREE.Group();scene.add(npcGroup);
+function toWorldX(col){return col-(COLS-1)/2}
+function toWorldZ(row){return row-(ROWS-1)/2}

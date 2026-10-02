@@ -4,1148 +4,194 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FUGA INSANA</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-button,input{font:inherit}
-button{user-select:none}
-:focus-visible{outline:3px solid #66ffcc;outline-offset:3px}
-html,body{width:100%;min-height:100%;overflow:hidden;background:#05050f;font-family:'Courier New',monospace;color:#fff}
-#bg-canvas{position:fixed;inset:0;z-index:0;display:block}
-#lobby{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;background:radial-gradient(ellipse at 50% 30%,rgba(255,100,0,.15),transparent 60%),radial-gradient(ellipse at 50% 80%,rgba(255,0,255,.12),transparent 60%);transition:opacity .4s ease}
-#lobby.hidden{opacity:0;pointer-events:none}
-.title-wrap{margin-bottom:10px;text-align:center}
-.game-title{font-size:clamp(46px,8vw,90px);font-weight:900;letter-spacing:clamp(6px,1.5vw,16px);background:linear-gradient(180deg,#fff 0%,#ffcc00 40%,#ff6600 70%,#ff0066 100%);background-size:100% 200%;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-shadow:0 0 30px rgba(255,150,0,.6),0 0 60px rgba(255,50,0,.4);animation:titleFloat 4s ease-in-out infinite,titleShine 3s linear infinite;line-height:1}
-@keyframes titleFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-@keyframes titleShine{0%{background-position:0% 0%}100%{background-position:0% 200%}}
-.subtitle{font-size:clamp(11px,1.5vw,16px);letter-spacing:clamp(4px,1vw,10px);color:#ff6600;text-shadow:0 0 15px #ff3300,0 0 30px #ff0000;margin-top:6px;animation:pulse 2s ease-in-out infinite}
-@keyframes pulse{0%,100%{opacity:.6}50%{opacity:1}}
-.menu{display:flex;flex-direction:column;gap:14px;margin-top:40px;width:100%;max-width:340px;z-index:2}
-.menu-btn{position:relative;padding:16px 32px;font-family:inherit;font-size:18px;font-weight:bold;letter-spacing:4px;text-transform:uppercase;color:#ffcc00;background:linear-gradient(145deg,rgba(20,20,40,.9),rgba(10,10,25,.95));border:2px solid rgba(255,200,0,.5);border-radius:12px;cursor:pointer;overflow:hidden;transition:all .25s ease;text-shadow:0 0 10px rgba(255,200,0,.6);display:flex;align-items:center;justify-content:center;gap:12px}
-.menu-btn .btn-icon{font-size:22px;filter:drop-shadow(0 0 6px currentColor)}
-.menu-btn::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,200,0,.25),transparent);transition:left .5s ease}
-.menu-btn:hover::before{left:100%}
-.menu-btn:hover{border-color:#ffcc00;color:#fff;box-shadow:0 0 25px rgba(255,200,0,.6),0 0 50px rgba(255,100,0,.3);transform:translateY(-2px) scale(1.02)}
-.menu-btn:active{transform:translateY(1px) scale(.99)}
-.menu-btn.primary{background:linear-gradient(145deg,#ffcc00,#ff8800);color:#1a1a2e;text-shadow:none;border-color:#ffcc00;font-size:20px;padding:18px 32px}
-.menu-btn.primary:hover{box-shadow:0 0 30px rgba(255,200,0,.9),0 0 70px rgba(255,100,0,.5)}
-.menu-btn.primary .btn-icon{color:#1a1a2e;filter:none}
-.lobby-footer{position:absolute;bottom:14px;left:0;right:0;text-align:center;color:#555;font-size:11px;letter-spacing:3px;text-transform:uppercase}
-.lobby-footer .highlight{color:#ffcc00}
-.modal-bg{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.85);backdrop-filter:blur(8px);display:none;justify-content:center;align-items:center;padding:20px;opacity:0;transition:opacity .3s ease}
-.modal-bg.show{display:flex;opacity:1}
-.modal{background:linear-gradient(160deg,#10102a,#08081a);border:2px solid rgba(255,200,0,.5);border-radius:20px;padding:28px 32px;width:100%;max-width:520px;max-height:88vh;overflow-y:auto;box-shadow:0 0 60px rgba(255,200,0,.3);transform:scale(.9) translateY(20px);transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
-.modal-bg.show .modal{transform:scale(1) translateY(0)}
-.modal::-webkit-scrollbar{width:8px}
-.modal::-webkit-scrollbar-track{background:rgba(0,0,0,.3);border-radius:4px}
-.modal::-webkit-scrollbar-thumb{background:#ffcc00;border-radius:4px}
-.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:14px;border-bottom:2px solid rgba(255,200,0,.3)}
-.modal-title{font-size:24px;font-weight:bold;letter-spacing:4px;color:#ffcc00;text-transform:uppercase;text-shadow:0 0 15px rgba(255,200,0,.8)}
-.modal-close{width:36px;height:36px;border-radius:50%;background:rgba(255,50,50,.2);border:2px solid #ff3333;color:#ff3333;font-size:20px;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;transition:all .2s}
-.modal-close:hover{background:#ff3333;color:#fff;transform:rotate(90deg)}
-.form-group{margin-bottom:20px}
-.form-label{display:block;font-size:12px;letter-spacing:3px;color:#ffcc00;text-transform:uppercase;margin-bottom:10px;font-weight:bold}
-.form-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
-.option-btn{padding:12px 16px;font-family:inherit;font-size:13px;font-weight:bold;letter-spacing:2px;text-transform:uppercase;color:#aaa;background:rgba(20,20,40,.6);border:2px solid rgba(100,100,150,.4);border-radius:10px;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:4px}
-.option-btn .opt-icon{font-size:20px;margin-bottom:2px}
-.option-btn:hover{color:#fff;border-color:rgba(255,200,0,.6);transform:translateY(-2px)}
-.option-btn.selected{color:#1a1a2e;background:linear-gradient(145deg,#ffcc00,#ff9900);border-color:#ffcc00;box-shadow:0 0 20px rgba(255,200,0,.6)}
-.slider-wrap{display:flex;align-items:center;gap:12px}
-.slider{-webkit-appearance:none;appearance:none;flex:1;height:6px;background:rgba(100,100,150,.3);border-radius:3px;outline:none;cursor:pointer}
-.slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:20px;height:20px;border-radius:50%;background:#ffcc00;box-shadow:0 0 12px #ffcc00;cursor:pointer}
-.slider::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:#ffcc00;box-shadow:0 0 12px #ffcc00;cursor:pointer;border:none}
-.slider-value{min-width:50px;text-align:right;color:#fff;font-weight:bold;font-size:14px}
-.toggle-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px dashed rgba(255,200,0,.15)}
-.toggle-row:last-child{border-bottom:none}
-.toggle-label{font-size:14px;color:#ddd;letter-spacing:1px}
-.toggle-label small{display:block;color:#666;font-size:11px;letter-spacing:0;margin-top:2px}
-.toggle-switch{position:relative;width:52px;height:28px;background:rgba(60,60,90,.6);border-radius:14px;cursor:pointer;transition:.3s;border:2px solid rgba(100,100,150,.4);flex-shrink:0}
-.toggle-switch::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;background:#888;border-radius:50%;transition:.3s}
-.toggle-switch.on{background:rgba(255,200,0,.3);border-color:#ffcc00}
-.toggle-switch.on::after{left:26px;background:#ffcc00;box-shadow:0 0 12px #ffcc00}
-.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-.stat-card{padding:16px;background:linear-gradient(145deg,rgba(30,30,60,.6),rgba(15,15,35,.6));border:1px solid rgba(255,200,0,.3);border-radius:12px;text-align:center}
-.stat-value{font-size:28px;font-weight:bold;color:#ffcc00;text-shadow:0 0 15px rgba(255,200,0,.6);margin-bottom:4px}
-.stat-label{font-size:11px;letter-spacing:2px;color:#888;text-transform:uppercase}
-.stats-actions{display:flex;gap:10px;margin-top:20px}
-.stats-actions .menu-btn{flex:1;font-size:13px;padding:12px 16px}
-.credits-content{text-align:center;line-height:1.9}
-.credits-content h3{color:#ffcc00;font-size:16px;letter-spacing:4px;margin:20px 0 8px;text-transform:uppercase;text-shadow:0 0 10px rgba(255,200,0,.6)}
-.credits-content h3:first-child{margin-top:0}
-.credits-content p{color:#ccc;font-size:14px;letter-spacing:1px}
-.credits-content .heart{color:#ff3366;animation:beat 1s ease-in-out infinite;display:inline-block}
-@keyframes beat{0%,100%{transform:scale(1)}50%{transform:scale(1.3)}}
-#btnBackToLobby{position:fixed;top:14px;left:14px;z-index:30;padding:8px 16px;background:rgba(10,10,25,.9);border:2px solid rgba(255,200,0,.5);border-radius:10px;color:#ffcc00;font-family:inherit;font-size:13px;font-weight:bold;letter-spacing:2px;cursor:pointer;display:none;transition:all .2s}
-#btnBackToLobby:hover{background:#ffcc00;color:#1a1a2e;box-shadow:0 0 20px #ffcc00}
-#btnBackToLobby.show{display:block}
-#game-container{position:fixed;inset:0;z-index:5;display:none;justify-content:center;align-items:center;background:#05050f}
-#game-container.show{display:flex}
-#gameLoading{position:fixed;inset:0;z-index:100;display:none;justify-content:center;align-items:center;flex-direction:column;gap:20px;background:rgba(5,5,15,.95);color:#ffcc00}
-#gameLoading.show{display:flex}
-.spinner{width:60px;height:60px;border:4px solid rgba(255,200,0,.2);border-top-color:#ffcc00;border-radius:50%;animation:spin 1s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.loading-text{font-size:14px;letter-spacing:4px;text-transform:uppercase}
-@media (max-width:500px){.menu{max-width:90%}.menu-btn{padding:14px 20px;font-size:15px;letter-spacing:2px}.modal{padding:20px}.modal-title{font-size:18px}.stats-grid{grid-template-columns:1fr}}
-#touch-controls{display:none;position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:25;grid-template-columns:repeat(3,48px);grid-template-rows:repeat(2,48px);gap:6px}
-#touch-controls button{border:1px solid rgba(255,204,0,.65);border-radius:10px;color:#ffcc00;background:rgba(10,10,25,.85);font-size:22px}
-#touch-controls button:active{background:#ffcc00;color:#15152b}
-@media (max-width:700px),(pointer:coarse){#touch-controls{display:grid}#game-canvas-container{touch-action:none}}
-@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms !important;transition-duration:.001ms !important}}
-</style>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
+
 <canvas id="bg-canvas"></canvas>
 <button id="btnBackToLobby">◄ MENU</button>
+
 <div id="lobby">
-<div class="title-wrap">
-<div class="game-title">FUGA INSANA</div>
-<div class="subtitle">✦ FUJA • COMA • SOBREVIVA ✦</div>
+    <div class="title-wrap">
+        <div class="game-title">FUGA INSANA</div>
+        <div class="subtitle">✦ FUJA • COMA • SOBREVIVA ✦</div>
+    </div>
+
+    <div class="menu">
+        <button class="menu-btn primary" id="btnPlay"><span class="btn-icon">▶</span> JOGAR</button>
+        <button class="menu-btn" id="btnSettings"><span class="btn-icon">⚙️</span> CONFIGURAÇÕES</button>
+        <button class="menu-btn" id="btnStats"><span class="btn-icon">📊</span> ESTATÍSTICAS</button>
+        <button class="menu-btn" id="btnStyle"><span class="btn-icon">🎨</span> ESTILO</button>
+        <button class="menu-btn" id="btnCredits"><span class="btn-icon">👑</span> CRÉDITOS</button>
+    </div>
+
+    <div class="lobby-footer">v1.0 • <span class="highlight">FUGA INSANA</span> • © 2025</div>
 </div>
-<div class="menu">
-<button class="menu-btn primary" id="btnPlay"><span class="btn-icon">▶</span> JOGAR</button>
-<button class="menu-btn" id="btnSettings"><span class="btn-icon">⚙️</span> CONFIGURAÇÕES</button>
-<button class="menu-btn" id="btnStats"><span class="btn-icon">📊</span> ESTATÍSTICAS</button>
-<button class="menu-btn" id="btnStyle"><span class="btn-icon">🎨</span> ESTILO</button>
-<button class="menu-btn" id="btnCredits"><span class="btn-icon">👑</span> CRÉDITOS</button>
-</div>
-<div class="lobby-footer">v1.0 • <span class="highlight">FUGA INSANA</span> • © 2025</div>
-</div>
+
 <div id="game-container"></div>
-<div id="gameLoading"><div class="spinner"></div><div class="loading-text">Carregando...</div></div>
+
+<div id="gameLoading">
+    <div class="spinner"></div>
+    <div class="loading-text">Carregando...</div>
+</div>
+
+<!-- MODAIS -->
 <div class="modal-bg" id="modalSettings">
-<div class="modal">
-<div class="modal-header"><div class="modal-title">⚙️ Configurações</div><button class="modal-close" data-close="modalSettings">✕</button></div>
-<div class="form-group"><label class="form-label">Qualidade Gráfica</label><div class="form-options" id="optQuality"><button class="option-btn" data-value="low"><span class="opt-icon">🔻</span> BAIXA</button><button class="option-btn" data-value="medium"><span class="opt-icon">⚡</span> MÉDIA</button><button class="option-btn" data-value="high"><span class="opt-icon">💎</span> ALTA</button></div></div>
-<div class="form-group"><label class="form-label">Tamanho do Mapa</label><div class="form-options" id="optMapSize"><button class="option-btn" data-value="small"><span class="opt-icon">📦</span> 15×15</button><button class="option-btn" data-value="medium"><span class="opt-icon">📦</span> 19×19</button><button class="option-btn" data-value="large"><span class="opt-icon">📦</span> 23×23</button></div></div>
-<div class="form-group"><label class="form-label">Densidade de Paredes</label><div class="form-options" id="optWallDensity"><button class="option-btn" data-value="low"><span class="opt-icon">🌿</span> FÁCIL</button><button class="option-btn" data-value="normal"><span class="opt-icon">⚖️</span> NORMAL</button><button class="option-btn" data-value="high"><span class="opt-icon">🔥</span> CAÓTICO</button></div></div>
-<div class="form-group"><label class="form-label">Velocidade dos Fantasmas</label><div class="slider-wrap"><input type="range" class="slider" id="sliderGhostSpeed" min="1" max="10" step="1" value="5"><span class="slider-value" id="sliderGhostSpeedVal">5</span></div></div>
-<div class="form-group"><label class="form-label">Volume do Jogo</label><div class="slider-wrap"><input type="range" class="slider" id="sliderVolume" min="0" max="10" step="1" value="7"><span class="slider-value" id="sliderVolumeVal">70%</span></div></div>
-<div class="form-group">
-<div class="toggle-row"><div class="toggle-label">Efeitos de Partículas<small>Explosões ao comer pastilhas</small></div><div class="toggle-switch on" id="toggleParticles"></div></div>
-<div class="toggle-row"><div class="toggle-label">Sombras Dinâmicas<small>Melhor aparência, mais lento</small></div><div class="toggle-switch on" id="toggleShadows"></div></div>
-<div class="toggle-row"><div class="toggle-label">Modo Tela Cheia ao Jogar<small>Expande o jogo automaticamente</small></div><div class="toggle-switch" id="toggleFullscreen"></div></div>
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">⚙️ Configurações</div>
+            <button class="modal-close" data-close="modalSettings">✕</button>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Qualidade Gráfica</label>
+            <div class="form-options" id="optQuality">
+                <button class="option-btn" data-value="low"><span class="opt-icon">🔻</span> BAIXA</button>
+                <button class="option-btn" data-value="medium"><span class="opt-icon">⚡</span> MÉDIA</button>
+                <button class="option-btn" data-value="high"><span class="opt-icon">💎</span> ALTA</button>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Tamanho do Mapa</label>
+            <div class="form-options" id="optMapSize">
+                <button class="option-btn" data-value="small"><span class="opt-icon">📦</span> 15×15</button>
+                <button class="option-btn" data-value="medium"><span class="opt-icon">📦</span> 19×19</button>
+                <button class="option-btn" data-value="large"><span class="opt-icon">📦</span> 23×23</button>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Densidade de Paredes</label>
+            <div class="form-options" id="optWallDensity">
+                <button class="option-btn" data-value="low"><span class="opt-icon">🌿</span> FÁCIL</button>
+                <button class="option-btn" data-value="normal"><span class="opt-icon">⚖️</span> NORMAL</button>
+                <button class="option-btn" data-value="high"><span class="opt-icon">🔥</span> CAÓTICO</button>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Velocidade dos Fantasmas</label>
+            <div class="slider-wrap">
+                <input type="range" class="slider" id="sliderGhostSpeed" min="1" max="10" step="1" value="5">
+                <span class="slider-value" id="sliderGhostSpeedVal">5</span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Volume do Jogo</label>
+            <div class="slider-wrap">
+                <input type="range" class="slider" id="sliderVolume" min="0" max="10" step="1" value="7">
+                <span class="slider-value" id="sliderVolumeVal">70%</span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="toggle-row">
+                <div class="toggle-label">Efeitos de Partículas<small>Explosões ao comer pastilhas</small></div>
+                <div class="toggle-switch on" id="toggleParticles"></div>
+            </div>
+            <div class="toggle-row">
+                <div class="toggle-label">Sombras Dinâmicas<small>Melhor aparência, mais lento</small></div>
+                <div class="toggle-switch on" id="toggleShadows"></div>
+            </div>
+            <div class="toggle-row">
+                <div class="toggle-label">Modo Tela Cheia ao Jogar<small>Expande o jogo automaticamente</small></div>
+                <div class="toggle-switch" id="toggleFullscreen"></div>
+            </div>
+        </div>
+        <div class="stats-actions">
+            <button class="menu-btn" id="btnResetSettings"><span class="btn-icon">↺</span> RESETAR</button>
+            <button class="menu-btn primary" data-close="modalSettings"><span class="btn-icon">✓</span> SALVAR</button>
+        </div>
+    </div>
 </div>
-<div class="stats-actions"><button class="menu-btn" id="btnResetSettings"><span class="btn-icon">↺</span> RESETAR</button><button class="menu-btn primary" data-close="modalSettings"><span class="btn-icon">✓</span> SALVAR</button></div>
-</div>
-</div>
+
 <div class="modal-bg" id="modalStats">
-<div class="modal">
-<div class="modal-header"><div class="modal-title">📊 Estatísticas</div><button class="modal-close" data-close="modalStats">✕</button></div>
-<div class="stats-grid">
-<div class="stat-card"><div class="stat-value" id="statHighScore">0</div><div class="stat-label">Recorde</div></div>
-<div class="stat-card"><div class="stat-value" id="statTotalScore">0</div><div class="stat-label">Pontos Totais</div></div>
-<div class="stat-card"><div class="stat-value" id="statGames">0</div><div class="stat-label">Partidas</div></div>
-<div class="stat-card"><div class="stat-value" id="statLevel">1</div><div class="stat-label">Fase Máxima</div></div>
-<div class="stat-card"><div class="stat-value" id="statGhosts">0</div><div class="stat-label">Fantasmas Comidos</div></div>
-<div class="stat-card"><div class="stat-value" id="statNpcs">0</div><div class="stat-label">NPCs Visitados</div></div>
-<div class="stat-card"><div class="stat-value" id="statTime">0h</div><div class="stat-label">Tempo Jogado</div></div>
-<div class="stat-card"><div class="stat-value" id="statCombo">0x</div><div class="stat-label">Maior Combo</div></div>
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">📊 Estatísticas</div>
+            <button class="modal-close" data-close="modalStats">✕</button>
+        </div>
+        <div class="stats-grid">
+            <div class="stat-card"><div class="stat-value" id="statHighScore">0</div><div class="stat-label">Recorde</div></div>
+            <div class="stat-card"><div class="stat-value" id="statTotalScore">0</div><div class="stat-label">Pontos Totais</div></div>
+            <div class="stat-card"><div class="stat-value" id="statGames">0</div><div class="stat-label">Partidas</div></div>
+            <div class="stat-card"><div class="stat-value" id="statLevel">1</div><div class="stat-label">Fase Máxima</div></div>
+            <div class="stat-card"><div class="stat-value" id="statGhosts">0</div><div class="stat-label">Fantasmas Comidos</div></div>
+            <div class="stat-card"><div class="stat-value" id="statNpcs">0</div><div class="stat-label">NPCs Visitados</div></div>
+            <div class="stat-card"><div class="stat-value" id="statTime">0h</div><div class="stat-label">Tempo Jogado</div></div>
+            <div class="stat-card"><div class="stat-value" id="statCombo">0x</div><div class="stat-label">Maior Combo</div></div>
+        </div>
+        <div class="stats-actions">
+            <button class="menu-btn" id="btnResetStats"><span class="btn-icon">🗑️</span> LIMPAR</button>
+            <button class="menu-btn primary" data-close="modalStats"><span class="btn-icon">✓</span> FECHAR</button>
+        </div>
+    </div>
 </div>
-<div class="stats-actions"><button class="menu-btn" id="btnResetStats"><span class="btn-icon">🗑️</span> LIMPAR</button><button class="menu-btn primary" data-close="modalStats"><span class="btn-icon">✓</span> FECHAR</button></div>
-</div>
-</div>
+
 <div class="modal-bg" id="modalStyle">
-<div class="modal">
-<div class="modal-header"><div class="modal-title">🎨 Estilo</div><button class="modal-close" data-close="modalStyle">✕</button></div>
-<div class="form-group"><label class="form-label">Tema Visual</label><div class="form-options" id="optTheme"><button class="option-btn" data-value="classic"><span class="opt-icon">🔵</span> CLÁSSICO</button><button class="option-btn" data-value="neon"><span class="opt-icon">💜</span> NEON</button><button class="option-btn" data-value="retro"><span class="opt-icon">📺</span> RETRÔ</button><button class="option-btn" data-value="matrix"><span class="opt-icon">💚</span> MATRIX</button></div></div>
-<div class="form-group"><label class="form-label">Cor do Pac-Man</label><div class="form-options" id="optPacmanColor"><button class="option-btn" data-value="yellow"><span class="opt-icon">🟡</span> AMARELO</button><button class="option-btn" data-value="cyan"><span class="opt-icon">🔵</span> CIANO</button><button class="option-btn" data-value="pink"><span class="opt-icon">🩷</span> ROSA</button><button class="option-btn" data-value="lime"><span class="opt-icon">🟢</span> VERDE</button></div></div>
-<div class="form-group"><label class="form-label">Estilo dos Fantasmas</label><div class="form-options" id="optGhostStyle"><button class="option-btn" data-value="ghost"><span class="opt-icon">👻</span> CLÁSSICO</button><button class="option-btn" data-value="robot"><span class="opt-icon">🤖</span> ROBÔ</button><button class="option-btn" data-value="alien"><span class="opt-icon">👽</span> ALIEN</button></div></div>
-<div class="stats-actions"><button class="menu-btn primary" data-close="modalStyle"><span class="btn-icon">✓</span> APLICAR</button></div>
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">🎨 Estilo</div>
+            <button class="modal-close" data-close="modalStyle">✕</button>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Tema Visual</label>
+            <div class="form-options" id="optTheme">
+                <button class="option-btn" data-value="classic"><span class="opt-icon">🔵</span> CLÁSSICO</button>
+                <button class="option-btn" data-value="neon"><span class="opt-icon">💜</span> NEON</button>
+                <button class="option-btn" data-value="retro"><span class="opt-icon">📺</span> RETRÔ</button>
+                <button class="option-btn" data-value="matrix"><span class="opt-icon">💚</span> MATRIX</button>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Cor do Pac-Man</label>
+            <div class="form-options" id="optPacmanColor">
+                <button class="option-btn" data-value="yellow"><span class="opt-icon">🟡</span> AMARELO</button>
+                <button class="option-btn" data-value="cyan"><span class="opt-icon">🔵</span> CIANO</button>
+                <button class="option-btn" data-value="pink"><span class="opt-icon">🩷</span> ROSA</button>
+                <button class="option-btn" data-value="lime"><span class="opt-icon">🟢</span> VERDE</button>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Estilo dos Fantasmas</label>
+            <div class="form-options" id="optGhostStyle">
+                <button class="option-btn" data-value="ghost"><span class="opt-icon">👻</span> CLÁSSICO</button>
+                <button class="option-btn" data-value="robot"><span class="opt-icon">🤖</span> ROBÔ</button>
+                <button class="option-btn" data-value="alien"><span class="opt-icon">👽</span> ALIEN</button>
+            </div>
+        </div>
+        <div class="stats-actions">
+            <button class="menu-btn primary" data-close="modalStyle"><span class="btn-icon">✓</span> APLICAR</button>
+        </div>
+    </div>
 </div>
-</div>
+
 <div class="modal-bg" id="modalCredits">
-<div class="modal">
-<div class="modal-header"><div class="modal-title">👑 Créditos</div><button class="modal-close" data-close="modalCredits">✕</button></div>
-<div class="credits-content">
-<h3>🎮 FUGA INSANA</h3><p>Um jogo estilo Pac-Man em 3D</p>
-<h3>💻 Desenvolvimento</h3><p>Criado com JavaScript puro<br>Three.js para renderização 3D<br>WebGL para aceleração</p>
-<h3>🎨 Arte & Design</h3><p>Visual Neon-Arcade<br>NPCs estilizados únicos<br>Efeitos de partículas dinâmicos</p>
-<h3>🎵 Inspiração</h3><p>Pac-Man (1980) da Namco<br>Jogos Arcade Clássicos<br>Estética Retrowave</p>
-<h3>🙏 Agradecimentos Especiais</h3><p>A todos os jogadores<br>que ajudaram a testar!</p>
-<h3>❤️ Feito com Amor</h3><p>Obrigado por jogar!<br><span class="heart">♥</span></p>
-<h3>© 2025</h3><p>Todos os direitos reservados</p>
+    <div class="modal">
+        <div class="modal-header">
+            <div class="modal-title">👑 Créditos</div>
+            <button class="modal-close" data-close="modalCredits">✕</button>
+        </div>
+        <div class="credits-content">
+            <h3>🎮 FUGA INSANA</h3>
+            <p>Um jogo estilo Pac-Man em 3D</p>
+            <h3>💻 Desenvolvimento</h3>
+            <p>Criado com JavaScript puro<br>Three.js para renderização 3D<br>WebGL para aceleração</p>
+            <h3>🎨 Arte & Design</h3>
+            <p>Visual Neon-Arcade<br>NPCs estilizados únicos<br>Efeitos de partículas dinâmicos</p>
+            <h3>🎵 Inspiração</h3>
+            <p>Pac-Man (1980) da Namco<br>Jogos Arcade Clássicos<br>Estética Retrowave</p>
+            <h3>🙏 Agradecimentos Especiais</h3>
+            <p>A todos os jogadores<br>que ajudaram a testar!</p>
+            <h3>❤️ Feito com Amor</h3>
+            <p>Obrigado por jogar!<br><span class="heart">♥</span></p>
+            <h3>© 2025</h3>
+            <p>Todos os direitos reservados</p>
+        </div>
+        <div class="stats-actions">
+            <button class="menu-btn primary" data-close="modalCredits"><span class="btn-icon">✓</span> FECHAR</button>
+        </div>
+    </div>
 </div>
-<div class="stats-actions"><button class="menu-btn primary" data-close="modalCredits"><span class="btn-icon">✓</span> FECHAR</button></div>
-</div>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-<script>
-(function initBackground(){
-const bgCanvas=document.getElementById('bg-canvas');
-const bgCtx=bgCanvas.getContext('2d');
-let W,H;let particles=[];const PARTICLE_COUNT=80;
-function resize(){W=bgCanvas.width=window.innerWidth;H=bgCanvas.height=window.innerHeight}
-resize();window.addEventListener('resize',resize);
-for(let i=0;i<PARTICLE_COUNT;i++){particles.push({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,size:Math.random()*2+.5,color:['#ffcc00','#ff6600','#ff0066','#00ccff','#aa66ff'][Math.floor(Math.random()*5)],alpha:Math.random()*.5+.2,pulse:Math.random()*Math.PI*2})}
-function draw(){
-bgCtx.fillStyle='rgba(5,5,15,0.15)';bgCtx.fillRect(0,0,W,H);
-bgCtx.strokeStyle='rgba(50,50,100,0.08)';bgCtx.lineWidth=1;
-for(let x=0;x<W;x+=50){bgCtx.beginPath();bgCtx.moveTo(x,0);bgCtx.lineTo(x,H);bgCtx.stroke()}
-for(let y=0;y<H;y+=50){bgCtx.beginPath();bgCtx.moveTo(0,y);bgCtx.lineTo(W,y);bgCtx.stroke()}
-for(const p of particles){p.x+=p.vx;p.y+=p.vy;p.pulse+=.05;
-if(p.x<0)p.x=W;if(p.x>W)p.x=0;if(p.y<0)p.y=H;if(p.y>H)p.y=0;
-const alpha=p.alpha*(.6+Math.sin(p.pulse)*.4);
-bgCtx.globalAlpha=alpha;bgCtx.fillStyle=p.color;bgCtx.shadowColor=p.color;bgCtx.shadowBlur=15;
-bgCtx.beginPath();bgCtx.arc(p.x,p.y,p.size,0,Math.PI*2);bgCtx.fill()}
-bgCtx.globalAlpha=1;bgCtx.shadowBlur=0;requestAnimationFrame(draw)}
-draw()})();
 
-const STORAGE_KEY='fuga_insana_save_v1';
-const DEFAULT_SETTINGS={quality:'high',mapSize:'medium',wallDensity:'normal',ghostSpeed:5,volume:7,particles:true,shadows:true,fullscreen:false,theme:'neon',pacmanColor:'yellow',ghostStyle:'ghost'};
-const DEFAULT_STATS={highScore:0,totalScore:0,games:0,maxLevel:1,ghostsEaten:0,npcsVisited:0,timePlayed:0,maxCombo:0};
-function loadSave(){try{const raw=localStorage.getItem(STORAGE_KEY);if(!raw)return{settings:{...DEFAULT_SETTINGS},stats:{...DEFAULT_STATS}};const data=JSON.parse(raw);return{settings:{...DEFAULT_SETTINGS,...(data.settings||{})},stats:{...DEFAULT_STATS,...(data.stats||{})}}}catch(e){return{settings:{...DEFAULT_SETTINGS},stats:{...DEFAULT_STATS}}}}
-function saveGame(saveData){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(saveData))}catch(e){console.warn('Save falhou:',e)}}
-let saveData=loadSave();let settings=saveData.settings;let stats=saveData.stats;
-function persist(){saveData.settings=settings;saveData.stats=stats;saveGame(saveData)}
+<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+<script src="game.js"></script>
 
-const lobby=document.getElementById('lobby');
-const gameContainer=document.getElementById('game-container');
-const btnBackToLobby=document.getElementById('btnBackToLobby');
-const gameLoading=document.getElementById('gameLoading');
-function closeAllModals(){document.querySelectorAll('.modal-bg').forEach(m=>m.classList.remove('show'))}
-function openModal(id){closeAllModals();const m=document.getElementById(id);if(m)m.classList.add('show')}
-document.querySelectorAll('[data-close]').forEach(btn=>{btn.addEventListener('click',()=>{const id=btn.getAttribute('data-close');document.getElementById(id).classList.remove('show');if(id==='modalSettings'||id==='modalStyle')persist()})});
-document.querySelectorAll('.modal-bg').forEach(bg=>{bg.addEventListener('click',(e)=>{if(e.target===bg){bg.classList.remove('show');persist()}})});
-
-function syncSettingsUI(){
-document.querySelectorAll('#optQuality .option-btn').forEach(b=>b.classList.toggle('selected',b.dataset.value===settings.quality));
-document.querySelectorAll('#optMapSize .option-btn').forEach(b=>b.classList.toggle('selected',b.dataset.value===settings.mapSize));
-document.querySelectorAll('#optWallDensity .option-btn').forEach(b=>b.classList.toggle('selected',b.dataset.value===settings.wallDensity));
-document.getElementById('sliderGhostSpeed').value=settings.ghostSpeed;
-document.getElementById('sliderGhostSpeedVal').textContent=settings.ghostSpeed;
-document.getElementById('sliderVolume').value=settings.volume;
-document.getElementById('sliderVolumeVal').textContent=settings.volume*10+'%';
-document.getElementById('toggleParticles').classList.toggle('on',settings.particles);
-document.getElementById('toggleShadows').classList.toggle('on',settings.shadows);
-document.getElementById('toggleFullscreen').classList.toggle('on',settings.fullscreen)}
-function bindOptionGroup(groupId,settingKey){document.querySelectorAll(`#${groupId} .option-btn`).forEach(btn=>{btn.addEventListener('click',()=>{document.querySelectorAll(`#${groupId} .option-btn`).forEach(b=>b.classList.remove('selected'));btn.classList.add('selected');settings[settingKey]=btn.dataset.value;persist()})})}
-bindOptionGroup('optQuality','quality');bindOptionGroup('optMapSize','mapSize');bindOptionGroup('optWallDensity','wallDensity');bindOptionGroup('optTheme','theme');bindOptionGroup('optPacmanColor','pacmanColor');bindOptionGroup('optGhostStyle','ghostStyle');
-document.getElementById('sliderGhostSpeed').addEventListener('input',(e)=>{settings.ghostSpeed=parseInt(e.target.value);document.getElementById('sliderGhostSpeedVal').textContent=settings.ghostSpeed;persist()});
-document.getElementById('sliderVolume').addEventListener('input',(e)=>{settings.volume=parseInt(e.target.value);document.getElementById('sliderVolumeVal').textContent=settings.volume*10+'%';persist()});
-function bindToggle(id,settingKey){const el=document.getElementById(id);el.addEventListener('click',()=>{el.classList.toggle('on');settings[settingKey]=el.classList.contains('on');persist()})}
-bindToggle('toggleParticles','particles');bindToggle('toggleShadows','shadows');bindToggle('toggleFullscreen','fullscreen');
-document.getElementById('btnResetSettings').addEventListener('click',()=>{settings={...DEFAULT_SETTINGS};persist();syncSettingsUI()});
-function syncStyleUI(){
-document.querySelectorAll('#optTheme .option-btn').forEach(b=>b.classList.toggle('selected',b.dataset.value===settings.theme));
-document.querySelectorAll('#optPacmanColor .option-btn').forEach(b=>b.classList.toggle('selected',b.dataset.value===settings.pacmanColor));
-document.querySelectorAll('#optGhostStyle .option-btn').forEach(b=>b.classList.toggle('selected',b.dataset.value===settings.ghostStyle))}
-function updateStatsUI(){
-document.getElementById('statHighScore').textContent=stats.highScore;
-document.getElementById('statTotalScore').textContent=stats.totalScore;
-document.getElementById('statGames').textContent=stats.games;
-document.getElementById('statLevel').textContent=stats.maxLevel;
-document.getElementById('statGhosts').textContent=stats.ghostsEaten;
-document.getElementById('statNpcs').textContent=stats.npcsVisited;
-const hours=Math.floor(stats.timePlayed/3600);
-const mins=Math.floor((stats.timePlayed%3600)/60);
-document.getElementById('statTime').textContent=hours>0?`${hours}h ${mins}m`:`${mins}m`;
-document.getElementById('statCombo').textContent=stats.maxCombo+'x'}
-document.getElementById('btnResetStats').addEventListener('click',()=>{if(confirm('Tem certeza que quer limpar TODAS as estatísticas?')){stats={...DEFAULT_STATS};persist();updateStatsUI()}});
-document.getElementById('btnPlay').addEventListener('click',()=>startGame());
-document.getElementById('btnSettings').addEventListener('click',()=>{syncSettingsUI();openModal('modalSettings')});
-document.getElementById('btnStats').addEventListener('click',()=>{updateStatsUI();openModal('modalStats')});
-document.getElementById('btnStyle').addEventListener('click',()=>{syncStyleUI();openModal('modalStyle')});
-document.getElementById('btnCredits').addEventListener('click',()=>openModal('modalCredits'));
-syncSettingsUI();syncStyleUI();
-
-let gameRunning=false;let gameCleanup=null;
-function startGame(){
-if(gameRunning)return;
-gameLoading.classList.add('show');
-lobby.classList.add('hidden');
-if(settings.fullscreen)document.documentElement.requestFullscreen?.().catch(()=>{});
-setTimeout(()=>{
-gameContainer.classList.add('show');
-btnBackToLobby.classList.add('show');
-requestAnimationFrame(()=>requestAnimationFrame(()=>{
-try{gameRunning=true;gameCleanup=runGame();gameLoading.classList.remove('show')}
-catch(err){console.error('Erro ao iniciar jogo:',err);gameLoading.innerHTML='<div style="color:#ff3333;font-size:16px;text-align:center;padding:20px;">❌ Erro ao iniciar<br><br>'+String(err.message||err)+'<br><br><button id="retryGame" class="menu-btn primary" style="margin-top:12px;">TENTAR NOVAMENTE</button></div>';gameRunning=false;lobby.classList.remove('hidden');gameContainer.classList.remove('show');btnBackToLobby.classList.remove('show');document.getElementById('retryGame')?.addEventListener('click',startGame)}
-}))},100)}
-function stopGame(){
-if(!gameRunning&&!gameContainer.classList.contains('show'))return;
-gameRunning=false;
-if(gameCleanup){try{gameCleanup()}catch(e){console.warn(e)}gameCleanup=null}
-gameContainer.classList.remove('show');
-gameContainer.innerHTML='';
-lobby.classList.remove('hidden');
-btnBackToLobby.classList.remove('show');
-gameLoading.classList.remove('show')}
-btnBackToLobby.addEventListener('click',()=>stopGame());
-
-function runGame(){
-let COLS,ROWS;
-if(settings.mapSize==='small'){COLS=15;ROWS=15}
-else if(settings.mapSize==='large'){COLS=23;ROWS=23}
-else{COLS=19;ROWS=19}
-const CELL_SIZE=1;const WALL_HEIGHT=.7;const TOTAL_LEVELS=100;const mapCanvasSize=800;
-const THEMES={classic:{bg:0x05050f,wall:0x1a4a7a,wallTop:0x00aaff,floor:0x0a0a18},neon:{bg:0x0a0514,wall:0x2a1a5a,wallTop:0xff66ff,floor:0x12081e},retro:{bg:0x0a0800,wall:0x4a3a1a,wallTop:0xffaa00,floor:0x1a1200},matrix:{bg:0x000500,wall:0x003300,wallTop:0x00ff00,floor:0x001100}};
-const theme=THEMES[settings.theme]||THEMES.neon;
-const PACMAN_COLORS={yellow:{color:0xffdd00,emissive:0xcc8800},cyan:{color:0x00ddff,emissive:0x0088cc},pink:{color:0xff66aa,emissive:0xcc2266},lime:{color:0x66ff66,emissive:0x22aa22}};
-const pacColor=PACMAN_COLORS[settings.pacmanColor]||PACMAN_COLORS.yellow;
-const densityMap={low:.28,normal:.38,high:.48};
-const baseDensity=densityMap[settings.wallDensity]||.38;
-const ghostSpeedMul=.6+(settings.ghostSpeed-1)*(.8/9);
-const qualitySettings={low:{pixelRatio:1,shadowMap:512,antialias:false},medium:{pixelRatio:1,shadowMap:1024,antialias:true},high:{pixelRatio:1.5,shadowMap:2048,antialias:true}};
-const qs=qualitySettings[settings.quality]||qualitySettings.high;
-const container=document.createElement('div');
-container.id='game-canvas-container';
-container.style.cssText='position:relative;width:min(800px,calc(100vw - 20px),calc(100vh - 20px));height:min(800px,calc(100vw - 20px),calc(100vh - 20px));border-radius:16px;overflow:hidden;box-shadow:0 0 60px rgba(255,200,0,0.3);border:2px solid rgba(255,200,0,0.4);';
-gameContainer.appendChild(container);
-const canvas=document.createElement('canvas');
-canvas.width=mapCanvasSize;canvas.height=mapCanvasSize;
-container.appendChild(canvas);
-const scene=new THREE.Scene();
-scene.background=new THREE.Color(theme.bg);
-scene.fog=new THREE.Fog(theme.bg,COLS*1.6,COLS*2.8);
-const camera=new THREE.PerspectiveCamera(45,1,.1,200);
-const mapDiagonal=Math.sqrt(COLS*COLS+ROWS*ROWS);
-const vFov=(45*Math.PI)/180;
-const camDist=(mapDiagonal/2)/Math.tan(vFov/2)*1.15;
-camera.position.set(0,camDist*.95,camDist*.42);
-camera.lookAt(0,0,0);
-const renderer=new THREE.WebGLRenderer({canvas,antialias:qs.antialias});
-renderer.setPixelRatio(Math.min(window.devicePixelRatio,qs.pixelRatio));
-renderer.setSize(mapCanvasSize,mapCanvasSize,false);
-renderer.shadowMap.enabled=settings.shadows;
-renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-scene.add(new THREE.AmbientLight(0xffffff,.6));
-const dirLight=new THREE.DirectionalLight(0xffffff,1);
-dirLight.position.set(COLS*.4,COLS*1.2,ROWS*.3);
-dirLight.castShadow=settings.shadows;
-dirLight.shadow.mapSize.set(qs.shadowMap,qs.shadowMap);
-dirLight.shadow.camera.left=-COLS*.8;dirLight.shadow.camera.right=COLS*.8;
-dirLight.shadow.camera.top=ROWS*.8;dirLight.shadow.camera.bottom=-ROWS*.8;
-dirLight.shadow.camera.near=.5;dirLight.shadow.camera.far=COLS*3;
-scene.add(dirLight);
-const pointLight=new THREE.PointLight(0xffaa00,.5,COLS*2);
-pointLight.position.set(0,COLS*.6,0);
-scene.add(pointLight);
-const floorMat=new THREE.MeshStandardMaterial({color:theme.floor,roughness:.9,metalness:.1});
-const floor=new THREE.Mesh(new THREE.PlaneGeometry(COLS,ROWS),floorMat);
-floor.rotation.x=-Math.PI/2;floor.receiveShadow=true;scene.add(floor);
-const mazeGroup=new THREE.Group();scene.add(mazeGroup);
-const portalGroup=new THREE.Group();scene.add(portalGroup);
-const powerUpGroup=new THREE.Group();scene.add(powerUpGroup);
-const npcGroup=new THREE.Group();scene.add(npcGroup);
-function toWorldX(col){return col-(COLS-1)/2}
-function toWorldZ(row){return row-(ROWS-1)/2}
-const hudHTML=`
-<div style="position:absolute;top:12px;left:12px;right:12px;display:flex;justify-content:space-between;padding:8px 16px;background:rgba(10,10,25,0.85);border-radius:12px;border:1px solid rgba(255,200,0,0.4);backdrop-filter:blur(8px);pointer-events:none;z-index:10;gap:8px;flex-wrap:wrap;font-family:'Courier New',monospace;">
-<div style="display:flex;gap:5px;font-size:13px;font-weight:bold;color:#ffcc00;letter-spacing:1px;"><span>🎯 FASE</span> <span id="hudLevel" style="color:#fff;">1</span>/100</div>
-<div style="display:flex;gap:5px;font-size:13px;font-weight:bold;color:#ffcc00;letter-spacing:1px;"><span>🔵</span> <span id="hudScore" style="color:#fff;">0</span></div>
-<div style="display:flex;gap:5px;font-size:13px;font-weight:bold;color:#ffcc00;letter-spacing:1px;"><span>❤️</span> <span id="hudLives" style="color:#fff;">3</span></div>
-<div style="display:flex;gap:5px;font-size:13px;font-weight:bold;color:#ffcc00;letter-spacing:1px;"><span>⚡</span> <span id="hudPowers" style="color:#fff;">0</span></div>
-</div>
-<div id="powersPanel" style="position:absolute;top:70px;left:12px;display:flex;flex-direction:column;gap:8px;z-index:10;pointer-events:none;font-family:'Courier New',monospace;"></div>
-<div style="position:absolute;bottom:44px;left:50%;transform:translateX(-50%);width:60%;height:6px;background:rgba(0,0,0,0.6);border-radius:3px;overflow:hidden;z-index:10;border:1px solid rgba(255,200,0,0.3);"><div id="hudLevelBar" style="height:100%;width:0%;background:linear-gradient(90deg,#ffcc00,#ff9900);transition:width 0.5s ease;box-shadow:0 0 10px #ffcc00;"></div></div>
-<div id="npcDialog" style="position:absolute;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);max-width:90%;padding:16px 22px;background:linear-gradient(145deg,rgba(20,20,40,0.98),rgba(10,10,25,0.98));border:3px solid #66ffcc;border-radius:16px;color:#fff;font-size:15px;z-index:18;pointer-events:none;opacity:0;transition:all 0.4s cubic-bezier(0.34,1.56,0.64,1);font-family:'Courier New',monospace;">
-<div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;padding-bottom:8px;border-bottom:1px dashed #66ffcc;" id="npcHeader"><div style="width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:24px;border:2px solid #66ffcc;flex-shrink:0;" id="npcPortrait">💬</div><div><div style="font-weight:bold;font-size:14px;letter-spacing:2px;text-transform:uppercase;color:#66ffcc;" id="npcName">SÁBIO</div><div style="font-size:11px;letter-spacing:1px;opacity:0.7;margin-top:2px;color:#66ffcc;" id="npcTitle">Guardião do Conhecimento</div></div></div>
-<div style="color:#fff;line-height:1.5;font-style:italic;" id="npcText"></div></div>
-<div id="notification" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);padding:16px 40px;background:rgba(10,10,25,0.95);border:2px solid #ffcc00;border-radius:16px;font-size:22px;font-weight:bold;color:#fff;text-align:center;z-index:15;pointer-events:none;opacity:0;text-shadow:0 0 20px currentColor;font-family:'Courier New',monospace;transition:opacity 0.3s;"></div>`;
-container.insertAdjacentHTML('beforeend',hudHTML+`<div id="touch-controls" aria-label="Controles de movimento"><span></span><button data-dir="up" aria-label="Cima">▲</button><span></span><button data-dir="left" aria-label="Esquerda">◀</button><button data-dir="down" aria-label="Baixo">▼</button><button data-dir="right" aria-label="Direita">▶</button></div>`);
-const hudLevel=document.getElementById('hudLevel');
-const hudScore=document.getElementById('hudScore');
-const hudLives=document.getElementById('hudLives');
-const hudPowers=document.getElementById('hudPowers');
-const hudLevelBar=document.getElementById('hudLevelBar');
-const powersPanel=document.getElementById('powersPanel');
-const npcDialog=document.getElementById('npcDialog');
-const npcHeader=document.getElementById('npcHeader');
-const npcPortrait=document.getElementById('npcPortrait');
-const npcName=document.getElementById('npcName');
-const npcTitle=document.getElementById('npcTitle');
-const npcText=document.getElementById('npcText');
-const notification=document.getElementById('notification');
-
-class SeededRandom{constructor(seed){this.seed=seed}next(){this.seed^=this.seed<<13;this.seed^=this.seed>>17;this.seed^=this.seed<<5;return((this.seed>>>0)/4294967296)}int(max){return Math.floor(this.next()*max)}}
-
-function generateMaze(levelNum){
-const rng=new SeededRandom(levelNum*987654321+12345);
-const maze=[];
-for(let r=0;r<ROWS;r++)maze.push(new Array(COLS).fill(1));
-for(let r=1;r<ROWS-1;r++)for(let c=1;c<COLS-1;c++)maze[r][c]=0;
-const wallDensity=baseDensity+Math.min(levelNum/200,.15);
-const midR=Math.floor(ROWS/2);const midC=Math.floor(COLS/2);
-for(let r=1;r<ROWS-1;r++){for(let c=1;c<=Math.floor(COLS/2);c++){
-if(r===1||r===ROWS-2||c===1){maze[r][c]=0;maze[r][COLS-1-c]=0;continue}
-if(r===midR&&c===midC){maze[r][c]=0;maze[r][COLS-1-c]=0;continue}
-if(rng.next()<wallDensity){maze[r][c]=1;maze[r][COLS-1-c]=1}}}
-const visited=Array.from({length:ROWS},()=>new Array(COLS).fill(false));
-const queue=[[midR,midC]];visited[midR][midC]=true;
-const dirs=[[0,1],[0,-1],[1,0],[-1,0]];
-while(queue.length>0){const[r,c]=queue.shift();
-for(const[dr,dc]of dirs){const nr=r+dr,nc=c+dc;
-if(nr>0&&nr<ROWS-1&&nc>0&&nc<COLS-1){if(!visited[nr][nc]&&maze[nr][nc]===0){visited[nr][nc]=true;queue.push([nr,nc])}}}}
-for(let r=1;r<ROWS-1;r++)for(let c=1;c<COLS-1;c++)if(maze[r][c]===0&&!visited[r][c])maze[r][c]=1;
-let emptyCount=0;
-for(let r=1;r<ROWS-1;r++)for(let c=1;c<COLS-1;c++)if(maze[r][c]===0)emptyCount++;
-const minEmpty=Math.floor(COLS*ROWS*.25);
-let attempts=0;
-while(emptyCount<minEmpty&&attempts<300){const r=2+rng.int(ROWS-4);const c=2+rng.int(Math.floor(COLS/2)-2)+1;if(maze[r][c]===1){maze[r][c]=0;maze[r][COLS-1-c]=0;emptyCount+=2}attempts++}
-maze[midR][0]=5;maze[midR][COLS-1]=6;maze[midR][midC]=3;
-const corners=[[1,1],[1,COLS-2],[ROWS-2,1],[ROWS-2,COLS-2]];
-for(const[r,c]of corners)if(maze[r][c]===0)maze[r][c]=4;
-for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if(maze[r][c]===5||maze[r][c]===6)maze[r][c]=2;
-return maze}
-
-const wallMaterial=new THREE.MeshStandardMaterial({color:theme.wall,roughness:.5,metalness:.3,emissive:theme.wall,emissiveIntensity:.2});
-const wallTopMaterial=new THREE.MeshStandardMaterial({color:theme.wallTop,emissive:theme.wallTop,emissiveIntensity:1,roughness:.3,metalness:.5});
-const pelletMaterial=new THREE.MeshStandardMaterial({color:0xffdd44,emissive:0xffaa00,emissiveIntensity:1.2,roughness:.2});
-const powerPelletMaterial=new THREE.MeshStandardMaterial({color:0x00ffff,emissive:0x00ffff,emissiveIntensity:1.8,roughness:.1});
-
-let grid=[];let mapLayout=null;
-let player={x:Math.floor(COLS/2),y:Math.floor(ROWS/2)};
-let ghosts=[];let score=0;let lives=3;let level=1;
-let gameOver=false;let levelComplete=false;
-let totalPellets=0;let pelletsEaten=0;
-let direction='none';let nextDirection='none';
-let powerMode=false;let powerTimer=0;const POWER_DURATION=45;
-let ghostCombo=0;let levelMaxCombo=0;
-let fruit=null;let fruitTimer=0;let fruitSpawned=false;let fruitEaten=0;
-let moveInterval=null;let portalActive=false;let portalMesh=null;
-let activePowers={};let powerUpsOnMap=[];let powerSpawnTimer=0;let powerSpawnInterval=60;
-let npcsOnMap=[];let npcSpawnTimer=0;let npcSpawnInterval=120;
-let playerMesh=null;let playerBodyMesh=null;
-let ghostMeshes=[];let pelletMeshes=[];let fruitMesh=null;let portalLight=null;
-let animTime=0;const clock=new THREE.Clock();let rafId=null;let running=true;
-
-const POWER_TYPES={
-INVISIBILITY:{id:'invisibility',icon:'👻',name:'INVISÍVEL',color:0xaaaaaa,borderColor:'#cccccc',durationTicks:75},
-SPEED:{id:'speed',icon:'⚡',name:'VELOCIDADE',color:0xffff00,borderColor:'#ffff00',durationTicks:60},
-EXTRA_LIFE:{id:'extra_life',icon:'❤️',name:'VIDA EXTRA',color:0xff3366,borderColor:'#ff3366',durationTicks:0},
-FREEZE:{id:'freeze',icon:'❄️',name:'CONGELAR',color:0x00ffff,borderColor:'#00ffff',durationTicks:40},
-MAGNET:{id:'magnet',icon:'🧲',name:'ÍMÃ',color:0xff66cc,borderColor:'#ff66cc',durationTicks:50},
-INVINCIBLE:{id:'invincible',icon:'🛡️',name:'INVENCÍVEL',color:0x66ff66,borderColor:'#66ff66',durationTicks:50}};
-const POWER_LIST=Object.values(POWER_TYPES);
-
-const NPC_TYPES={
-SAGE:{id:'sage',name:'SÁBIO',icon:'🧙',title:'Guardião do Conhecimento',color:0x66ffcc,glowColor:'#66ffcc',hints:['Fantasmas vermelhos te perseguem diretamente. Fuja pelas curvas!','Use os power pellets nos cantos para virar o jogo!','Fantasmas rosas tentam te emboscar!','Quando a barra de poder estiver acabando, fuja!']},
-TRICKSTER:{id:'trickster',name:'TRICKSTER',icon:'🦊',title:'Espírito Trapalhão',color:0xffaa33,glowColor:'#ffaa33',hints:['A invisibilidade dura 12 segundos completos!','Com o ímã ativo, as pastilhas voam até você!','Congelar os fantasmas é ótimo para combos!','A velocidade te deixa 45% mais rápido!']},
-WHISPERER:{id:'whisperer',name:'SUSSURRADOR',icon:'👻',title:'Aquele que Ouve os Mortos',color:0xaa88ff,glowColor:'#aa88ff',hints:['Cada fantasma tem sua própria personalidade...','O vermelho persegue, o rosa embosca!','Fantasmas comidos voltam como olhos flutuantes.','Power pellets assustam todos os fantasmas!']},
-MERCHANT:{id:'merchant',name:'MERCADOR',icon:'🧝',title:'Comerciante do Vazio',color:0xff66aa,glowColor:'#ff66aa',hints:['Presente para você: +50 pontos!','Guarde poderes para as horas difíceis!','Bônus especial apenas para você!','As frutas valem mais que 10 pastilhas!']}};
-
-const ghostColors={ghost:[0xff2222,0xff77cc,0x33ddff,0xffaa33],robot:[0xcc0000,0xcc44aa,0x0088cc,0xcc8800],alien:[0x88ff22,0xcc44ff,0x22ffcc,0xffaa22]};
-const gc=ghostColors[settings.ghostStyle]||ghostColors.ghost;
-const GHOST_TYPES=[{name:'blinky',color:gc[0]},{name:'pinky',color:gc[1]},{name:'inky',color:gc[2]},{name:'clyde',color:gc[3]}];
-
-function buildMaze(){
-while(mazeGroup.children.length>0){const c=mazeGroup.children[0];mazeGroup.remove(c);if(c.geometry)c.geometry.dispose()}
-const wallGeo=new THREE.BoxGeometry(CELL_SIZE*.98,WALL_HEIGHT,CELL_SIZE*.98);
-const topGeo=new THREE.BoxGeometry(CELL_SIZE*.98,.08,CELL_SIZE*.98);
-for(let row=0;row<ROWS;row++){for(let col=0;col<COLS;col++){
-if(grid[row][col]===1){
-const x=toWorldX(col),z=toWorldZ(row);
-const wall=new THREE.Mesh(wallGeo,wallMaterial);
-wall.position.set(x,WALL_HEIGHT/2,z);
-wall.castShadow=settings.shadows;wall.receiveShadow=true;mazeGroup.add(wall);
-const top=new THREE.Mesh(topGeo,wallTopMaterial);
-top.position.set(x,WALL_HEIGHT+.04,z);mazeGroup.add(top)}}}}
-
-function buildPellets(){
-for(const p of pelletMeshes){scene.remove(p.mesh);p.mesh.geometry.dispose()}
-pelletMeshes=[];
-const pelletGeo=new THREE.SphereGeometry(.14,10,8);
-const powerGeo=new THREE.SphereGeometry(.26,12,10);
-for(let row=0;row<ROWS;row++){for(let col=0;col<COLS;col++){
-const v=grid[row][col];
-if(v===0||v===4){
-const isPower=v===4;
-const mesh=new THREE.Mesh(isPower?powerGeo:pelletGeo,isPower?powerPelletMaterial:pelletMaterial);
-mesh.position.set(toWorldX(col),.35,toWorldZ(row));
-mesh.castShadow=settings.shadows&&!isPower;
-scene.add(mesh);
-pelletMeshes.push({mesh,col,row,isPower})}}}}
-
-function createPowerUpMesh(type){
-const group=new THREE.Group();const color=type.color;
-const base=new THREE.Mesh(new THREE.OctahedronGeometry(.35,0),new THREE.MeshStandardMaterial({color,emissive:color,emissiveIntensity:1.8,roughness:.2,metalness:.5,transparent:true,opacity:.95}));
-base.position.y=.55;base.castShadow=settings.shadows;group.add(base);
-const ringGeo=new THREE.TorusGeometry(.45,.05,8,20);
-const ringMat=new THREE.MeshStandardMaterial({color:0xffffff,emissive:color,emissiveIntensity:2.5,transparent:true,opacity:.7});
-const ring=new THREE.Mesh(ringGeo,ringMat);ring.rotation.x=Math.PI/2;ring.position.y=.55;group.add(ring);
-const ring2=new THREE.Mesh(ringGeo,ringMat);ring2.rotation.z=Math.PI/2;ring2.position.y=.55;group.add(ring2);
-const light=new THREE.PointLight(color,1.5,3);light.position.y=.8;group.add(light);
-return group}
-
-function spawnPowerUp(){
-const candidates=[];
-for(let r=1;r<ROWS-1;r++){for(let c=1;c<COLS-1;c++){
-if(grid[r][c]===2&&!(r===player.y&&c===player.x)){
-let minDist=Math.abs(r-player.y)+Math.abs(c-player.x);
-for(const g of ghosts){const d=Math.abs(r-g.y)+Math.abs(c-g.x);if(d<minDist)minDist=d}
-for(const npc of npcsOnMap){const d=Math.abs(r-npc.row)+Math.abs(c-npc.col);if(d<3){minDist=-1;break}}
-if(minDist>=5)candidates.push({x:c,y:r,dist:minDist})}}}
-if(candidates.length===0)return;
-candidates.sort((a,b)=>b.dist-a.dist);
-const pos=candidates[0];
-const roll=Math.random();let type;
-if(roll<.08)type=POWER_TYPES.EXTRA_LIFE;
-else if(roll<.18)type=POWER_TYPES.INVINCIBLE;
-else if(roll<.32)type=POWER_TYPES.INVISIBILITY;
-else if(roll<.48)type=POWER_TYPES.SPEED;
-else if(roll<.64)type=POWER_TYPES.FREEZE;
-else type=POWER_TYPES.MAGNET;
-const mesh=createPowerUpMesh(type);
-mesh.position.set(toWorldX(pos.x),0,toWorldZ(pos.y));
-powerUpGroup.add(mesh);
-powerUpsOnMap.push({type,col:pos.x,row:pos.y,mesh,spawnTime:animTime})}
-
-function buildPowerUps(){
-while(powerUpGroup.children.length>0){const c=powerUpGroup.children[0];powerUpGroup.remove(c);c.traverse(o=>{if(o.geometry)o.geometry.dispose()})}
-powerUpsOnMap=[]}
-
-function createSageMesh(color){
-const group=new THREE.Group();
-const matDark=new THREE.MeshStandardMaterial({color:0x003344,emissive:0x004455,emissiveIntensity:.5,roughness:.6});
-const robe=new THREE.Mesh(new THREE.ConeGeometry(.35,1.1,8),matDark);
-robe.position.y=.55;robe.castShadow=settings.shadows;group.add(robe);
-const trim=new THREE.Mesh(new THREE.TorusGeometry(.35,.03,6,16),new THREE.MeshStandardMaterial({color:0x66ffcc,emissive:0x66ffcc,emissiveIntensity:3}));
-trim.rotation.x=Math.PI/2;trim.position.y=.15;group.add(trim);
-const head=new THREE.Mesh(new THREE.SphereGeometry(.18,12,10),new THREE.MeshStandardMaterial({color:0xeeddcc,emissive:0x886644,emissiveIntensity:.3}));
-head.position.y=1.15;head.castShadow=settings.shadows;group.add(head);
-const eyeGeo=new THREE.SphereGeometry(.04,8,6);
-const eyeMat=new THREE.MeshStandardMaterial({color:0x66ffcc,emissive:0x66ffcc,emissiveIntensity:4});
-const eyeL=new THREE.Mesh(eyeGeo,eyeMat);eyeL.position.set(-.07,1.18,.14);group.add(eyeL);
-const eyeR=new THREE.Mesh(eyeGeo,eyeMat);eyeR.position.set(.07,1.18,.14);group.add(eyeR);
-const beard=new THREE.Mesh(new THREE.ConeGeometry(.15,.4,8),new THREE.MeshStandardMaterial({color:0xf0f0f0,emissive:0xaaaaff,emissiveIntensity:.3}));
-beard.position.y=.95;beard.rotation.x=Math.PI;group.add(beard);
-const hat=new THREE.Mesh(new THREE.ConeGeometry(.25,.6,8),new THREE.MeshStandardMaterial({color:0x003344,emissive:0x006677,emissiveIntensity:.6,roughness:.4}));
-hat.position.y=1.55;hat.castShadow=settings.shadows;group.add(hat);
-const star=new THREE.Mesh(new THREE.OctahedronGeometry(.08,0),new THREE.MeshStandardMaterial({color:0x66ffcc,emissive:0x66ffcc,emissiveIntensity:4}));
-star.position.set(.15,1.6,0);star.name='star';group.add(star);
-const staff=new THREE.Mesh(new THREE.CylinderGeometry(.025,.025,1.4,6),new THREE.MeshStandardMaterial({color:0x553322,roughness:.7}));
-staff.position.set(.42,.7,0);group.add(staff);
-const orb=new THREE.Mesh(new THREE.SphereGeometry(.1,12,10),new THREE.MeshStandardMaterial({color:0x66ffcc,emissive:0x66ffcc,emissiveIntensity:5}));
-orb.position.set(.42,1.45,0);orb.name='orb';group.add(orb);
-const aura=new THREE.Mesh(new THREE.TorusGeometry(.7,.02,6,20),new THREE.MeshStandardMaterial({color:0x66ffcc,emissive:0x66ffcc,emissiveIntensity:3,transparent:true,opacity:.7}));
-aura.rotation.x=Math.PI/2;aura.position.y=.05;aura.name='aura';group.add(aura);
-const light=new THREE.PointLight(color,1.5,4);light.position.y=1.2;group.add(light);
-return group}
-
-function createTricksterMesh(color){
-const group=new THREE.Group();
-const matBody=new THREE.MeshStandardMaterial({color,emissive:color,emissiveIntensity:.5,roughness:.4,metalness:.2});
-const matWhite=new THREE.MeshStandardMaterial({color:0xfff5e0,emissive:0x886644,emissiveIntensity:.3,roughness:.5});
-const body=new THREE.Mesh(new THREE.CapsuleGeometry(.22,.35,6,10),matBody);
-body.rotation.z=Math.PI/2;body.position.y=.35;body.castShadow=settings.shadows;group.add(body);
-const head=new THREE.Mesh(new THREE.SphereGeometry(.18,12,10),matBody);
-head.scale.set(1.3,1,1);head.position.set(.42,.75,0);head.castShadow=settings.shadows;group.add(head);
-const snout=new THREE.Mesh(new THREE.ConeGeometry(.08,.18,8),matWhite);
-snout.rotation.z=-Math.PI/2;snout.position.set(.62,.72,0);group.add(snout);
-const eyeGeo=new THREE.SphereGeometry(.045,8,6);
-const eyeMat=new THREE.MeshStandardMaterial({color:0xffee00,emissive:0xffee00,emissiveIntensity:3});
-const eyeL=new THREE.Mesh(eyeGeo,eyeMat);eyeL.position.set(.48,.82,.08);group.add(eyeL);
-const eyeR=new THREE.Mesh(eyeGeo,eyeMat);eyeR.position.set(.48,.82,-.08);group.add(eyeR);
-const earGeo=new THREE.ConeGeometry(.09,.25,4);
-const earL=new THREE.Mesh(earGeo,matBody);earL.position.set(.4,.95,.12);earL.rotation.z=-.2;group.add(earL);
-const earR=new THREE.Mesh(earGeo,matBody);earR.position.set(.4,.95,-.12);earR.rotation.z=-.2;group.add(earR);
-const tail=new THREE.Mesh(new THREE.TorusKnotGeometry(.18,.07,24,6,2,3),new THREE.MeshStandardMaterial({color,emissive:color,emissiveIntensity:.7,roughness:.4}));
-tail.position.set(-.38,.4,0);tail.rotation.y=Math.PI/4;tail.name='tail';group.add(tail);
-for(let i=0;i<5;i++){const spark=new THREE.Mesh(new THREE.OctahedronGeometry(.05,0),new THREE.MeshStandardMaterial({color:0xffee00,emissive:0xffee00,emissiveIntensity:4}));const angle=(i/5)*Math.PI*2;spark.position.set(Math.cos(angle)*.6,.6,Math.sin(angle)*.6);spark.name=`spark${i}`;group.add(spark)}
-const light=new THREE.PointLight(color,1.2,3.5);light.position.y=.6;group.add(light);
-return group}
-
-function createWhispererMesh(color){
-const group=new THREE.Group();
-const matGhost=new THREE.MeshStandardMaterial({color,emissive:color,emissiveIntensity:.8,roughness:.2,transparent:true,opacity:.5,side:THREE.DoubleSide});
-const body=new THREE.Mesh(new THREE.SphereGeometry(.4,20,14),matGhost);
-body.scale.set(1,1.2,1);body.position.y=.6;group.add(body);
-for(let i=0;i<4;i++){const veil=new THREE.Mesh(new THREE.TorusGeometry(.5+i*.12,.02,6,24),new THREE.MeshStandardMaterial({color,emissive:color,emissiveIntensity:3,transparent:true,opacity:.4-i*.07}));veil.rotation.x=Math.PI/2;veil.position.y=.5+i*.15;veil.name=`veil${i}`;group.add(veil)}
-const tail=new THREE.Mesh(new THREE.ConeGeometry(.42,.7,12,1,true),matGhost);
-tail.position.y=.05;tail.rotation.x=Math.PI;group.add(tail);
-const socketGeo=new THREE.SphereGeometry(.1,10,8);
-const socketMat=new THREE.MeshStandardMaterial({color:0x000000,emissive:0x110022,emissiveIntensity:.5});
-const socketL=new THREE.Mesh(socketGeo,socketMat);socketL.position.set(-.13,.78,.32);group.add(socketL);
-const socketR=new THREE.Mesh(socketGeo,socketMat);socketR.position.set(.13,.78,.32);group.add(socketR);
-const glowGeo=new THREE.SphereGeometry(.035,8,6);
-const glowMat=new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xddaaff,emissiveIntensity:6});
-const glowL=new THREE.Mesh(glowGeo,glowMat);glowL.position.set(-.13,.78,.35);glowL.name='glowL';group.add(glowL);
-const glowR=new THREE.Mesh(glowGeo,glowMat);glowR.position.set(.13,.78,.35);glowR.name='glowR';group.add(glowR);
-const mouth=new THREE.Mesh(new THREE.RingGeometry(.06,.1,16),new THREE.MeshBasicMaterial({color:0x000000,side:THREE.DoubleSide}));
-mouth.position.set(0,.55,.38);mouth.name='mouth';group.add(mouth);
-const light=new THREE.PointLight(color,1.8,4.5);light.position.y=.9;light.name='ghostLight';group.add(light);
-return group}
-
-function createMerchantMesh(color){
-const group=new THREE.Group();
-const matBody=new THREE.MeshStandardMaterial({color,emissive:color,emissiveIntensity:.4,roughness:.5,metalness:.4});
-const matDark=new THREE.MeshStandardMaterial({color:0x553344,emissive:0x442233,emissiveIntensity:.3,roughness:.7,metalness:.2});
-const matGold=new THREE.MeshStandardMaterial({color:0xffdd44,emissive:0xffaa00,emissiveIntensity:2,roughness:.2,metalness:.9});
-const body=new THREE.Mesh(new THREE.CylinderGeometry(.42,.45,.7,10),matBody);
-body.position.y=.35;body.castShadow=settings.shadows;group.add(body);
-const chest=new THREE.Mesh(new THREE.BoxGeometry(.6,.35,.15),matGold);
-chest.position.set(0,.5,.35);group.add(chest);
-const head=new THREE.Mesh(new THREE.BoxGeometry(.5,.42,.5),matBody);
-head.position.y=.95;head.castShadow=settings.shadows;group.add(head);
-const beard=new THREE.Mesh(new THREE.BoxGeometry(.4,.25,.08),matDark);
-beard.position.set(0,.75,.28);group.add(beard);
-const eyeGeo=new THREE.CylinderGeometry(.08,.08,.03,12);
-const eyeL=new THREE.Mesh(eyeGeo,matGold);eyeL.rotation.x=Math.PI/2;eyeL.position.set(-.12,1,.26);group.add(eyeL);
-const eyeR=new THREE.Mesh(eyeGeo,matGold);eyeR.rotation.x=Math.PI/2;eyeR.position.set(.12,1,.26);group.add(eyeR);
-const hat=new THREE.Mesh(new THREE.CylinderGeometry(.35,.35,.15,12),matDark);
-hat.position.y=1.25;group.add(hat);
-const pack=new THREE.Mesh(new THREE.BoxGeometry(.7,.8,.4),matDark);
-pack.position.set(0,.6,-.5);pack.castShadow=settings.shadows;group.add(pack);
-const coinGeo=new THREE.CylinderGeometry(.06,.06,.02,12);
-for(let i=0;i<5;i++){const coin=new THREE.Mesh(coinGeo,matGold);coin.position.set((Math.random()-.5)*.4,.9+Math.random()*.15,-.45+Math.random()*.1);coin.name=`coin${i}`;group.add(coin)}
-const aura=new THREE.Mesh(new THREE.TorusGeometry(.75,.025,6,20),matGold);
-aura.rotation.x=Math.PI/2;aura.position.y=.05;aura.name='aura';group.add(aura);
-const light=new THREE.PointLight(color,1.5,4);light.position.y=.9;group.add(light);
-return group}
-
-const NPC_MESH_CREATORS={sage:createSageMesh,trickster:createTricksterMesh,whisperer:createWhispererMesh,merchant:createMerchantMesh};
-
-function spawnNpc(){
-const candidates=[];
-for(let r=2;r<ROWS-2;r++){for(let c=2;c<COLS-2;c++){
-if(grid[r][c]===2&&!(r===player.y&&c===player.x)){
-let minDist=Math.abs(r-player.y)+Math.abs(c-player.x);
-if(minDist<6)continue;
-let tooClose=false;
-for(const g of ghosts)if(Math.abs(r-g.y)+Math.abs(c-g.x)<4){tooClose=true;break}
-if(tooClose)continue;
-for(const npc of npcsOnMap)if(Math.abs(r-npc.row)+Math.abs(c-npc.col)<4){tooClose=true;break}
-if(tooClose)continue;
-candidates.push({x:c,y:r})}}}
-if(candidates.length===0)return;
-const pos=candidates[Math.floor(Math.random()*candidates.length)];
-const roll=Math.random();let npcType;
-if(roll<.35)npcType=NPC_TYPES.SAGE;
-else if(roll<.60)npcType=NPC_TYPES.TRICKSTER;
-else if(roll<.85)npcType=NPC_TYPES.WHISPERER;
-else npcType=NPC_TYPES.MERCHANT;
-const hint=npcType.hints[Math.floor(Math.random()*npcType.hints.length)];
-const mesh=NPC_MESH_CREATORS[npcType.id](npcType.color);
-mesh.position.set(toWorldX(pos.x),0,toWorldZ(pos.y));
-npcGroup.add(mesh);
-npcsOnMap.push({type:npcType,col:pos.x,row:pos.y,mesh,hint,spawnTime:animTime,bobOffset:Math.random()*Math.PI*2})}
-
-function buildNpcs(){
-while(npcGroup.children.length>0){const c=npcGroup.children[0];npcGroup.remove(c);c.traverse(o=>{if(o.geometry)o.geometry.dispose()})}
-npcsOnMap=[]}
-
-function buildPortal(){
-while(portalGroup.children.length>0){const c=portalGroup.children[0];portalGroup.remove(c);if(c.geometry)c.geometry.dispose()}
-portalMesh=null;portalLight=null;
-if(!portalActive)return;
-const group=new THREE.Group();
-const ringGeo=new THREE.TorusGeometry(.55,.1,12,24);
-const ringMat=new THREE.MeshStandardMaterial({color:0xff66ff,emissive:0xff00ff,emissiveIntensity:2,roughness:.2,metalness:.5});
-const ring=new THREE.Mesh(ringGeo,ringMat);ring.rotation.x=Math.PI/2;ring.position.y=.6;group.add(ring);
-const ring2=new THREE.Mesh(new THREE.TorusGeometry(.35,.06,12,24),new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xffff00,emissiveIntensity:2.5,roughness:.1}));
-ring2.rotation.x=Math.PI/2;ring2.position.y=.6;group.add(ring2);
-const core=new THREE.Mesh(new THREE.SphereGeometry(.25,16,12),new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xffaa88,emissiveIntensity:3}));
-core.position.y=.6;group.add(core);
-portalLight=new THREE.PointLight(0xff66ff,2,5);portalLight.position.y=1;group.add(portalLight);
-group.position.set(toWorldX(Math.floor(COLS/2)),0,toWorldZ(Math.floor(ROWS/2)));
-portalGroup.add(group);
-portalMesh=group}
-
-const playerMaterial=new THREE.MeshStandardMaterial({color:pacColor.color,emissive:pacColor.emissive,emissiveIntensity:.7,roughness:.3,metalness:.2});
-
-function buildPlayer(){
-if(playerMesh){scene.remove(playerMesh);playerMesh.traverse(c=>{if(c.geometry)c.geometry.dispose()})}
-const group=new THREE.Group();
-const body=new THREE.Mesh(new THREE.SphereGeometry(.42,20,16),playerMaterial.clone());
-body.castShadow=settings.shadows;group.add(body);playerBodyMesh=body;
-const eyeGeo=new THREE.SphereGeometry(.09,10,8);
-const eyeMat=new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xffffff,emissiveIntensity:.5});
-const pupilMat=new THREE.MeshStandardMaterial({color:0x000000});
-const eyeL=new THREE.Mesh(eyeGeo,eyeMat);eyeL.position.set(-.14,.15,.32);group.add(eyeL);
-const eyeR=new THREE.Mesh(eyeGeo,eyeMat);eyeR.position.set(.14,.15,.32);group.add(eyeR);
-const pupilGeo=new THREE.SphereGeometry(.045,8,6);
-const pupilL=new THREE.Mesh(pupilGeo,pupilMat);pupilL.position.set(0,0,.06);eyeL.add(pupilL);
-const pupilR=new THREE.Mesh(pupilGeo,pupilMat);pupilR.position.set(0,0,.06);eyeR.add(pupilR);
-const mouth=new THREE.Mesh(new THREE.CircleGeometry(.18,12,0,Math.PI),new THREE.MeshBasicMaterial({color:0x000000,side:THREE.DoubleSide}));
-mouth.position.set(0,.02,.38);mouth.rotation.z=Math.PI;mouth.name='mouth';group.add(mouth);
-group.position.set(toWorldX(player.x),.45,toWorldZ(player.y));
-scene.add(group);playerMesh=group}
-
-function buildGhosts(){
-for(const g of ghostMeshes){scene.remove(g.group);g.group.traverse(c=>{if(c.geometry)c.geometry.dispose()})}
-ghostMeshes=[];
-for(let i=0;i<ghosts.length;i++){
-const g=ghosts[i];
-const group=new THREE.Group();
-const bodyMat=new THREE.MeshStandardMaterial({color:g.type.color,emissive:g.type.color,emissiveIntensity:.4,roughness:.4,metalness:.1});
-const body=new THREE.Mesh(new THREE.SphereGeometry(.4,16,12),bodyMat);
-body.scale.set(1,1.05,1);body.position.y=.55;body.castShadow=settings.shadows;group.add(body);
-const skirt=new THREE.Mesh(new THREE.CylinderGeometry(.4,.4,.3,12,1,true),new THREE.MeshStandardMaterial({color:g.type.color,emissive:g.type.color,emissiveIntensity:.3,roughness:.5,side:THREE.DoubleSide}));
-skirt.position.y=.3;group.add(skirt);
-const eyeGeo=new THREE.SphereGeometry(.12,10,8);
-const eyeMat=new THREE.MeshStandardMaterial({color:0xffffff,emissive:0xffffff,emissiveIntensity:.4});
-const pupilMat=new THREE.MeshStandardMaterial({color:0x000000});
-const eyeL=new THREE.Mesh(eyeGeo,eyeMat);eyeL.position.set(-.14,.68,.32);group.add(eyeL);
-const eyeR=new THREE.Mesh(eyeGeo,eyeMat);eyeR.position.set(.14,.68,.32);group.add(eyeR);
-const pupilGeo=new THREE.SphereGeometry(.055,8,6);
-const pupilL=new THREE.Mesh(pupilGeo,pupilMat);pupilL.position.set(0,0,.07);eyeL.add(pupilL);
-const pupilR=new THREE.Mesh(pupilGeo,pupilMat);pupilR.position.set(0,0,.07);eyeR.add(pupilR);
-group.position.set(toWorldX(g.x),0,toWorldZ(g.y));
-scene.add(group);
-ghostMeshes.push({group,body,bodyMat,eyeL,eyeR,pupilL,pupilR,originalColor:g.type.color})}}
-
-function buildFruit(){
-if(fruitMesh){scene.remove(fruitMesh);fruitMesh.traverse(c=>{if(c.geometry)c.geometry.dispose()});fruitMesh=null}
-if(!fruit)return;
-const group=new THREE.Group();
-const color=fruit.type==='cherry'?0xff1744:0xff3366;
-const sphereMat=new THREE.MeshStandardMaterial({color,emissive:color,emissiveIntensity:.5,roughness:.3});
-if(fruit.type==='cherry'){
-const s1=new THREE.Mesh(new THREE.SphereGeometry(.2,12,10),sphereMat);
-s1.position.set(-.15,.4,0);s1.castShadow=settings.shadows;group.add(s1);
-const s2=new THREE.Mesh(new THREE.SphereGeometry(.2,12,10),sphereMat);
-s2.position.set(.15,.4,0);s2.castShadow=settings.shadows;group.add(s2);
-const stem=new THREE.Mesh(new THREE.CylinderGeometry(.02,.02,.3,6),new THREE.MeshStandardMaterial({color:0x2e7d32}));
-stem.position.set(0,.65,0);group.add(stem)}
-else{const s=new THREE.Mesh(new THREE.SphereGeometry(.28,14,10),sphereMat);
-s.scale.set(1,1.2,1);s.position.y=.4;s.castShadow=settings.shadows;group.add(s);
-const leaf=new THREE.Mesh(new THREE.ConeGeometry(.22,.15,6),new THREE.MeshStandardMaterial({color:0x2e7d32,emissive:0x112211,emissiveIntensity:.3}));
-leaf.position.y=.7;group.add(leaf)}
-group.position.set(toWorldX(fruit.x),0,toWorldZ(fruit.y));
-scene.add(group);fruitMesh=group}
-
-function activatePower(type){
-if(type.id==='extra_life'){lives++;score+=200;updateHUD();showNotification('❤️ VIDA EXTRA! +200','#ff3366');return}
-activePowers[type.id]={type,timer:type.durationTicks,totalTicks:type.durationTicks};
-updatePowersPanel();
-showNotification(`${type.icon} ${type.name}!`,type.borderColor)}
-
-function showNotification(text,color){
-notification.textContent=text;
-notification.style.color=color;
-notification.style.borderColor=color;
-notification.style.boxShadow=`0 0 40px ${color}`;
-notification.style.opacity='1';
-setTimeout(()=>{notification.style.opacity='0'},1400)}
-
-function hasPower(id){return activePowers[id]&&activePowers[id].timer>0}
-
-function updatePowerTimers(){
-let changed=false;
-for(const id in activePowers){activePowers[id].timer--;if(activePowers[id].timer<=0){delete activePowers[id];changed=true}}
-if(changed||Object.keys(activePowers).length>0)updatePowersPanel()}
-
-function updatePowersPanel(){
-const ids=Object.keys(activePowers);
-if(ids.length===0){powersPanel.innerHTML='';return}
-powersPanel.innerHTML='';
-for(const id of ids){const p=activePowers[id];
-const badge=document.createElement('div');
-badge.style.cssText=`display:flex;align-items:center;gap:8px;padding:6px 12px;background:rgba(10,10,25,0.85);border-radius:20px;border:2px solid ${p.type.borderColor};font-size:13px;font-weight:bold;color:#fff;backdrop-filter:blur(6px);box-shadow:0 0 15px ${p.type.borderColor}66;`;
-const pct=(p.timer/p.totalTicks)*100;
-badge.innerHTML=`<span style="font-size:18px;">${p.type.icon}</span><span>${p.type.name}</span><div style="width:40px;height:4px;background:rgba(0,0,0,0.6);border-radius:2px;overflow:hidden;margin-left:4px;"><div style="height:100%;width:${pct}%;background:${p.type.borderColor};"></div></div><span style="min-width:30px;text-align:right;">${(p.timer/60).toFixed(1)}s</span>`;
-powersPanel.appendChild(badge)}}
-
-let npcDialogHideTimeout=null;
-function showNpcDialog(npcType,text){
-npcPortrait.textContent=npcType.icon;
-npcPortrait.style.borderColor=npcType.glowColor;
-npcPortrait.style.boxShadow=`0 0 20px ${npcType.glowColor}`;
-npcName.textContent=npcType.name;
-npcName.style.color=npcType.glowColor;
-npcTitle.textContent=npcType.title;
-npcHeader.style.borderBottomColor=npcType.glowColor;
-npcText.textContent=`"${text}"`;
-npcDialog.style.borderColor=npcType.glowColor;
-npcDialog.style.boxShadow=`0 0 30px ${npcType.glowColor}`;
-npcDialog.style.opacity='1';
-npcDialog.style.transform='translateX(-50%) translateY(0)';
-if(npcDialogHideTimeout)clearTimeout(npcDialogHideTimeout);
-npcDialogHideTimeout=setTimeout(()=>{npcDialog.style.opacity='0';npcDialog.style.transform='translateX(-50%) translateY(20px)'},4000)}
-
-function startLevel(){
-if(moveInterval)clearInterval(moveInterval);
-gameOver=false;levelComplete=false;pelletsEaten=0;
-direction='none';nextDirection='none';
-powerMode=false;powerTimer=0;ghostCombo=0;levelMaxCombo=0;
-fruit=null;fruitTimer=0;fruitSpawned=false;fruitEaten=0;
-portalActive=false;portalMesh=null;
-powerUpsOnMap=[];powerSpawnTimer=30;
-powerSpawnInterval=Math.max(30,70-level);
-npcsOnMap=[];npcSpawnTimer=20;
-npcSpawnInterval=Math.max(60,120-level);
-mapLayout=generateMaze(level);
-loadLevel();
-buildMaze();buildPellets();buildPlayer();buildGhosts();buildFruit();buildPortal();buildPowerUps();buildNpcs();
-updateHUD();updatePowersPanel();
-npcDialog.style.opacity='0';
-const delay=getPlayerDelay();
-moveInterval=setInterval(moveEntities,delay)}
-
-function getPlayerDelay(){
-let base=Math.max(90,170-(level-1)*.8);
-if(hasPower('speed'))base*=.55;
-return base}
-
-function loadLevel(){
-grid=[];totalPellets=0;
-const midR=Math.floor(ROWS/2);
-const midC=Math.floor(COLS/2);
-for(let row=0;row<ROWS;row++){const newRow=[];
-for(let col=0;col<COLS;col++){const val=mapLayout[row][col];
-if(val===1)newRow.push(1);
-else if(val===0){newRow.push(0);totalPellets++}
-else if(val===4){newRow.push(4);totalPellets++}
-else if(val===3){newRow.push(2);player.x=col;player.y=row}
-else newRow.push(2)}
-grid.push(newRow)}
-const spawns=[];const candidates=[];
-for(let r=1;r<ROWS-1;r++)for(let c=1;c<COLS-1;c++)if(grid[r][c]===2&&!(r===player.y&&c===player.x)){const dist=Math.abs(r-player.y)+Math.abs(c-player.x);if(dist>=8)candidates.push({x:c,y:r,dist})}
-candidates.sort((a,b)=>b.dist-a.dist);
-const used=[];
-for(const cand of candidates){if(spawns.length>=4)break;let ok=true;for(const s of used)if(Math.abs(s.x-cand.x)+Math.abs(s.y-cand.y)<6){ok=false;break}if(ok){spawns.push(cand);used.push(cand)}}
-while(spawns.length<4&&candidates.length>0){const cand=candidates.shift();if(!spawns.find(s=>s.x===cand.x&&s.y===cand.y))spawns.push(cand)}
-ghosts=[];
-for(let i=0;i<4;i++){const spawn=spawns[i]||{x:1,y:1};ghosts.push({x:spawn.x,y:spawn.y,type:GHOST_TYPES[i],index:i,wobble:Math.random()*Math.PI*2,scared:false,eaten:false,respawnTimer:0})}}
-
-function updateHUD(){
-hudScore.textContent=score;
-hudLives.textContent=lives;
-hudLevel.textContent=level;
-hudPowers.textContent=Object.keys(activePowers).length;
-const pct=totalPellets>0?(pelletsEaten/totalPellets)*100:0;
-hudLevelBar.style.width=pct+'%'}
-
-function isWall(col,row){
-if(row<0||row>=ROWS)return true;
-if(col<0||col>=COLS)return false;
-return grid[row][col]===1}
-
-function wrapX(x){if(x<0)return COLS-1;if(x>=COLS)return 0;return x}
-function hasPellet(col,row){if(row<0||row>=ROWS||col<0||col>=COLS)return false;const v=grid[row][col];return v===0||v===4}
-
-function eatPellet(col,row){
-if(!hasPellet(col,row))return;
-const wasPower=grid[row][col]===4;
-grid[row][col]=2;
-pelletsEaten++;
-for(let i=pelletMeshes.length-1;i>=0;i--){const p=pelletMeshes[i];if(p.col===col&&p.row===row){scene.remove(p.mesh);p.mesh.geometry.dispose();pelletMeshes.splice(i,1);break}}
-if(wasPower){score+=50;activatePowerMode()}
-else score+=10;
-updateHUD();
-if(pelletsEaten>=totalPellets){levelComplete=true;portalActive=true;buildPortal();updateHUD()}}
-
-function activatePowerMode(){
-powerMode=true;powerTimer=POWER_DURATION;ghostCombo=0;
-for(const g of ghosts)if(!g.eaten)g.scared=true;
-updateHUD()}
-
-function checkNpcInteraction(){
-for(let i=npcsOnMap.length-1;i>=0;i--){const npc=npcsOnMap[i];
-if(npc.col===player.x&&npc.row===player.y){
-showNpcDialog(npc.type,npc.hint);
-stats.npcsVisited++;
-if(npc.type.id==='merchant'){score+=50;updateHUD();
-if(Math.random()<.4){const randomPower=POWER_LIST[Math.floor(Math.random()*(POWER_LIST.length-1))];setTimeout(()=>activatePower(randomPower),800)}}
-else if(npc.type.id==='sage'&&Math.random()<.15){score+=100;updateHUD()}
-npcGroup.remove(npc.mesh);
-npc.mesh.traverse(o=>{if(o.geometry)o.geometry.dispose()});
-npcsOnMap.splice(i,1);
-updateHUD();
-break}}}
-
-function movePlayer(){
-if(gameOver)return;
-let dx=0,dy=0;
-if(direction==='up')dy=-1;
-else if(direction==='down')dy=1;
-else if(direction==='left')dx=-1;
-else if(direction==='right')dx=1;
-else return;
-const newX=wrapX(player.x+dx);
-const newY=player.y+dy;
-if(!isWall(newX,newY)){
-player.x=newX;player.y=newY;
-eatPellet(player.x,player.y);
-checkNpcInteraction();
-const midR=Math.floor(ROWS/2),midC=Math.floor(COLS/2);
-if(portalActive&&player.x===midC&&player.y===midR)advanceLevel()}}
-
-function advanceLevel(){
-if(levelComplete&&portalActive){
-portalActive=false;
-if(moveInterval)clearInterval(moveInterval);
-level++;
-if(level>stats.maxLevel)stats.maxLevel=level;
-if(level>TOTAL_LEVELS){winGame();return}
-score+=500;updateHUD();showLevelComplete()}}
-
-function winGame(){
-gameOver=true;
-stats.totalScore+=score;
-stats.games++;
-if(score>stats.highScore)stats.highScore=score;
-if(levelMaxCombo>stats.maxCombo)stats.maxCombo=levelMaxCombo;
-persist();
-showNotification('🏆 VITÓRIA TOTAL!','#aaffaa');
-setTimeout(()=>{showNotification(`Pontuação: ${score}`,'#ffcc00');setTimeout(()=>stopGame(),2500)},2500)}
-
-function showLevelComplete(){
-showNotification(`🌀 FASE ${level-1} COMPLETA!`,'#ff66ff');
-setTimeout(()=>{if(running)startLevel()},2200)}
-
-function getGhostTarget(ghost){
-if(ghost.scared)return{x:player.x,y:player.y,flee:true};
-switch(ghost.type.name){
-case'blinky':return{x:player.x,y:player.y};
-case'pinky':{let dx=0,dy=0;if(direction==='up')dy=-1;else if(direction==='down')dy=1;else if(direction==='left')dx=-1;else if(direction==='right')dx=1;return{x:wrapX(player.x+dx*3),y:Math.max(0,Math.min(ROWS-1,player.y+dy*3))}}
-case'inky':{const blinky=ghosts[0];const midX=wrapX(player.x+(player.x-blinky.x));const midY=Math.max(0,Math.min(ROWS-1,player.y+(player.y-blinky.y)));return{x:midX,y:midY}}
-case'clyde':{const dist=Math.abs(ghost.x-player.x)+Math.abs(ghost.y-player.y);if(dist<6)return{x:1,y:ROWS-2,scatter:true};return{x:player.x,y:player.y}}}
-return{x:player.x,y:player.y}}
-
-function moveGhost(ghost){
-if(gameOver)return;
-if(ghost.eaten){ghost.respawnTimer--;
-if(ghost.respawnTimer<=0){ghost.eaten=false;ghost.scared=false;
-for(let attempt=0;attempt<50;attempt++){const r=1+Math.floor(Math.random()*(ROWS-2));const c=1+Math.floor(Math.random()*(COLS-2));if(grid[r][c]===2&&!(r===player.y&&c===player.x)){ghost.x=c;ghost.y=r;break}}}
-return}
-const target=getGhostTarget(ghost);
-const dirs=[{dx:1,dy:0},{dx:-1,dy:0},{dx:0,dy:1},{dx:0,dy:-1}];
-const valid=dirs.filter(d=>!isWall(wrapX(ghost.x+d.dx),ghost.y+d.dy));
-if(valid.length===0)return;
-let bestDir=valid[0];
-let bestDist=target.flee?-Infinity:Infinity;
-for(const d of valid){const nx=wrapX(ghost.x+d.dx),ny=ghost.y+d.dy;const dist=Math.abs(nx-target.x)+Math.abs(ny-target.y);
-if(target.flee){if(dist>bestDist){bestDist=dist;bestDir=d}}
-else{if(dist<bestDist){bestDist=dist;bestDir=d}}}
-let chosenDir=bestDir;
-if(Math.random()<.1)chosenDir=valid[Math.floor(Math.random()*valid.length)];
-const newX=wrapX(ghost.x+chosenDir.dx);
-const newY=ghost.y+chosenDir.dy;
-if(!isWall(newX,newY)){ghost.x=newX;ghost.y=newY}
-ghost.wobble+=.3}
-
-function checkGhostCollision(){
-if(gameOver)return;
-if(hasPower('invincible')||hasPower('invisibility'))return;
-for(const ghost of ghosts){
-if(ghost.eaten)continue;
-if(ghost.x===player.x&&ghost.y===player.y){
-if(powerMode&&ghost.scared){ghost.eaten=true;ghost.respawnTimer=20;ghostCombo++;
-if(ghostCombo>levelMaxCombo)levelMaxCombo=ghostCombo;
-stats.ghostsEaten++;
-const points=200*Math.pow(2,ghostCombo-1);
-score+=points;updateHUD()}
-else{lives--;updateHUD();
-if(lives<=0){gameOver=true;
-if(moveInterval)clearInterval(moveInterval);
-stats.totalScore+=score;stats.games++;
-if(score>stats.highScore)stats.highScore=score;
-if(levelMaxCombo>stats.maxCombo)stats.maxCombo=levelMaxCombo;
-persist();
-showNotification('💀 GAME OVER','#ff3333');
-setTimeout(()=>{showNotification(`Fase ${level} • ${score} pts`,'#ffcc00');setTimeout(()=>stopGame(),2500)},2200)}
-else{player.x=Math.floor(COLS/2);player.y=Math.floor(ROWS/2);
-direction='none';nextDirection='none';
-powerMode=false;powerTimer=0;ghostCombo=0;
-activePowers={};updatePowersPanel();
-for(const g of ghosts){g.scared=false;g.eaten=false;
-for(let attempt=0;attempt<50;attempt++){const r=1+Math.floor(Math.random()*(ROWS-2));const c=1+Math.floor(Math.random()*(COLS-2));const midR=Math.floor(ROWS/2),midC=Math.floor(COLS/2);if(grid[r][c]===2&&Math.abs(r-midR)+Math.abs(c-midC)>8){g.x=c;g.y=r;break}}}
-updateHUD()}
-break}}}}
-
-function checkPowerUpPickup(){
-for(let i=powerUpsOnMap.length-1;i>=0;i--){const p=powerUpsOnMap[i];
-if(p.col===player.x&&p.row===player.y){
-activatePower(p.type);
-powerUpGroup.remove(p.mesh);
-p.mesh.traverse(o=>{if(o.geometry)o.geometry.dispose()});
-powerUpsOnMap.splice(i,1)}}}
-
-function applyMagnetPower(){
-if(!hasPower('magnet'))return;
-for(let i=pelletMeshes.length-1;i>=0;i--){const p=pelletMeshes[i];
-const dist=Math.abs(p.col-player.x)+Math.abs(p.row-player.y);
-if(dist<=3&&dist>0){
-const dx=Math.sign(player.x-p.col);
-const dy=Math.sign(player.y-p.row);
-const newCol=p.col+dx;
-const newRow=p.row+dy;
-if(!isWall(newCol,newRow)&&grid[newRow]&&grid[newRow][newCol]===2){
-grid[p.row][p.col]=2;
-grid[newRow][newCol]=0;
-p.col=newCol;p.row=newRow;
-p.mesh.position.set(toWorldX(newCol),.35,toWorldZ(newRow))}}}}
-
-function trySpawnFruit(){
-const pct=pelletsEaten/totalPellets;
-const midR=Math.floor(ROWS/2),midC=Math.floor(COLS/2);
-if(!fruitSpawned&&pct>=.3&&fruitEaten===0){
-if(grid[midR][midC]===2||(player.x!==midC||player.y!==midR)){
-fruit={x:midC,y:midR,type:'cherry',value:100};
-fruitTimer=60;fruitSpawned=true;buildFruit()}}
-else if(!fruitSpawned&&pct>=.7&&fruitEaten===1){
-if(grid[midR][midC]===2||(player.x!==midC||player.y!==midR)){
-fruit={x:midC,y:midR,type:'strawberry',value:300};
-fruitTimer=60;fruitSpawned=true;buildFruit()}}}
-
-function checkFruitEat(){
-if(!fruit)return;
-if(player.x===fruit.x&&player.y===fruit.y){
-score+=fruit.value;
-fruit=null;fruitEaten++;fruitSpawned=false;
-updateHUD();buildFruit()}}
-
-function updateFruit(){
-if(fruit){fruitTimer--;if(fruitTimer<=0){fruit=null;fruitSpawned=false;buildFruit()}}}
-
-function moveEntities(){
-if(gameOver||!running)return;
-if(nextDirection!=='none'){
-const testDx=nextDirection==='left'?-1:(nextDirection==='right'?1:0);
-const testDy=nextDirection==='up'?-1:(nextDirection==='down'?1:0);
-if(!isWall(wrapX(player.x+testDx),player.y+testDy))direction=nextDirection;
-nextDirection='none'}
-movePlayer();
-if(powerMode){powerTimer--;
-if(powerTimer<=0){powerMode=false;
-for(const g of ghosts)g.scared=false;
-ghostCombo=0;updateHUD()}}
-const frozen=hasPower('freeze');
-if(!frozen)for(const ghost of ghosts)moveGhost(ghost);
-checkGhostCollision();
-applyMagnetPower();
-checkPowerUpPickup();
-updatePowerTimers();
-powerSpawnTimer--;
-if(powerSpawnTimer<=0){spawnPowerUp();powerSpawnTimer=powerSpawnInterval+Math.floor(Math.random()*20)}
-npcSpawnTimer--;
-if(npcSpawnTimer<=0){if(npcsOnMap.length<3)spawnNpc();npcSpawnTimer=npcSpawnInterval+Math.floor(Math.random()*40)}
-for(let i=npcsOnMap.length-1;i>=0;i--){const npc=npcsOnMap[i];
-if(animTime-npc.spawnTime>45){npcGroup.remove(npc.mesh);npc.mesh.traverse(o=>{if(o.geometry)o.geometry.dispose()});npcsOnMap.splice(i,1);updateHUD()}}
-trySpawnFruit();
-checkFruitEat();
-updateFruit()}
-
-function animate(){
-if(!running)return;
-rafId=requestAnimationFrame(animate);
-const dt=clock.getDelta();
-animTime+=dt;
-if(playerMesh){
-const targetX=toWorldX(player.x);
-const targetZ=toWorldZ(player.y);
-playerMesh.position.x+=(targetX-playerMesh.position.x)*.35;
-playerMesh.position.z+=(targetZ-playerMesh.position.z)*.35;
-playerMesh.position.y=.45+Math.sin(animTime*3)*.03;
-let targetRotY=playerMesh.rotation.y;
-if(direction==='right')targetRotY=0;
-else if(direction==='left')targetRotY=Math.PI;
-else if(direction==='up')targetRotY=Math.PI/2;
-else if(direction==='down')targetRotY=-Math.PI/2;
-let diff=targetRotY-playerMesh.rotation.y;
-while(diff>Math.PI)diff-=Math.PI*2;
-while(diff<-Math.PI)diff+=Math.PI*2;
-playerMesh.rotation.y+=diff*.25;
-const mat=playerBodyMesh.material;
-if(hasPower('invisibility')){mat.transparent=true;mat.opacity=.15+Math.sin(animTime*10)*.1;mat.emissive.setHex(0xaaaaaa);mat.color.setHex(0xcccccc)}
-else if(hasPower('invincible')){mat.transparent=false;mat.opacity=1;const blink=Math.floor(animTime*8)%2===0;mat.color.setHex(blink?0x66ff66:0xffffff);mat.emissive.setHex(blink?0x66ff66:0x88ff88)}
-else if(powerMode){mat.transparent=false;mat.opacity=1;const blink=Math.floor(animTime*6)%2===0;mat.color.setHex(blink?0xffffff:0x00ffff);mat.emissive.setHex(blink?0x8888ff:0x00ffff)}
-else{mat.transparent=false;mat.opacity=1;mat.color.setHex(pacColor.color);mat.emissive.setHex(pacColor.emissive)}
-const mouth=playerMesh.getObjectByName('mouth');
-if(mouth){const open=Math.abs(Math.sin(animTime*8))*.5+.5;mouth.scale.set(open,open,1)}}
-const frozen=hasPower('freeze');
-for(let i=0;i<ghosts.length;i++){const g=ghosts[i];const gm=ghostMeshes[i];if(!gm)continue;
-const targetX=toWorldX(g.x);const targetZ=toWorldZ(g.y);
-if(g.eaten){gm.group.position.x+=(targetX-gm.group.position.x)*.4;gm.group.position.z+=(targetZ-gm.group.position.z)*.4;gm.body.visible=false;continue}
-gm.body.visible=true;
-const speed=frozen?.05:.4;
-gm.group.position.x+=(targetX-gm.group.position.x)*speed;
-gm.group.position.z+=(targetZ-gm.group.position.z)*speed;
-gm.group.position.y=Math.sin(animTime*2+g.wobble)*.05;
-gm.group.rotation.y=Math.sin(animTime*1.5+g.wobble)*.15;
-if(g.scared){const blink=powerTimer<15&&Math.floor(animTime*6)%2===0;const c=blink?0xffffff:0x2244cc;gm.bodyMat.color.setHex(c);gm.bodyMat.emissive.setHex(c)}
-else if(frozen){gm.bodyMat.color.setHex(0x88ddff);gm.bodyMat.emissive.setHex(0x0066ff)}
-else{gm.bodyMat.color.setHex(gm.originalColor);gm.bodyMat.emissive.setHex(gm.originalColor)}
-const dx=player.x-g.x,dy=player.y-g.y;
-const dist=Math.sqrt(dx*dx+dy*dy)||1;
-const lx=(dx/dist)*.03,lz=(dy/dist)*.03;
-gm.pupilL.position.x=lx;gm.pupilL.position.z=lz;
-gm.pupilR.position.x=lx;gm.pupilR.position.z=lz}
-const pulse=.9+Math.sin(animTime*4)*.1;
-for(const p of pelletMeshes){p.mesh.scale.setScalar(pulse);p.mesh.position.y=.35+Math.sin(animTime*3+p.col+p.row)*.05}
-for(const p of powerUpsOnMap){p.mesh.rotation.y+=.04;p.mesh.position.y=Math.sin(animTime*3+p.col+p.row)*.12;if(p.mesh.children[1])p.mesh.children[1].rotation.z+=.03;if(p.mesh.children[2])p.mesh.children[2].rotation.x+=.03}
-for(const npc of npcsOnMap){const t=npc.type.id;const bobOffset=npc.bobOffset;
-if(t==='sage'){npc.mesh.position.y=Math.sin(animTime*1.2+bobOffset)*.15;npc.mesh.rotation.y=Math.sin(animTime*.6+bobOffset)*.2;
-const orb=npc.mesh.getObjectByName('orb');if(orb){orb.position.y=1.45+Math.sin(animTime*3)*.08;orb.scale.setScalar(1+Math.sin(animTime*5)*.15)}
-const star=npc.mesh.getObjectByName('star');if(star)star.rotation.y+=.05;
-const aura=npc.mesh.getObjectByName('aura');if(aura){aura.rotation.z+=.01;aura.scale.setScalar(1+Math.sin(animTime*2)*.1)}}
-else if(t==='trickster'){npc.mesh.position.y=Math.sin(animTime*4+bobOffset)*.12;npc.mesh.rotation.y=Math.sin(animTime*3+bobOffset)*.6;
-const tail=npc.mesh.getObjectByName('tail');if(tail){tail.rotation.z=Math.sin(animTime*5+bobOffset)*.5;tail.rotation.x=Math.cos(animTime*4+bobOffset)*.3}
-for(let i=0;i<5;i++){const spark=npc.mesh.getObjectByName(`spark${i}`);if(spark){const a=(i/5)*Math.PI*2+animTime*2;spark.position.set(Math.cos(a)*.6,.6+Math.sin(a*2)*.15,Math.sin(a)*.6);spark.rotation.y+=.1}}}
-else if(t==='whisperer'){npc.mesh.position.y=Math.sin(animTime*1.8+bobOffset)*.2;npc.mesh.rotation.y=animTime*.4;
-for(let i=0;i<4;i++){const veil=npc.mesh.getObjectByName(`veil${i}`);if(veil){veil.rotation.z+=.02+i*.01;veil.rotation.x=Math.PI/2+Math.sin(animTime*2+i)*.3}}
-const gl=npc.mesh.getObjectByName('glowL');const gr=npc.mesh.getObjectByName('glowR');
-if(gl&&gr){const floatY=Math.sin(animTime*4)*.03;gl.position.y=.78+floatY;gr.position.y=.78+floatY}
-const mouth=npc.mesh.getObjectByName('mouth');if(mouth){const s=1+Math.sin(animTime*8)*.3;mouth.scale.set(s,s,1)}
-const ghostLight=npc.mesh.getObjectByName('ghostLight');if(ghostLight)ghostLight.intensity=1.5+Math.sin(animTime*12)*.5}
-else if(t==='merchant'){npc.mesh.position.y=Math.abs(Math.sin(animTime*2+bobOffset))*.08;npc.mesh.rotation.y=Math.sin(animTime*1.5+bobOffset)*.15;
-for(let i=0;i<5;i++){const coin=npc.mesh.getObjectByName(`coin${i}`);if(coin){coin.rotation.y+=.08;coin.position.y+=Math.sin(animTime*3+i)*.002}}
-const aura=npc.mesh.getObjectByName('aura');if(aura){aura.rotation.z+=.015;aura.scale.setScalar(1+Math.sin(animTime*2.5)*.08)}}}
-if(fruitMesh){fruitMesh.rotation.y+=.03;fruitMesh.position.y=Math.sin(animTime*3)*.08}
-if(portalMesh){portalMesh.rotation.y+=.04;const s=1+Math.sin(animTime*5)*.08;portalMesh.scale.setScalar(s);if(portalLight)portalLight.intensity=2+Math.sin(animTime*6)*.8}
-if(hasPower('invisibility'))pointLight.color.setHex(0xaaaaaa);
-else if(hasPower('speed'))pointLight.color.setHex(0xffff00);
-else if(hasPower('invincible'))pointLight.color.setHex(0x66ff66);
-else if(hasPower('freeze'))pointLight.color.setHex(0x00ffff);
-else if(hasPower('magnet'))pointLight.color.setHex(0xff66cc);
-else pointLight.color.setHex(0xffaa00);
-pointLight.intensity=.5+Math.sin(animTime*2)*.15;
-renderer.render(scene,camera)}
-
-function handleKeydown(e){
-const key=e.key;
-let desiredDir='none';
-if(key==='ArrowUp'||key==='w'||key==='W')desiredDir='up';
-else if(key==='ArrowDown'||key==='s'||key==='S')desiredDir='down';
-else if(key==='ArrowLeft'||key==='a'||key==='A')desiredDir='left';
-else if(key==='ArrowRight'||key==='d'||key==='D')desiredDir='right';
-else if(key==='Escape'){stopGame();return}
-else return;
-e.preventDefault();
-if(gameOver)return;
-const dx=desiredDir==='left'?-1:(desiredDir==='right'?1:0);
-const dy=desiredDir==='up'?-1:(desiredDir==='down'?1:0);
-if(!isWall(wrapX(player.x+dx),player.y+dy)){direction=desiredDir;nextDirection='none'}
-else{nextDirection=desiredDir}}
-
-function onResize(){
-const size=Math.min(window.innerWidth-40,window.innerHeight-40,800);
-container.style.width=size+'px';
-container.style.height=size+'px';
-renderer.setSize(size,size,false);
-renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,qs.pixelRatio));
-camera.aspect=1;
-camera.updateProjectionMatrix()}
-
-window.addEventListener('resize',onResize);
-window.addEventListener('keydown',handleKeydown,{passive:false});
-container.querySelectorAll('#touch-controls button[data-dir]').forEach(btn=>{
-btn.addEventListener('pointerdown',(e)=>{
-e.preventDefault();
-if(gameOver)return;
-const desiredDir=btn.dataset.dir;
-const dx=desiredDir==='left'?-1:(desiredDir==='right'?1:0);
-const dy=desiredDir==='up'?-1:(desiredDir==='down'?1:0);
-if(!isWall(wrapX(player.x+dx),player.y+dy)){direction=desiredDir;nextDirection='none'}
-else{nextDirection=desiredDir}})});
-
-startLevel();
-animate();
-onResize();
-stats.games++;
-persist();
-
-return function cleanup(){
-running=false;
-if(rafId)cancelAnimationFrame(rafId);
-if(moveInterval)clearInterval(moveInterval);
-window.removeEventListener('resize',onResize);
-window.removeEventListener('keydown',handleKeydown);
-renderer.dispose();
-scene.traverse(obj=>{
-if(obj.geometry)obj.geometry.dispose();
-if(obj.material){if(Array.isArray(obj.material))obj.material.forEach(m=>m.dispose());else obj.material.dispose()}});
-persist()}}
-</script>
 </body>
 </html>
